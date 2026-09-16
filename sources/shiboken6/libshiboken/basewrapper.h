@@ -311,6 +311,11 @@ namespace Object {
 LIBSHIBOKEN_API std::string info(SbkObject *self);
 
 /**
+ *  Like info(), but creates a dump of the entire object tree
+ */
+LIBSHIBOKEN_API std::string dumpTree(SbkObject *self);
+
+/**
 *   Returns true if the object is an instance of a type created by the Shiboken generator.
 */
 LIBSHIBOKEN_API bool checkType(PyObject *pyObj);

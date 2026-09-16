@@ -60,38 +60,42 @@ void _debugFormat(std::ostream &s, SbkObject *self)
         s << ", " << d->referredObjects->size() << " referred object(s)";
 }
 
-std::string info(SbkObject *self)
+static void info_format_preamble(std::ostream &s, SbkObject *self, const std::string &indent)
 {
-    std::ostringstream s;
-
-    s << "id................ " << self << '\n';
+    s << indent << "id................ " << self << '\n';
     if (self->d && self->d->cptr) {
         const std::vector<PyTypeObject *> bases = getBases(self);
 
-        s << "C++ address....... ";
+        s << indent << "C++ address....... ";
         for (size_t i = 0, size = bases.size(); i < size; ++i)
             s << bases[i]->tp_name << '/' << self->d->cptr[i] << ' ';
         s << "\n";
     }
     else {
-        s << "C++ address....... <<Deleted>>\n";
+        s << indent << "C++ address....... <<Deleted>>\n";
     }
 
-    s << "hasOwnership...... " << bool(self->d->hasOwnership) << "\n"
-         "containsCppWrapper " << self->d->containsCppWrapper << "\n"
-         "validCppObject.... " << self->d->validCppObject << "\n"
-         "wasCreatedByPython " << self->d->cppObjectCreated << "\n"
-         "value......        " << isValueType(self) << "\n"
-         "reference count... " << Py_REFCNT(reinterpret_cast<PyObject *>(self)) << '\n';
+    s << indent << "hasOwnership...... " << bool(self->d->hasOwnership) << '\n'
+        << indent << "containsCppWrapper " << self->d->containsCppWrapper << '\n'
+        << indent << "validCppObject.... " << self->d->validCppObject << '\n'
+        << indent << "wasCreatedByPython " << self->d->cppObjectCreated << '\n'
+        << indent << "value......        " << isValueType(self) << '\n'
+        << indent << "reference count... " << Py_REFCNT(reinterpret_cast<PyObject *>(self)) << '\n';
+}
 
+static void info_format_parent(std::ostream &s, SbkObject *self, const std::string &indent)
+{
     if (self->d->parentInfo && self->d->parentInfo->parent) {
         auto *obParent = reinterpret_cast<PyObject *>(self->d->parentInfo->parent);
-        s << "parent............ <" << Py_TYPE(obParent)->tp_name << " at " << obParent << ">\n";
+        s << indent << "parent............ <" << Py_TYPE(obParent)->tp_name << " at " << obParent << ">\n";
     }
+}
 
+static void info_format_children(std::ostream &s, SbkObject *self, const std::string &indent)
+{
     if (self->d->parentInfo && !self->d->parentInfo->children.empty()) {
         const auto &children = self->d->parentInfo->children;
-        s << "children.......... [" << children.size() << "] ";
+        s << indent << "children.......... [" << children.size() << "] ";
         int n = 0;
         for (SbkObject *sbkChild : children) {
             auto *obChild = reinterpret_cast<PyObject *>(sbkChild);
@@ -103,10 +107,13 @@ std::string info(SbkObject *self)
         }
         s << '\n';
     }
+}
 
+static void info_format_referredObjects(std::ostream &s, SbkObject *self, const std::string &indent)
+{
     if (self->d->referredObjects && !self->d->referredObjects->empty()) {
         const Shiboken::RefCountMap &map = *self->d->referredObjects;
-        s << "referred objects.. ";
+        s << indent << "referred objects.. ";
         std::string lastKey;
         for (const auto &p : map) {
             if (p.first != lastKey) {
@@ -119,6 +126,37 @@ std::string info(SbkObject *self)
         }
         s << '\n';
     }
+}
+
+static void dumpTreeRecursion(std::ostream &s, SbkObject *self, unsigned depth = 0)
+{
+    const std::string indent(4 * depth, ' ');
+    info_format_preamble(s, self, indent);
+    info_format_referredObjects(s, self, indent);
+    if (self->d->parentInfo && !self->d->parentInfo->children.empty()) {
+        s << indent << "Children:\n";
+        for (SbkObject *sbkChild : self->d->parentInfo->children) {
+            dumpTreeRecursion(s, sbkChild, depth + 1);
+            s << '\n';
+        }
+    }
+}
+
+std::string dumpTree(SbkObject *self)
+{
+    std::ostringstream s;
+    dumpTreeRecursion(s, self, 0);
+    return s.str();
+}
+
+std::string info(SbkObject *self)
+{
+    std::ostringstream s;
+    const std::string indent;
+    info_format_preamble(s, self, indent);
+    info_format_parent(s, self, indent);
+    info_format_children(s, self, indent);
+    info_format_referredObjects(s, self, indent);
     return s.str();
 }
 
