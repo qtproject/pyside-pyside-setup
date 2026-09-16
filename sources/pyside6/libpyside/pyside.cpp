@@ -266,11 +266,15 @@ static QByteArrayList _SbkType_LookupProperty(PyTypeObject *type,
     QByteArray origName(_sigWithOrigName(name, snake_flag));
     if (origName.isEmpty())
         return QByteArrayList{};
-    PyObject *mro = type->tp_mro;
-    auto n = PyTuple_Size(mro);
+    PepMroRef mro(type);
+    if (mro.isNull()) {
+        Shiboken::Errors::storeErrorOrPrint();
+        return QByteArrayList{};
+    }
+    auto n = PyTuple_Size(mro.object());
     auto len = std::strlen(origName);
     for (Py_ssize_t idx = 0; idx < n; idx++) {
-        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro.object(), idx));
         if (!SbkObjectType_Check(base))
             continue;
         auto *props = SbkObjectType_GetPropertyStrings(base);

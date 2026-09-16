@@ -1137,36 +1137,63 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName
         if (PyMethod_Self(method) != obWrapper)
             return nullptr;
         function = PyMethod_Function(method);
+#ifdef Py_GIL_DISABLED
+        Py_INCREF(function);
+#endif
     } else if (isCompiledMethod(method)) {
         Shiboken::AutoDecRef im_self(PyObject_GetAttr(method, PyName::im_self()));
         // Not retaining a reference inline with what PyMethod_GET_SELF does.
         if (im_self.object() != obWrapper)
             return nullptr;
         function = PyObject_GetAttr(method, PyName::im_func());
+#ifdef Py_GIL_DISABLED
+        // Owned; functionRef below releases it.
+#else
         // Not retaining a reference inline with what PyMethod_GET_FUNCTION does.
         Py_DECREF(function);
+#endif
     } else {
         return nullptr;
     }
 
-    PyObject *mro = Py_TYPE(obWrapper)->tp_mro;
+#ifdef Py_GIL_DISABLED
+    // Owned across the walk, which runs Python; each return hands it over.
+    // See "A virtual dispatch owns the override it found" in the free-threading notes.
+    AutoDecRef functionRef(function);
+#endif
+    // A snapshot: the loop runs Python code (PepType_GetDict(), key
+    // comparisons), where another thread can assign __bases__.
+    PepMroRef mro(Py_TYPE(obWrapper));
+    if (mro.isNull())
+        return nullptr;
+    // A test assigns __bases__ here from another thread.
+    SBK_FAILPOINT("mro-after-snapshot");
     bool defaultFound = false;
     // The first class in the mro (index 0) is the class being checked and it should not be tested.
     // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
-    for (Py_ssize_t idx = 1, size = PyTuple_Size(mro); idx < size - 1; ++idx) {
-        auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+    for (Py_ssize_t idx = 1, size = PyTuple_Size(mro.object()); idx < size - 1; ++idx) {
+        auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro.object(), idx));
         AutoDecRef parentDict(PepType_GetDict(parent));
         if (parentDict) {
-            if (PyObject *defaultMethod = PyDict_GetItem(parentDict.object(), pyMethodName)) {
+            AutoDecRef defaultMethod(PepDict_GetItemOwned(parentDict.object(), pyMethodName));
+            if (!defaultMethod.isNull()) {
                 defaultFound = true;
-                if (function != defaultMethod)
+                if (function != defaultMethod.object())
+#ifdef Py_GIL_DISABLED
+                    return functionRef.release();
+#else
                     return function;
+#endif
             }
         }
     }
     // PYSIDE-2255: If no default method was found, use the method.
     if (!defaultFound)
+#ifdef Py_GIL_DISABLED
+        return functionRef.release();
+#else
         return function;
+#endif
     return nullptr;
 }
 
@@ -1331,13 +1358,16 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
         return false;
 
     auto *startType = Py_TYPE(self);
-    auto *mro = startType->tp_mro;
+    // Held past the loops: the type they stop at goes to PyObject_GetAttr().
+    PepMroRef mro(startType);
+    if (mro.isNull())
+        return false;
     Py_ssize_t idx = 0;
-    const Py_ssize_t n = PyTuple_Size(mro);
+    const Py_ssize_t n = PyTuple_Size(mro.object());
     /* No need to check the last one: it's gonna be skipped anyway.  */
     const char *className = typeStruct.fullName;
     for ( ; idx + 1 < n; ++idx) {
-        auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro.object(), idx));
         if (std::strcmp(className, PepType_GetFullyQualifiedNameStr(lookType)) == 0)
             break;
     }
@@ -1345,14 +1375,14 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     // mro: ('C', 'A', 'QObject', 'Object', 'B', 'object')
     // We want to catch class `B` and call its `__init__`.
     for (idx += 1; idx + 1 < n; ++idx) {
-        auto *t = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        auto *t = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro.object(), idx));
         if (isPythonType(t))
             break;
     }
     if (idx >= n)
         return false;
 
-    auto *obSubType = PyTuple_GetItem(mro, idx);
+    auto *obSubType = PyTuple_GetItem(mro.object(), idx);
     auto *subType = reinterpret_cast<PyTypeObject *>(obSubType);
     if (subType == &PyBaseObject_Type)
         return false;

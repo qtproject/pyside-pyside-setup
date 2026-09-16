@@ -324,6 +324,58 @@ There is no `proof-*` row. Clearing `LeaseSnapshot` puts back
 reproduce, so both must answer the same. The row guards the arithmetic
 against drift; it is not a measure.
 
+### signal-type-collectable - a guard, no proof row
+
+A signal instance remembers the type of its source, and a signal instance is
+not tracked by the collector. A class that keeps one of its own bound
+signals, `Holder.saved = Holder().fired`, is then a cycle whose last edge,
+signal to class, only the record knows about: held strongly, the class is
+never freed. The test drops the class, collects, and expects its weak
+reference dead. A strong reference fails it; so does nothing on a build with
+a GIL, where the pointer is raw. There is no `proof-*` row: a reference is
+not a bit that can be cleared.
+
+The use-after-free the weak reference also closes has no test here. Every
+read of the type sits behind a check that the source is alive, so one thread
+cannot reach a dead type; the race is between that check and the read, and
+there is no failpoint in that gap.
+See "A signal instance remembers its type weakly" in the free-threading notes.
+
+### capsule-method-owns-instance, capsule-access-no-leak - guards, no proof row
+
+G80: a QtRemoteObjects source keeps a bound slot, `method = source.reset`,
+and drops the object. The first test expects the object alive under the
+method and gone with it, then keeps the method in the instance dictionary
+and expects the cycle collected, then assigns `method.__module__` and
+expects the object still alive. The second checks a slot, two properties and
+a POD field once, then reads and sets them 10000 times each and expects less
+than 50 kB left in `tracemalloc`.
+
+Without the fix the first test finds the object freed and the second 80
+bytes per slot access. A capsule that holds the instance fails the cycle, a
+function that holds it as `__module__` the assignment. Both skip on a build
+with a GIL, which keeps the old code, and on a build without QtRemoteObjects.
+See "A capsule method owns its instance" in the free-threading notes.
+
+### source-property-copy, proof-source-property-copy
+
+G84: a QtRemoteObjects source's getter parks at `source-property-after-read`,
+the value read but not yet converted, and the main thread sets the property.
+The getter must return the value it read. The test sets the property once
+first, so the instance's list no longer shares its data with the type's and
+the setter writes into the element the getter reads. `proof-source-property-copy`
+clears `SourcePropertyCopy` and expects the getter to return the later value.
+Skips on a build with a GIL and on one without QtRemoteObjects.
+See "A source's property is read as a copy" in the free-threading notes.
+
+### source-property-missing - a guard, no proof row
+
+G85: a source whose `__PROPERTIES__` was deleted, or replaced by an integer,
+is read and set. Both must raise `RuntimeError`; before the fix they locked
+or dereferenced a null list. It runs in a child process, since a regression
+crashes. Skips like the one above.
+See "A source's property is read as a copy" in the free-threading notes.
+
 ### lease-snapshot, proof-lease-snapshot
 
 B5-1: C++ deletes an object while a lease on it is out, and
@@ -784,6 +836,86 @@ Taking the lifetime authority out of `__dict__` is what removes both.
 and no failpoint: it is the `metaobject_lock` scenario in `run.py`, kept
 because a single-threaded reproducer is worth more than a race when the
 answer is an assertion.
+
+### mro-snapshot-owns, mro-snapshot, proof-mro-snapshot
+
+FT3. An assignment to `__bases__` replaces `tp_mro`, and owning a type does
+not own the tuple. The walks in `getOverride()`, `methodGetAttr()`,
+`find_name_in_mro()` and `callInheritedInit()` call back into Python while
+they read it; `PepMroRef` holds one snapshot for the whole walk.
+
+`mro-after-snapshot` parks a virtual in `getOverride()` between taking the
+snapshot and walking it. `mro-snapshot-owns` checks the mechanism: the
+parked walk holds a reference to `__mro__` that the finished walk gives
+back.
+
+`mro-snapshot` checks the window. It assigns `__bases__`, collects, and
+allocates 2000 tuples of the same width whose entries carry the override
+under its own name. A walk that reads the freed tuple takes the override
+for an inherited default and does not call it; a walk into other memory
+crashes. The test expects the override to run. The `gc.collect()` is
+required: `set_tp_mro()` turns on deferred refcounting, and only the
+tracing collector frees such a tuple.
+
+`proof-mro-snapshot` clears `MroSnapshot` and expects `mro-snapshot` to
+fail.
+
+### bases-snapshot, proof-bases-snapshot
+
+The same window on `tp_bases`, through `PepBasesRef`.
+`bases-after-snapshot` parks `getFromType()`, which `QObject.property()`
+reaches, between taking a type's bases and recursing into them. The test
+assigns `__bases__` and allocates 2000 one-element tuples of a class
+without the property; a bases tuple needs no collection. A walk that reads
+them reports an invalid property rather than crashing. The test expects
+the property's value; `proof-bases-snapshot` clears `MroSnapshot` and
+expects the failure.
+
+### shadowed-mro - no proof row
+
+A metaclass can shadow `__mro__` with a property that builds a new tuple on
+every access, held by nobody else. With `MroSnapshot` cleared the holder
+goes back to a borrow, and it must not do that for such a tuple: the walk
+would read freed memory, single-threaded, every time. The test calls
+`tr()`, which walks the mro in `qObjectTr()`, 50 times on such a class and
+expects the source text back. It first checks that `__mro__` really is
+shadowed and built per access.
+
+There is no `proof-*` row: no bit brings back the defect this test guards
+against.
+The instance is kept alive for the reason given under `metatype-subclass`.
+Free-threaded builds only.
+
+### metaclass-tuples - a guard, no proof row
+
+A3: one metaclass answers `__mro__` with `(cls, 1, object)`, another
+`__bases__` with `(cls,)`. `tr()` walks the first in `qObjectTr()`, and a
+lookup of an inherited property walks the second in `getFromType()`, which
+recurses over bases. Both must raise `TypeError`. Before, the first crashed
+reading the name of an int as a type, and the second recursed until Python
+stopped it with `RecursionError`. It runs in a child process, since a
+regression crashes.
+See "Walking a type's mro and bases" in the free-threading notes.
+
+### signal-homonym - a guard, no proof row
+
+A4: calling a signal instance calls the homonymous method of its class, found
+in a class dictionary. The call parks at `signal-homonym-before-bind`, the
+method found but not bound; the main thread replaces it in the class,
+collects and allocates 20000 functions of the same size. The call must
+answer with the method it found. Borrowed, it bound one of the new functions
+in the freed memory. It runs in a child process, since a regression reads
+freed memory.
+See "Dictionary lookups own their result" in the free-threading notes.
+
+### failed-override-lookup - no proof row
+
+`getOverride()` answers nullptr both for "no override" and for a failed mro
+lookup, and `Sbk_GetPyOverride()` caches "no override" per object for good.
+A metaclass raises `MemoryError` from `__mro__` once, on the first virtual
+call - armed only after the class and its instance exist, since creating
+either reads `__mro__`. The test runs the virtual twice and expects the
+override to have run. There is no bit. Free-threaded builds only.
 
 ### container-element-lease, proof-conversion-leases
 

@@ -12,6 +12,9 @@
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "sbkenum_p.h"
+#include "helper.h"
+#include "sbkftoptions.h"
+#include "sbkheldlocks.h"
 #include "voidptr.h"
 
 #include <cstdlib>
@@ -183,9 +186,14 @@ find_name_in_mro(PyTypeObject *type, PyObject *name, int *error)
     /* Look in tp_dict of types in MRO. Keep a strong reference to mro because
      * type->tp_mro can be replaced during dict lookup, e.g. when comparing to
      * non-string keys. */
-    assert(PyTuple_Check(type->tp_mro));
-    Py_INCREF(type->tp_mro);
-    Shiboken::AutoDecRef mro(type->tp_mro);
+    PepMroRef mro(type);
+    if (mro.isNull()) {
+        // Free-threaded, the holder left an exception behind. With a GIL the
+        // slot was null, which no ready type has, and the old code would have
+        // dereferenced it.
+        *error = -1;
+        return nullptr;
+    }
     for (Py_ssize_t i = 0, n = PyTuple_Size(mro.object()); i < n; ++i) {
         auto *base = PyTuple_GetItem(mro.object(), i);
         assert(PyType_Check(base));
@@ -1062,6 +1070,140 @@ PyObject *PepType_GetDict(PyTypeObject *type)
     return emulatePyType_GetDict(type);
 #endif // Py_LIMITED_API
 }
+
+// The raw field, only compared. A stale answer keeps the reference, which is
+// the safe direction. Relaxed, because another thread writes the field.
+#ifdef Py_GIL_DISABLED
+static PyObject *fieldValue(PyObject **field)
+{
+#  ifndef Py_LIMITED_API
+    return static_cast<PyObject *>(_Py_atomic_load_ptr_relaxed(field));
+#  else
+    return *field;
+#  endif
+}
+#endif
+
+PepTypeTupleRef::PepTypeTupleRef(PyTypeObject *type, PyObject *name,
+                                 PyObject **field)
+    : m_tuple(nullptr), m_owned(false)
+{
+#ifndef Py_GIL_DISABLED
+    // A build with a GIL reads the slot and keeps a reference for the walk,
+    // as find_name_in_mro() did before this holder existed: the lookups in
+    // the loop can run Python and replace the tuple. No attribute lookup -
+    // that is the free-threaded half, and it would run Python here.
+    SBK_UNUSED(type);
+    SBK_UNUSED(name);
+    m_tuple = *field;
+    if (m_tuple != nullptr) {
+        assert(PyTuple_Check(m_tuple));   // as find_name_in_mro() asserted
+        Py_INCREF(m_tuple);
+        m_owned = true;
+    }
+#else
+    // The lookup can run Python: a metaclass may answer with a descriptor.
+    SBK_ASSERT_NO_RAW_LOCK();
+    auto *result = PyObject_GetAttr(reinterpret_cast<PyObject *>(type), name);
+    if (result == nullptr)
+        return;
+    if (PyTuple_Check(result) == 0) {
+        // A metaclass answered with something we cannot walk.
+        PyErr_Format(PyExc_TypeError, "%s.%S is not a tuple",
+                     PepType_GetNameStr(type), name);
+        Py_DECREF(result);
+        return;
+    }
+    // Every walk takes the items for types, and one over __bases__ recurses:
+    // a base that is no type, or the type itself, would be followed blindly.
+    for (Py_ssize_t i = 0, n = PyTuple_Size(result); i < n; ++i) {
+        PyObject *item = PyTuple_GetItem(result, i);
+        if (PyType_Check(item) == 0
+            || (field == &type->tp_bases && item == reinterpret_cast<PyObject *>(type))) {
+            PyErr_Format(PyExc_TypeError, "%s.%S holds %R, which cannot be walked",
+                         PepType_GetNameStr(type), name, item);
+            Py_DECREF(result);
+            return;
+        }
+    }
+    m_tuple = result;
+    m_owned = true;
+    // MroSnapshot cleared: borrow the type's own tuple only. One a metaclass
+    // builds on the spot has no other owner and would be freed under the walk.
+    if (m_tuple == fieldValue(field)
+        && !Shiboken::FreeThreading::optionEnabled(
+               Shiboken::FreeThreading::MroSnapshot)) {
+        Py_DECREF(m_tuple);
+        m_owned = false;
+    }
+#endif
+}
+
+PepTypeTupleRef::~PepTypeTupleRef()
+{
+    if (!m_owned)
+        return;
+    // This can be the last reference to the tuple, and freeing it decrements
+    // the types inside it. Asserted for the free-threaded build only: a debug
+    // build with a GIL takes the binding locks too, and aborting there would
+    // be a new condition this series has no business adding.
+#ifdef Py_GIL_DISABLED
+    SBK_ASSERT_NO_RAW_LOCK();
+#endif
+    Py_DECREF(m_tuple);
+}
+
+PepMroRef::PepMroRef(PyTypeObject *type)
+    : PepTypeTupleRef(type, Shiboken::PyMagicName::mro(), &type->tp_mro)
+{
+}
+
+PepBasesRef::PepBasesRef(PyTypeObject *type)
+    : PepTypeTupleRef(type, Shiboken::PyMagicName::bases(), &type->tp_bases)
+{
+}
+
+#ifdef Py_GIL_DISABLED
+PyObject *PepDict_GetItemOwned(PyObject *dict, PyObject *key)
+{
+    PyObject *pending = PyErr_GetRaisedException();
+    PyObject *result{};
+    if (PyDict_GetItemRef(dict, key, &result) < 0)
+        PyErr_Clear();
+    PyErr_SetRaisedException(pending);
+    return result;
+}
+
+PyObject *PepDict_GetItemStringOwned(PyObject *dict, const char *key)
+{
+    PyObject *pending = PyErr_GetRaisedException();
+    PyObject *result{};
+    if (PyDict_GetItemStringRef(dict, key, &result) < 0)
+        PyErr_Clear();
+    PyErr_SetRaisedException(pending);
+    return result;
+}
+
+PyObject *PepDict_IterationSnapshot(PyObject *dict)
+{
+    return PyDict_Copy(dict);
+}
+#else
+PyObject *PepDict_GetItemOwned(PyObject *dict, PyObject *key)
+{
+    return Py_XNewRef(PyDict_GetItem(dict, key));
+}
+
+PyObject *PepDict_GetItemStringOwned(PyObject *dict, const char *key)
+{
+    return Py_XNewRef(PyDict_GetItemString(dict, key));
+}
+
+PyObject *PepDict_IterationSnapshot(PyObject *dict)
+{
+    return Py_NewRef(dict);
+}
+#endif
 
 int PepType_SetDict(PyTypeObject *type, PyObject *dict)
 {

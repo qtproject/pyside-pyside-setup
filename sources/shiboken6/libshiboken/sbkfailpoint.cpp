@@ -44,10 +44,14 @@ static constexpr std::array KnownFailpoints = {
     "metaobject-before-commit",  // instance builder built, not committed yet
     "parent-before-commit",      // leases held, the new edge not published yet
     "convert-before-lease",      // in a pointer conversion, before its own lease
+    "mro-after-snapshot",        // mro taken, the walk over it still to come
+    "bases-after-snapshot",      // bases taken, the recursion into them to come
     "detach-mid-round",          // _detachChildren(), a child picked, the round not done
     "ctor-after-publish",        // updateSourceObject(), object published, setup to come
     "dict-before-publish",       // instance dict found missing, not created yet
     "clear-before-dict",         // tp_clear, children detached, the dict to come
+    "source-property-after-read", // QtRO source getter, value read, not converted
+    "signal-homonym-before-bind", // signal call, method found, not bound yet
 };
 #else
 // A build with a GIL has none of these windows: no lease, and a deallocator

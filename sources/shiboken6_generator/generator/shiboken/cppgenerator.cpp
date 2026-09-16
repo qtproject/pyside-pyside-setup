@@ -6910,8 +6910,15 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
     if (attroCheck.testFlag(AttroCheckFlag::GetattroOverloads)) {
         s << "// Search the method in the instance dict\n"
             << "auto *ob_dict = SbkObject_GetDict_NoRef(self);\n";
-        s << "if (auto *meth = PyDict_GetItem(ob_dict, name)) {\n" << indent
+        // The owning lookup is the free-threaded build's: there another
+        // thread can drop the entry between the borrow and the incref.
+        s << "#ifdef Py_GIL_DISABLED\n"
+            << "if (auto *meth = PepDict_GetItemOwned(ob_dict, name))\n" << indent
+            << "return meth;\n" << outdent
+            << "#else\n"
+            << "if (auto *meth = PyDict_GetItem(ob_dict, name)) {\n" << indent
             << "Py_INCREF(meth);\nreturn meth;\n" << outdent << "}\n"
+            << "#endif\n"
             << "// Search the method in the type dict\n"
             << "if (Shiboken::Object::isUserType(self)) {\n" << indent
             << "Shiboken::AutoDecRef tpDict(PepType_GetDict(Py_TYPE(self)));\n"
@@ -7940,14 +7947,24 @@ auto *typeName = Py_TYPE(self)->tp_name;
 if (idx >= 0)
 )" << indent << "str.replace(0, idx, typeName);\n" << outdent
         << "str = str.trimmed();\n"
-        << "Shiboken::AutoDecRef tpDict(PepType_GetDict(Py_TYPE(self)));\n"
-        << "PyObject *mod = PyDict_GetItem(tpDict.object(), Shiboken::PyMagicName::module());\n";
+        << "Shiboken::AutoDecRef tpDict(PepType_GetDict(Py_TYPE(self)));\n";
     // PYSIDE-595: The introduction of heap types has the side effect that the module name
-    // is always prepended to the type name. Therefore the strchr check:
-    s << "if (mod != nullptr && std::strchr(typeName, '.') == nullptr)\n" << indent
+    // is always prepended to the type name. Therefore the strchr check.
+    // The owning lookup is the free-threaded build's: a borrowed __module__
+    // can be replaced while the string below is read.
+    s << "#ifdef Py_GIL_DISABLED\n"
+        << "Shiboken::AutoDecRef mod(PepDict_GetItemOwned(tpDict.object(), Shiboken::PyMagicName::module()));\n"
+        << "if (!mod.isNull() && std::strchr(typeName, '.') == nullptr)\n" << indent
+        << "return Shiboken::String::fromFormat(\"<%s.%s at %p>\","
+           " Shiboken::String::toCString(mod.object()), str.constData(), self);\n"
+        << outdent
+        << "#else\n"
+        << "PyObject *mod = PyDict_GetItem(tpDict.object(), Shiboken::PyMagicName::module());\n"
+        << "if (mod != nullptr && std::strchr(typeName, '.') == nullptr)\n" << indent
         << "return Shiboken::String::fromFormat(\"<%s.%s at %p>\","
            " Shiboken::String::toCString(mod), str.constData(), self);\n"
         << outdent
+        << "#endif\n"
         << "return Shiboken::String::fromFormat(\"<%s at %p>\", str.constData(), self);\n";
     writeReprFunctionFooter(s);
     return funcName;

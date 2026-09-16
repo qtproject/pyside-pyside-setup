@@ -82,11 +82,19 @@ return %out;
 
 static QString pyDictToCppMap(bool isQMap)
 {
+    // The walk takes a snapshot on a free-threaded build: the conversions in
+    // the body run Python, and PyDict_Next() may not see the dict change.
+    // A build with a GIL walks the dict itself, as it always has.
     return uR"(PyObject *key{};
 PyObject *value{};
 %out.clear();
 Py_ssize_t pos = 0;
+#ifdef Py_GIL_DISABLED
+Shiboken::AutoDecRef dictItems(PepDict_IterationSnapshot(%in));
+while (!dictItems.isNull() && PyDict_Next(dictItems.object(), &pos, &key, &value)) {
+#else
 while (PyDict_Next(%in, &pos, &key, &value)) {
+#endif
     %OUTTYPE_0 cppKey = %CONVERTTOCPP[%OUTTYPE_0](key);
     %OUTTYPE_1 cppValue = %CONVERTTOCPP[%OUTTYPE_1](value);
     %out.insert()"_s
@@ -149,11 +157,18 @@ static QString cppMultiHashToPyDict(bool isQMultiHash)
 // Convert Dict of Lists to a STL or Qt multi hash/map
 static QString pyDictToCppMultiHash(bool isQMultiHash)
 {
+    // Snapshot on a free-threaded build, the dict itself otherwise; see
+    // pyDictToCppMap().
     return uR"(PyObject *key{};
     PyObject *values{};
     %out.clear();
     Py_ssize_t pos = 0;
+#ifdef Py_GIL_DISABLED
+    Shiboken::AutoDecRef dictItems(PepDict_IterationSnapshot(%in));
+    while (!dictItems.isNull() && PyDict_Next(dictItems.object(), &pos, &key, &values)) {
+#else
     while (PyDict_Next(%in, &pos, &key, &values)) {
+#endif
         %OUTTYPE_0 cppKey = %CONVERTTOCPP[%OUTTYPE_0](key);
         const Py_ssize_t size = PySequence_Size(values);
         for (Py_ssize_t i = 0; i < size; ++i) {

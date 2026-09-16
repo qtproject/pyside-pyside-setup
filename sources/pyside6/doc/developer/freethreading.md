@@ -48,6 +48,10 @@ package's handoff. The names this change uses:
 | FT7 | pending destruction that stays right while the graph changes |
 | B6-4 | a failed allocation leaving a transaction half written |
 | B10-3 | direct entries running on the output of a failed conversion |
+| FT2 | disabling `__feature__` on free-threaded builds |
+| FT3 | owning Python references and synchronized mutable layout |
+| FT10 | dynamic meta-object publication and lifetime |
+| FT12 | GC, shutdown, finalization and fork boundaries |
 
 Every statement stands without them. They are here so that a reader who has
 the review can find the passage a sentence came from.
@@ -935,6 +939,181 @@ every one of them in the feature system - `sbkfeature_base`,
 `initSelectableFeature()` around the subtype walk, `class_property` - which
 is the finding this work package does not own. Not one report names either
 cache any more.
+
+### Walking a type's mro and bases
+
+An assignment to `__bases__` replaces `tp_mro` and `tp_bases`, and owning a
+type does not own the tuples. A walk that borrows one and calls back into
+Python before it is done - `PepType_GetDict()`, a dict lookup,
+`PyObject_GetAttr()` - can read a tuple another thread has released.
+`PepMroRef` and `PepBasesRef` hold an owned snapshot for the walk (FT3).
+
+The snapshot comes from `PyObject_GetAttr()`, not from the field.
+`set_tp_bases()` stores under the type lock without stopping the world, and
+`set_tp_mro()` stops the world only from 3.14 on, so loading the field and
+then incrementing races the writer's decrement. `_PyType_GetBases()` takes
+the type lock around those two steps; the attribute is how an extension
+gets the same. The price is that a metaclass answers: it can raise or
+return something that is not a tuple, so a null snapshot carries an
+exception, and a caller with no error channel stores it. The same holds
+for a tuple whose items are not types, or a `__bases__` that names the
+type itself: every walk takes the items for types, and the one over bases
+recurses.
+
+No raw binding lock may be held around a holder. The lookup can run
+Python, and releasing a bases tuple can free the types in it. An mro tuple
+is freed only by the tracing collector from 3.14 on, because `set_tp_mro()`
+turns on deferred refcounting; on 3.13t it falls like any other tuple. The
+holder asserts on both ends.
+
+A failed lookup makes `getOverride()` answer nullptr, as "no override"
+does, and `Sbk_GetPyOverride()` caches that answer for the object's
+lifetime. It caches only when no error is set.
+
+Bit `MroSnapshot`; cleared, a walk borrows the type's own tuple again. A
+tuple a metaclass builds per access stays owned, since nothing else holds
+it. Cleared, `find_name_in_mro()` borrows as well, which no release did.
+
+Walks that are not converted:
+
+| Where | Why |
+|---|---|
+| `walkThroughBases()`, `isDirectAncestor()` | shiboken's own graph walks; converting them needs its own measurement. `walkThroughBases()` asserts that the state lock is not held |
+| `dynamicqmetaobject.cpp` | the dynamic meta object, FT10 |
+| `feature_select.cpp`, `sbkfeature_base.cpp` | the feature system, FT2. Still compiled into free-threaded builds, and `lookupUnqualifiedOrOldEnum()` walks `tp_mro` on every failed attribute lookup on a Qt class |
+| `helper.cpp` | diagnostics, FT12 |
+| `pep384impl.cpp` | the startup probe, before a second thread exists |
+| `sbktypefactory.cpp` | writes the fields while the type is created |
+| `resolveMetaType()` | reads `tp_base`, the third field `__bases__` replaces, bare. Reached only for a type without bases, which an initialized type never is |
+
+### Dictionary lookups own their result
+
+`PyDict_GetItem()` and `PyDict_GetItemString()` return a borrowed value.
+With the GIL nothing runs between the lookup and the caller's incref;
+without it another thread can remove the entry and release the value in
+that gap. The same holds for `PyDict_Next()`: its key and value are borrowed
+from a dict another thread can change, and a loop body that calls Python
+releases a critical section on the dict, so a section alone does not help.
+
+`PepDict_GetItemOwned()` and `PepDict_GetItemStringOwned()` return a new
+reference, through `PyDict_GetItemRef()` on a free-threaded build; they
+suppress errors and keep a pending exception, as the borrowed calls do.
+`PepDict_IterationSnapshot()` hands a loop a private copy on a free-threaded
+build and the dict itself otherwise. Type and instance dictionaries,
+`sys.modules`, module globals and dicts handed in by the caller take these
+paths, the generated `getattro` and the dict converter templates included.
+A dict private to the call, such as its keyword arguments, keeps the plain
+API. A signal call owns the homonymous method it found until it is bound.
+That list is what was converted, not a claim about every
+borrowed lookup: `find_name_in_mro()` still returns one out of a type dict,
+and the `__feature__` code is left as it is (FT2).
+
+There is no option bit: the owned form only closes a gap, it trades nothing.
+
+### A failed type function stops there
+
+A generated type function that fails answers nullptr with an error set.
+Every step after it took the answer as a type: `incarnateHelper()` and
+`incarnateType()` incremented it, `getEnclosingObject()` asserted on it and a
+release build walked on with nullptr, and the attribute walk in
+`Module::get()` looked the next name up on it. All of that sits on the
+import path, so the failure ends startup either way - what must not happen is
+that a crash replaces the report.
+
+Under free threading each of these stops on nullptr and leaves the error set.
+`incarnateType()` restores the feature switch it turned off for the call, as
+its normal exit does, and when a subtype failed it reports that error rather
+than hand out the main type with an exception pending.
+
+That is the entry side of B13-2. Whether a failed initializer may leave a
+readiness flag, a half-built type or a dropped subtype entry behind, and what
+a retry then sees, belongs to the lazy machinery and is not settled here.
+
+There is no bit: not dereferencing a null answer trades against nothing, and
+a counter-proof would have to make a generated type function fail.
+
+### A virtual dispatch owns the override it found
+
+`getOverride()` looked the method up, took what `PyMethod_Function()` or the
+compiled-method attribute gave it - both borrowed - and let the bound method
+go at the return. After that the callable hung on the class dictionary alone,
+and the one caller treats it as owned: it releases it when an error is
+pending, which drops a reference nobody took.
+
+The walk between the lookup and the return runs Python, so the reference has
+to be taken where the callable is found, not where it is handed out. Under
+free threading the two branches own what they found, an `AutoDecRef` carries
+it across the mro walk, and each return hands the caller a reference of its
+own. The caller is then right as it stands: it releases on the error path,
+and the reference it takes for `publish()` is the one that keeps the override
+alive across the call.
+
+There is no bit: owning what you return is not a trade against anything.
+There is no guard test either, although the window can be reached: the
+walk parks at `mro-after-snapshot`, which `proof-mro-snapshot` uses, and
+another thread could replace the method in the class there.
+
+### A signal instance remembers its type weakly
+
+A signal instance keeps the type of its source to find the homonymous method
+later, stored as a raw pointer. Every read sits behind a check that the
+source is alive, and with a GIL a live source keeps its type. Under free
+threading the check and the read race: another thread can finish the last
+wrapper and release the type in between, and the walk over it now takes a
+`PepMroRef`, which asks the type for its `__mro__`.
+
+A strong reference is not the answer: a signal instance is not tracked by the
+collector, and a class that keeps one of its own bound signals would close a
+cycle through that edge and never be freed. Under free threading the record
+holds a weak reference instead, and each reader resolves it to a strong one
+for as long as it uses the type. A type that is gone has no homonymous
+method, and a wrapper built for the sender then gets its type from the QObject
+heuristics. Every type takes weak references; should one refuse, the record
+reads as if the type were gone.
+
+There is no bit: a reference is not a measure that can be switched off.
+`signal-type-collectable` guards the cycle; the race has no failpoint.
+
+### A capsule method owns its instance
+
+QtRemoteObjects gives a dynamic class its slots and properties through a
+descriptor that binds a builtin function to a capsule. The capsule records
+the instance and the descriptor's own capsule as raw pointers, and the handler
+reads the instance as `self`. A bound method that outlives its object reads
+a freed wrapper, and every access leaks: the method's capsule takes one
+reference too many, and a property access never releases its function.
+
+Under free threading the function's `__self__` is a tuple of the instance
+and the capsule: nobody can write it, and the collector traverses both. The
+capsule's context holds the descriptor, which owns the method definition and
+the capsule the handler reads. Neither a capsule nor `__module__` can hold
+the instance: a capsule shows the collector no edges, and `__module__` can
+be assigned. A bound `PyMethod` is no way out either: `connect()` expects a
+Python function behind every method. The method stays a builtin whose
+`__self__` is that tuple instead of the capsule.
+
+There is no bit: a reference is not a measure that can be switched off.
+`capsule-method-owns-instance` and `capsule-access-no-leak` guard it. The
+build with a GIL keeps the borrowed pointer and the leak.
+
+### A source's property is read as a copy
+
+A QtRemoteObjects source keeps its property values in a `QVariantList` of
+its own, in a capsule in the instance dictionary, and one handler reads and
+sets them. The getter held a reference into the list while it converted the
+value, and the setter replaced the element in place. With a GIL the two never
+overlap; under free threading a setter in another thread rewrites the variant
+under the reader, and two setters write the same variant at once.
+
+Under free threading every access to the list holds the capsule's critical
+section. A read takes a copy and converts it after the section, and a set
+swaps the new value in and releases the old one after the section, where its
+destructor may run Python. The setter compares against its own read, so a
+set that races another is ordered at that read. A source whose list is gone
+raises a `RuntimeError` instead of locking a null capsule.
+
+Bit `SourcePropertyCopy`; cleared, the getter holds the reference again and
+`proof-source-property-copy` returns the value a setter wrote after the read.
 
 ### The guard's reach in generated code
 

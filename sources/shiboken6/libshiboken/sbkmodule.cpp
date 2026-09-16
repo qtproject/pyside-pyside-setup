@@ -219,7 +219,8 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     auto dotPos = usePySide ? names.find('.', 8) : names.find('.');
     auto startPos = dotPos + 1;
     AutoDecRef modName(String::fromCppStringView(names.substr(0, dotPos)));
-    auto *modOrType = PyDict_GetItem(moduleData()->sysModules, modName);
+    AutoDecRef module(PepDict_GetItemOwned(moduleData()->sysModules, modName));
+    PyObject *modOrType = module.object();
     if (modOrType == nullptr) {
         PyErr_Format(PyExc_SystemError,
                      R"(libshiboken: Error instantiating "%s": Module "%U" should already be in sys.modules)",
@@ -235,6 +236,12 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
         startPos = dotPos + 1;
         AutoDecRef obTypeName(String::fromCppStringView(typeName));
         modOrType = PyObject_GetAttr(modOrType, obTypeName);
+#ifdef Py_GIL_DISABLED
+        // A type function that failed ends the walk with its error set.
+        // See "A failed type function stops there" in the free-threading notes.
+        if (modOrType == nullptr)
+            return nullptr;
+#endif
     } while (!typeIsUsable(typeStruct) && dotPos != std::string::npos);
 
     return typeStruct.type;
@@ -251,6 +258,11 @@ static PyObject *getEnclosingObject(PyObject *modOrType, std::string_view namePa
         auto typeName = namePath.substr(startPos, dotPos - startPos);
         AutoDecRef obTypeName(String::fromCppStringView(typeName));
         auto *next = PyObject_GetAttr(modOrType, obTypeName.object());
+#ifdef Py_GIL_DISABLED
+        // The enclosing type failed; the caller stops on nullptr.
+        if (next == nullptr)
+            return nullptr;
+#endif
         assert(next);
         modOrType = next;
         startPos = dotPos + 1;
@@ -262,7 +274,18 @@ static PyObject *getEnclosingObject(PyObject *modOrType, std::string_view namePa
 static void incarnateHelper(PyObject *enclosing, std::string_view names,
                             const TypeCreationStruct &tcStruct)
 {
+#ifdef Py_GIL_DISABLED
+    // A failed type function answers nullptr with its error set, and so
+    // does getEnclosingObject() when the enclosing type failed.
+    // See "A failed type function stops there" in the free-threading notes.
+    if (enclosing == nullptr)
+        return;
+#endif
     PyTypeObject *type = tcStruct.func(enclosing);
+#ifdef Py_GIL_DISABLED
+    if (type == nullptr)
+        return;
+#endif
     assert(type != nullptr);
     auto *obType = reinterpret_cast<PyObject *>(type);
     if (PyModule_Check(enclosing) != 0) {
@@ -323,6 +346,14 @@ static PyTypeObject *incarnateType(PyObject *module, const std::string &name,
     // PYSIDE-2404: Make sure that no switching happens during type creation.
     auto saveFeature = initSelectableFeature(nullptr);
     PyTypeObject *type = initFunc(modOrType);
+#ifdef Py_GIL_DISABLED
+    // Failed with its error set, as in incarnateHelper(). The feature
+    // switch is restored on this exit too.
+    if (type == nullptr) {
+        initSelectableFeature(saveFeature);
+        return nullptr;
+    }
+#endif
 
     // - assign this object to the name in the module (for adding subtypes)
     auto *obType = reinterpret_cast<PyObject *>(type);
@@ -336,6 +367,12 @@ static PyTypeObject *incarnateType(PyObject *module, const std::string &name,
     // - remove the entry, if not by something cleared.
     if (!nameToFunc.empty())
         nameToFunc.erase(funcIter);
+#ifdef Py_GIL_DISABLED
+    // A subtype that failed left its error set: report that instead of
+    // handing out the main type with an exception pending.
+    if (PyErr_Occurred() != nullptr)
+        return nullptr;
+#endif
     // - return the PyTypeObject.
     return type;
 }
@@ -690,10 +727,8 @@ void AddTypeCreationFunction(PyObject *module,
 PyObject *import(const char *moduleName)
 {
     PyObject *sysModules = PyImport_GetModuleDict();
-    PyObject *module = PyDict_GetItemString(sysModules, moduleName);
-    if (module != nullptr)
-        Py_INCREF(module);
-    else
+    PyObject *module = PepDict_GetItemStringOwned(sysModules, moduleName);
+    if (module == nullptr)
         module = PyImport_ImportModule(moduleName);
 
     if (module == nullptr) {

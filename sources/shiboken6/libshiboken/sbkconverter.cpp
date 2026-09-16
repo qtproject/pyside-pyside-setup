@@ -820,8 +820,13 @@ bool checkDictTypes(PyTypeObject *keyType, PyTypeObject *valueType, PyObject *py
 
     PyObject *key{};
     PyObject *value{};
+    Shiboken::AutoDecRef items(PepDict_IterationSnapshot(pyIn));
+    if (items.isNull()) {
+        PyErr_Clear();
+        return false;
+    }
     Py_ssize_t pos = 0;
-    while (PyDict_Next(pyIn, &pos, &key, &value)) {
+    while (PyDict_Next(items.object(), &pos, &key, &value)) {
         if (!PyObject_TypeCheck(key, keyType))
             return false;
         if (!PyObject_TypeCheck(value, valueType))
@@ -841,8 +846,13 @@ bool checkMultiDictTypes(PyTypeObject *keyType, PyTypeObject *valueType,
 
     PyObject *key{};
     PyObject *values{};
+    Shiboken::AutoDecRef items(PepDict_IterationSnapshot(pyIn));
+    if (items.isNull()) {
+        PyErr_Clear();
+        return false;
+    }
     Py_ssize_t pos = 0;
-    while (PyDict_Next(pyIn, &pos, &key, &values)) {
+    while (PyDict_Next(items.object(), &pos, &key, &values)) {
         if (!PyObject_TypeCheck(key, keyType))
             return false;
         if (!PySequence_Check(values))
@@ -867,8 +877,13 @@ bool convertibleDictTypes(const SbkConverter *keyConverter, bool keyCheckExact, 
         return false;
     PyObject *key{};
     PyObject *value{};
+    Shiboken::AutoDecRef items(PepDict_IterationSnapshot(pyIn));
+    if (items.isNull()) {
+        PyErr_Clear();
+        return false;
+    }
     Py_ssize_t pos = 0;
-    while (PyDict_Next(pyIn, &pos, &key, &value)) {
+    while (PyDict_Next(items.object(), &pos, &key, &value)) {
         if (keyCheckExact) {
             if (!PyObject_TypeCheck(key, keyConverter->pythonType))
                 return false;
@@ -896,8 +911,13 @@ bool convertibleMultiDictTypes(const SbkConverter *keyConverter, bool keyCheckEx
         return false;
     PyObject *key{};
     PyObject *values{};
+    Shiboken::AutoDecRef items(PepDict_IterationSnapshot(pyIn));
+    if (items.isNull()) {
+        PyErr_Clear();
+        return false;
+    }
     Py_ssize_t pos = 0;
-    while (PyDict_Next(pyIn, &pos, &key, &values)) {
+    while (PyDict_Next(items.object(), &pos, &key, &values)) {
         if (keyCheckExact) {
             if (!PyObject_TypeCheck(key, keyConverter->pythonType))
                 return false;

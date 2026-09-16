@@ -169,7 +169,12 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     PyTypeObject *qobjectType = PySide::qObjectType();
 
     auto *elementType = reinterpret_cast<PyTypeObject *>(data->obElementType);
-    if (!PySequence_Contains(elementType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
+    // PySequence_Contains() compares, and a comparison can run Python code.
+    PepMroRef elementMro(elementType);
+    if (elementMro.isNull())
+        return -1;              // the holder's exception says more than ours
+    if (!PySequence_Contains(elementMro.object(),
+                             reinterpret_cast<PyObject *>(qobjectType))) {
         PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
                      qobjectType->tp_name, elementType->tp_name);
         return -1;

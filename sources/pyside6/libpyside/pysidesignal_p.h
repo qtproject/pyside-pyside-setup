@@ -48,6 +48,18 @@ struct PySideSignalInstanceShared
 {
     QPointer<QObject> source;
     PyTypeObject *sourceType = nullptr;
+#ifdef Py_GIL_DISABLED
+    /// Replaces sourceType on this build; readers hold what
+    /// acquireSourceType() returns for as long as they use the type.
+    /// See "A signal instance remembers its type weakly" in the free-threading notes.
+    PyObject *sourceTypeRef = nullptr;
+    void rememberSourceType();
+    PyTypeObject *acquireSourceType() const; // new reference, or nullptr
+    PySideSignalInstanceShared() = default;
+    PySideSignalInstanceShared(const PySideSignalInstanceShared &) = delete;
+    PySideSignalInstanceShared &operator=(const PySideSignalInstanceShared &) = delete;
+    ~PySideSignalInstanceShared();
+#endif
 };
 
 using PySideSignalInstanceSharedPtr = std::shared_ptr<PySideSignalInstanceShared>;

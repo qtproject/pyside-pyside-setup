@@ -137,6 +137,41 @@ static void CapsuleDescriptor_free(PyObject *self)
     free(const_cast<char*>(d->methodDef.ml_doc));
 }
 
+#ifdef Py_GIL_DISABLED
+// The function's self is a tuple of the instance and the payload, which the
+// collector traverses and nobody can write; the payload holds the descriptor.
+// See "A capsule method owns its instance" in the free-threading notes.
+static void CapsuleDescriptorData_destroy(PyObject *payload)
+{
+    Py_XDECREF(reinterpret_cast<PyObject *>(PyCapsule_GetContext(payload)));
+    delete reinterpret_cast<CapsuleDescriptorData *>(PyCapsule_GetPointer(payload, "Payload"));
+}
+
+static PyObject *newCapsuleMethod(PyObject *descriptor, PyObject *instance)
+{
+    auto *d = reinterpret_cast<CapsuleDescriptor *>(descriptor);
+    auto *data = new CapsuleDescriptorData{instance, d->capsule};
+    PyObject *payload = PyCapsule_New(data, "Payload", CapsuleDescriptorData_destroy);
+    if (payload == nullptr) {
+        delete data;
+        return nullptr;
+    }
+    PyCapsule_SetContext(payload, Py_NewRef(descriptor));
+    PyObject *self = PyTuple_Pack(2, instance, payload);
+    Py_DECREF(payload);
+    if (self == nullptr)
+        return nullptr;
+    PyObject *method = PyCFunction_New(&d->methodDef, self);
+    Py_DECREF(self);
+    return method;
+}
+
+PyObject *capsuleMethodPayload(PyObject *self)
+{
+    return PyTuple_Check(self) && PyTuple_Size(self) == 2 ? PyTuple_GetItem(self, 1) : nullptr;
+}
+#endif
+
 static PyObject *CapsuleMethod_descr_get(PyObject *self, PyObject *instance, PyObject * /* owner */)
 {
     if (instance == nullptr) {
@@ -145,6 +180,9 @@ static PyObject *CapsuleMethod_descr_get(PyObject *self, PyObject *instance, PyO
         return self;
     }
 
+#ifdef Py_GIL_DISABLED
+    return newCapsuleMethod(self, instance);
+#else
     auto *d = reinterpret_cast<CapsuleDescriptor *>(self);
     auto *data = new CapsuleDescriptorData{instance, d->capsule};
     PyObject *payload = PyCapsule_New(data, "Payload", [](PyObject *capsule) {
@@ -155,6 +193,7 @@ static PyObject *CapsuleMethod_descr_get(PyObject *self, PyObject *instance, PyO
 
     Py_INCREF(payload);
     return PyCFunction_New(&d->methodDef, payload);
+#endif
 }
 
 bool add_capsule_method_to_type(PyTypeObject *type, PyMethodDef *method, PyObject *capsule)
@@ -187,6 +226,15 @@ static PyObject *CapsuleProperty_descr_get(PyObject *self, PyObject *instance, P
         return self;
     }
 
+#ifdef Py_GIL_DISABLED
+    PyObject *method = newCapsuleMethod(self, instance);
+    if (!method)
+        return nullptr;
+
+    PyObject *result = PyObject_CallFunctionObjArgs(method, nullptr);
+    Py_DECREF(method);
+    return result;
+#else
     auto *d = reinterpret_cast<CapsuleDescriptor *>(self);
     auto *data = new CapsuleDescriptorData{instance, d->capsule};
     PyObject *payload = PyCapsule_New(data, "Payload", [](PyObject *capsule) {
@@ -196,10 +244,19 @@ static PyObject *CapsuleProperty_descr_get(PyObject *self, PyObject *instance, P
         return nullptr;
 
     return PyObject_CallFunctionObjArgs(PyCFunction_New(&d->methodDef, payload), nullptr);
+#endif
 }
 
 static int CapsuleProperty_descr_set(PyObject *self, PyObject *instance, PyObject *value)
 {
+#ifdef Py_GIL_DISABLED
+    PyObject *method = newCapsuleMethod(self, instance);
+    if (!method)
+        return -1;
+
+    PyObject *result = PyObject_CallFunctionObjArgs(method, value, nullptr);
+    Py_DECREF(method);
+#else
     auto *d = reinterpret_cast<CapsuleDescriptor *>(self);
     auto *data = new CapsuleDescriptorData{instance, d->capsule};
     PyObject *payload = PyCapsule_New(data, "Payload", [](PyObject *capsule) {
@@ -211,6 +268,7 @@ static int CapsuleProperty_descr_set(PyObject *self, PyObject *instance, PyObjec
     Py_INCREF(payload);
     PyObject *result = PyObject_CallFunctionObjArgs(PyCFunction_New(&d->methodDef, payload),
                                                     value, nullptr);
+#endif
     if (!result)
         return -1;
 

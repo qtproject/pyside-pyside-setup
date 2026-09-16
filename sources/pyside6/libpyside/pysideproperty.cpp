@@ -12,6 +12,8 @@
 #include <autodecref.h>
 #include <pep384ext.h>
 #include <sbkconverter.h>
+#include <sbkerrors.h>
+#include <sbkfailpoint.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
@@ -278,6 +280,9 @@ void PySidePropertyPrivate::metaCall(PyObject *source, QMetaObject::Call call, v
 static const char dataCapsuleName[] = "PropertyPrivate";
 static const char dataCapsuleKeyName[] = "_PropertyPrivate"; // key in keyword args
 
+/// Takes back the reference addDataCapsuleToKwArgs() left in the dict: the
+/// AutoDecRef below releases that one, so the plain lookup is the second half
+/// of a hand-over, not a borrow. Exactly one read per write.
 static PySidePropertyBase *getDataFromKwArgs(PyObject *kwds)
 {
     if (kwds != nullptr && PyDict_Check(kwds) != 0) {
@@ -293,6 +298,9 @@ static PySidePropertyBase *getDataFromKwArgs(PyObject *kwds)
     return nullptr;
 }
 
+/// Hands the property data to the type's constructor through its keyword
+/// arguments. The capsule's own reference stays in the dict on purpose:
+/// getDataFromKwArgs() takes it back. Exactly one read per write.
 static void addDataCapsuleToKwArgs(const AutoDecRef &kwds, PySidePropertyBase *data)
 {
     auto *capsule = PyCapsule_New(data, dataCapsuleName, nullptr);
@@ -586,21 +594,33 @@ static int qpropertyClear(PyObject *self)
 
 } // extern "C"
 
+/// A new reference, or nullptr. Not a borrow: releasing the bases snapshot
+/// on return can free the dictionary a borrowed answer lives in.
 static PyObject *getFromType(PyTypeObject *type, PyObject *name)
 {
     AutoDecRef tpDict(PepType_GetDict(type));
-    auto *attr = PyDict_GetItem(tpDict.object(), name);
-    if (!attr) {
-        PyObject *bases = type->tp_bases;
-        const Py_ssize_t size = PyTuple_Size(bases);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            PyObject *base = PyTuple_GetItem(bases, i);
-            attr = getFromType(reinterpret_cast<PyTypeObject *>(base), name);
-            if (attr)
-                return attr;
-        }
+    if (auto *attr = PepDict_GetItemOwned(tpDict.object(), name))
+        return attr;
+
+    // One snapshot per level; levels may see different __bases__
+    // assignments, but each level walks one coherent tuple.
+    PepBasesRef bases(type);
+    if (bases.isNull()) {
+        Shiboken::Errors::storeErrorOrPrint();
+        return nullptr;
     }
-    return attr;
+    // A test assigns __bases__ here from another thread. Only the
+    // outermost level parks.
+    SBK_FAILPOINT("bases-after-snapshot");
+    const Py_ssize_t size = PyTuple_Size(bases.object());
+    for (Py_ssize_t i = 0; i < size; ++i) {
+        PyObject *base = PyTuple_GetItem(bases.object(), i);
+        // A new reference: it outlives this level's snapshot.
+        if (auto *found = getFromType(reinterpret_cast<PyTypeObject *>(base),
+                                      name))
+            return found;
+    }
+    return nullptr;
 }
 
 namespace PySide::Property {
@@ -666,11 +686,10 @@ PySideProperty *getObject(PyObject *source, PyObject *name)
     PyObject *attr = nullptr;
 
     attr = getFromType(Py_TYPE(source), name);
-    if (attr && checkType(attr)) {
-        Py_INCREF(attr);
-        return reinterpret_cast<PySideProperty *>(attr);
-    }
+    if (attr && checkType(attr))
+        return reinterpret_cast<PySideProperty *>(attr);   // hands it on
 
+    Py_XDECREF(attr);
     if (!attr)
         PyErr_Clear(); //Clear possible error caused by PyObject_GenericGetAttr
 

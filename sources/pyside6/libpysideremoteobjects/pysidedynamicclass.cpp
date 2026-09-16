@@ -31,6 +31,12 @@
 #include <cstring>
 #include <cctype>
 
+#ifdef Py_GIL_DISABLED
+#  include <sbkfailpoint.h>
+#  include <sbkftoptions.h>
+#  include <utility>
+#endif
+
 using namespace Shiboken;
 
 class FriendlyReplica : public QRemoteObjectReplica
@@ -50,6 +56,43 @@ PyObject *propertiesAttr()
     static PyObject *const s = Shiboken::String::createStaticString("__PROPERTIES__");
     return s;
 }
+
+#ifdef Py_GIL_DISABLED
+// A source's property list is read and set under its capsule's critical
+// section, and a read leaves it as a copy.
+// See "A source's property is read as a copy" in the free-threading notes.
+static const QVariant *readSourceProperty(PyObject *capsule, const QVariantList *list,
+                                          qsizetype index, QVariant *copy)
+{
+    using Shiboken::FreeThreading::optionEnabled;
+    if (!optionEnabled(Shiboken::FreeThreading::SourcePropertyCopy))
+        return index >= 0 && index < list->size() ? &list->at(index) : nullptr;
+    bool found = false;
+    PyCriticalSection section;
+    PyCriticalSection_Begin(&section, capsule);
+    if (index >= 0 && index < list->size()) {
+        *copy = list->at(index);
+        found = true;
+    }
+    PyCriticalSection_End(&section);
+    return found ? copy : nullptr;
+}
+
+static void writeSourceProperty(PyObject *capsule, QVariantList *list, qsizetype index,
+                                QVariant value)
+{
+    using Shiboken::FreeThreading::optionEnabled;
+    if (!optionEnabled(Shiboken::FreeThreading::SourcePropertyCopy)) {
+        list->replace(index, value);
+        return;
+    }
+    // The old value is released after the section, where it may run Python.
+    PyCriticalSection section;
+    PyCriticalSection_Begin(&section, capsule);
+    std::swap((*list)[index], value);
+    PyCriticalSection_End(&section);
+}
+#endif
 
 struct SourceDefs
 {
@@ -94,6 +137,9 @@ struct SourceDefs
 
     static PyObject *capsule_method_handler(PyObject *payload, PyObject *args)
     {
+#ifdef Py_GIL_DISABLED
+        payload = capsuleMethodPayload(payload);
+#endif
         auto *methodData = reinterpret_cast<CapsuleDescriptorData *>(PyCapsule_GetPointer(payload,
                                                                                           "Payload"));
         if (!methodData) {
@@ -106,10 +152,27 @@ struct SourceDefs
             auto *capsule = PyCapsule_GetPointer(methodData->payload, "PropertyCapsule");
             if (capsule) {
                 auto *ob_dict = SbkObject_GetDict_NoRef(self);
-                auto *propPtr = PyCapsule_GetPointer(PyDict_GetItem(ob_dict, propertiesAttr()),
+                Shiboken::AutoDecRef propCapsule(PepDict_GetItemOwned(ob_dict, propertiesAttr()));
+                auto *propPtr = PyCapsule_GetPointer(propCapsule,
                                                      nullptr);
                 auto *currentProperties = reinterpret_cast<QVariantList *>(propPtr);
                 auto *callData = reinterpret_cast<PropertyCapsule *>(capsule);
+#ifdef Py_GIL_DISABLED
+                if (currentProperties == nullptr) {
+                    PyErr_SetString(PyExc_RuntimeError, "The source has no property list");
+                    return nullptr;
+                }
+                QVariant copy;
+                const QVariant *read = readSourceProperty(propCapsule, currentProperties,
+                                                          callData->indexInObject, &copy);
+                if (read == nullptr) {
+                    PyErr_Format(PyExc_RuntimeError, "Unknown property method: %s",
+                                 callData->name.constData());
+                    return nullptr;
+                }
+                SBK_FAILPOINT("source-property-after-read");
+                const QVariant &currentVariant = *read;
+#else
                 if (callData->indexInObject < 0
                     || callData->indexInObject >= currentProperties->size()) {
                     PyErr_Format(PyExc_RuntimeError, "Unknown property method: %s",
@@ -117,6 +180,7 @@ struct SourceDefs
                     return nullptr;
                 }
                 const QVariant &currentVariant = currentProperties->at(callData->indexInObject);
+#endif
 
                 // Handle getter
                 if (PyTuple_Size(args) == 0)
@@ -141,7 +205,12 @@ struct SourceDefs
                 if (variant == currentVariant)
                     Py_RETURN_NONE;
 
+#ifdef Py_GIL_DISABLED
+                writeSourceProperty(propCapsule, currentProperties, callData->indexInObject,
+                                    variant);
+#else
                 currentProperties->replace(callData->indexInObject, variant);
+#endif
                 // Get the QMetaObject and emit the property changed signal if there is one
                 const auto *metaObject = PySide::retrieveMetaObject(self);
                 auto metaProperty = metaObject->property(callData->propertyIndex);
@@ -268,6 +337,9 @@ struct ReplicaDefs
 
     static PyObject *capsule_method_handler(PyObject *payload, PyObject *args)
     {
+#ifdef Py_GIL_DISABLED
+        payload = capsuleMethodPayload(payload);
+#endif
         auto *methodData = reinterpret_cast<CapsuleDescriptorData *>(PyCapsule_GetPointer(payload,
                                                                                           "Payload"));
         if (!methodData) {

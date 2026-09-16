@@ -157,6 +157,10 @@ public:
     SbkObject *retrieveWrapper(const void *cptr) const;
 #endif // Py_GIL_DISABLED
 
+    /// Returns the Python override of a virtual, or nullptr. Under free
+    /// threading the result is a new reference the caller releases; with a
+    /// GIL it is borrowed, as it always was.
+    /// See "A virtual dispatch owns the override it found" in the free-threading notes.
     static PyObject *getOverride(SbkObject *wrapper, PyObject *pyMethodName);
 
     /// One edge of the class hierarchy, the way a module's generated

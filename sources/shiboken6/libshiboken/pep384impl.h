@@ -499,6 +499,66 @@ LIBSHIBOKEN_API PyTypeObject *PepType_Type_tp_new(PyTypeObject *metatype,
 
 LIBSHIBOKEN_API PyObject *PepType_GetDict(PyTypeObject *type);
 
+/// An owned snapshot of a type's mro or bases, held for the walk that took
+/// it. An assignment to `__bases__` replaces both tuples, and owning the type
+/// does not own them.
+///
+/// The tuple stays valid for the holder's lifetime; it is not guaranteed to
+/// be the type's current one. On a free-threaded build the lookup is
+/// `PyObject_GetAttr()`, so a metaclass can raise or answer with something
+/// that is not a tuple, and a null result always carries a Python exception.
+/// A build with a GIL reads the slot, where null carries none.
+///
+/// No raw binding lock may be held on construction or destruction. The
+/// lookup can run Python, and releasing a bases tuple can free the types in
+/// it.
+/// See "Walking a type's mro and bases" in the free-threading notes.
+class LIBSHIBOKEN_API PepTypeTupleRef
+{
+public:
+    PepTypeTupleRef(const PepTypeTupleRef &) = delete;
+    PepTypeTupleRef &operator=(const PepTypeTupleRef &) = delete;
+
+    PyObject *object() const { return m_tuple; }
+    bool isNull() const { return m_tuple == nullptr; }
+
+protected:
+    /// \a field is the slot the attribute usually answers with. It is only
+    /// compared: with MroSnapshot cleared the holder borrows the tuple if it
+    /// is the one the type keeps alive.
+    PepTypeTupleRef(PyTypeObject *type, PyObject *name, PyObject **field);
+    ~PepTypeTupleRef();
+
+private:
+    PyObject *m_tuple;
+    bool m_owned;
+};
+
+class LIBSHIBOKEN_API PepMroRef : public PepTypeTupleRef
+{
+public:
+    explicit PepMroRef(PyTypeObject *type);
+};
+
+class LIBSHIBOKEN_API PepBasesRef : public PepTypeTupleRef
+{
+public:
+    explicit PepBasesRef(PyTypeObject *type);
+};
+
+/// PyDict_GetItem() returning a new reference. Errors are suppressed and a
+/// pending exception is kept, as there.
+/// Without the GIL another thread can remove the entry and release the value
+/// between a borrowed lookup and the caller's incref.
+/// See "Dictionary lookups own their result" in the free-threading notes.
+LIBSHIBOKEN_API PyObject *PepDict_GetItemOwned(PyObject *dict, PyObject *key);
+LIBSHIBOKEN_API PyObject *PepDict_GetItemStringOwned(PyObject *dict, const char *key);
+
+/// A dict to walk with PyDict_Next() when the walk may run Python or another
+/// thread may change the dict: a private copy on a free-threaded build, the
+/// dict itself otherwise. Returns a new reference, null with an exception.
+LIBSHIBOKEN_API PyObject *PepDict_IterationSnapshot(PyObject *dict);
+
 // This function does not exist as PyType_SetDict. But because tp_dict
 // is no longer considered to be accessible, we treat it as such.
 LIBSHIBOKEN_API int PepType_SetDict(PyTypeObject *type, PyObject *dict);

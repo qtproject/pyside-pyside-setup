@@ -90,6 +90,9 @@ struct PodDefs
 
     static PyObject *CapsuleMethod_handler(PyObject *payload, PyObject * /* args */)
     {
+#ifdef Py_GIL_DISABLED
+        payload = capsuleMethodPayload(payload);
+#endif
         auto *methodData = reinterpret_cast<CapsuleDescriptorData *>(
             PyCapsule_GetPointer(payload, "Payload"));
         if (!methodData) {

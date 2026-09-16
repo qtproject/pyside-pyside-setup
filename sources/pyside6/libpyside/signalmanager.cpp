@@ -226,9 +226,18 @@ PyObject *methodGetAttr(PyObject *self, PyObject *name)
     if (result != nullptr || !_Pep_IsPrivateName(name))
         return result;
 
-    auto *type = Py_TYPE(self);
-    for (Py_ssize_t i = 0, size = PyTuple_Size(type->tp_mro); i < size; ++i) {
-        auto *candidate = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_mro, i));
+#ifdef Py_GIL_DISABLED
+    // Clear the AttributeError from above: the snapshot is itself a lookup,
+    // held for the whole walk because the loop calls PyObject_GetAttr().
+    // A build with a GIL reads the slot and keeps the error pending, as the
+    // loop below expects when it finds no candidate to try.
+    PyErr_Clear();
+#endif
+    PepMroRef mro(Py_TYPE(self));
+    if (mro.isNull())
+        return nullptr;
+    for (Py_ssize_t i = 0, size = PyTuple_Size(mro.object()); i < size; ++i) {
+        auto *candidate = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro.object(), i));
         if (candidate != &PyBaseObject_Type) {
             PyErr_Clear();
             Shiboken::AutoDecRef mangledName(_Pep_TypePrivateMangle(candidate, name));
@@ -580,11 +589,21 @@ static PySide::MetaObjectBuilder *metaBuilderFromDict(PyObject *dict)
     if (!dict || !PyDict_Contains(dict, metaObjectAttr()))
         return nullptr;
 
+#ifdef Py_GIL_DISABLED
+    // Attached here - retrieveMetaObjectForCppObject() takes the state before
+    // Qt asks - so the entry can be taken with a reference of its own.
+    Shiboken::AutoDecRef pyBuilder(PepDict_GetItemOwned(dict, metaObjectAttr()));
+    if (pyBuilder.isNull())
+        return nullptr;
+    return reinterpret_cast<PySide::MetaObjectBuilder *>(PyCapsule_GetPointer(pyBuilder, nullptr));
+#else
     // PYSIDE-813: The above assumption is not true in debug mode:
     // PyDict_GetItem would touch PyThreadState_GET and the global error state.
-    // PyDict_GetItemWithError instead can work without GIL.
+    // PyDict_GetItemWithError instead can work without GIL. Nothing owning
+    // either: an incref with no thread state is what it must not do.
     PyObject *pyBuilder = PyDict_GetItemWithError(dict, metaObjectAttr());
     return reinterpret_cast<PySide::MetaObjectBuilder *>(PyCapsule_GetPointer(pyBuilder, nullptr));
+#endif
 }
 
 // Helper to format a method signature "foo(QString)" into

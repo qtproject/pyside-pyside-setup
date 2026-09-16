@@ -30,7 +30,14 @@ void QAbstractOAuthModifyFunctor::operator()(QAbstractOAuth::Stage stage,
         PyObject *key{};
         PyObject *value{};
         Py_ssize_t pos = 0;
+        // The conversions in the body run Python, so the walk takes a
+        // snapshot on a free-threaded build; with a GIL it walks the dict.
+#ifdef Py_GIL_DISABLED
+        Shiboken::AutoDecRef items(PepDict_IterationSnapshot(ret.object()));
+        while (!items.isNull() && PyDict_Next(items.object(), &pos, &key, &value)) {
+#else
         while (PyDict_Next(ret.object(), &pos, &key, &value)) {
+#endif
             QString cppKey = %CONVERTTOCPP[QString](key);
             QVariant cppValue = %CONVERTTOCPP[QVariant](value);
             dictPointer->replace(cppKey, cppValue);

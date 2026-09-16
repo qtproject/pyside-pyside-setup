@@ -122,6 +122,10 @@ enum Option : int
     /// is gone, and a failing allocation leaves a child with no parent and an
     /// edge reference nobody releases.
     TransactionPrepare = 0x80000,
+    /// A walk of a type's mro or bases keeps the reference the attribute
+    /// lookup handed it. Cleared, it borrows the type's own tuple, which an
+    /// assignment to __bases__ can release underneath it.
+    MroSnapshot = 0x100000,
     /// A lease taken inside an argument's conversion - on a container
     /// element, on a wrapper passed as void * - is kept until the native call
     /// has returned. Cleared, it ends with the conversion, and a concurrent
@@ -146,7 +150,11 @@ enum Option : int
     /// CPython creates it, and never replaced: tp_clear empties it. Cleared,
     /// a first access can overwrite a dict another thread created, and
     /// tp_clear releases the dict under a reader.
-    DictPublishOnce = 0x10000000
+    DictPublishOnce = 0x10000000,
+    /// A QtRemoteObjects source reads a property as a copy and sets it,
+    /// both under the property list's critical section. Cleared, a reader
+    /// holds a reference into the list while another thread replaces it.
+    SourcePropertyCopy = 0x20000000
 };
 
 /// Whether opt is enabled. The environment is read once, on first use.

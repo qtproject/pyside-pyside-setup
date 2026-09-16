@@ -9,6 +9,7 @@
 
 #include <autodecref.h>
 #include <sbkconverter.h>
+#include <sbkerrors.h>
 #include <sbkpep.h>
 #include <basewrapper.h>
 
@@ -121,14 +122,25 @@ QMetaType resolveMetaType(PyTypeObject *type)
     // tp_base does not always point to the first base class, but rather to the first
     // that has added any python fields or slots to its object layout.
     // See https://mail.python.org/pipermail/python-list/2009-January/520733.html
-    if (type->tp_bases) {
-        const auto size = PyTuple_Size(type->tp_bases);
+    // One snapshot per level: size and items come from one tuple. tp_base
+    // below is still read bare.
+    // See "Walking a type's mro and bases" in the free-threading notes.
+    PepBasesRef bases(type);
+    if (bases.isNull() && Shiboken::Errors::occurred() != nullptr) {
+        // A failed attribute lookup is not "no bases", so it gets no tp_base
+        // fallback. A build with a GIL only reads the slot and sets no error
+        // there: a null slot is what that fallback is for, and it keeps it.
+        Shiboken::Errors::storeErrorOrPrint();
+        return {};
+    }
+    const auto size = bases.isNull() ? 0 : PyTuple_Size(bases.object());
+    if (size > 0) {
         Py_ssize_t i = 0;
         // PYSIDE-1887, PYSIDE-86: Skip QObject base class of QGraphicsObject;
         // it needs to use always QGraphicsItem as a QVariant type for
         // QGraphicsItem::itemChange() to work.
         if (qstrcmp(typeName, "QGraphicsObject*") == 0 && size > 1) {
-            auto *firstBaseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, 0));
+            auto *firstBaseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(bases.object(), 0));
             if (SbkObjectType_Check(firstBaseType)) {
                 const char *firstBaseTypeName = Shiboken::ObjectType::getOriginalName(firstBaseType);
                 if (firstBaseTypeName != nullptr && qstrcmp(firstBaseTypeName, "QObject*") == 0)
@@ -136,7 +148,7 @@ QMetaType resolveMetaType(PyTypeObject *type)
             }
         }
         for ( ; i < size; ++i) {
-            auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, i));
+            auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(bases.object(), i));
             const QMetaType derived = resolveMetaType(baseType);
             if (derived.isValid())
                 return derived;
@@ -207,9 +219,12 @@ QVariant convertToVariantMap(PyObject *map)
         return {};
     }
 
+    Shiboken::AutoDecRef items(PepDict_IterationSnapshot(map));
+    if (items.isNull())
+        return {};
     PyObject *key{};
     PyObject *value{};
-    while (PyDict_Next(map, &pos, &key, &value)) {
+    while (PyDict_Next(items.object(), &pos, &key, &value)) {
         QVariant cppValue;
         converter.toCpp(value, &cppValue);
         result.insert(PySide::pyUnicodeToQString(key), cppValue);

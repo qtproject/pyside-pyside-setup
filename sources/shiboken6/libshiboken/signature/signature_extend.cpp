@@ -52,10 +52,9 @@ static PyObject *_get_written_signature(signaturefunc sf, PyObject *ob, PyObject
      * a computed value exists and then forbid writing.
      * See pyside_set___signature
      */
-    PyObject *ret = PyDict_GetItem(signatureGlobals()->value_dict, ob);
+    PyObject *ret = PepDict_GetItemOwned(signatureGlobals()->value_dict, ob);
     if (ret == nullptr)
         return ob == nullptr ? nullptr : sf(ob, modifier);
-    Py_INCREF(ret);
     return ret;
 }
 

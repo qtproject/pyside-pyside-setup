@@ -389,6 +389,32 @@ static PyObject *signalGetAttr(PyObject *obSelf, PyObject *name)
     return tuple;
 }
 
+#ifdef Py_GIL_DISABLED
+// Every type takes weak references; should one refuse, the record reads as
+// if the type were gone, and no error stays set.
+void PySideSignalInstanceShared::rememberSourceType()
+{
+    sourceTypeRef = PyWeakref_NewRef(reinterpret_cast<PyObject *>(sourceType), nullptr);
+    if (sourceTypeRef == nullptr)
+        PyErr_Clear();
+    sourceType = nullptr;
+}
+
+PyTypeObject *PySideSignalInstanceShared::acquireSourceType() const
+{
+    PyObject *type = nullptr;
+    if (sourceTypeRef != nullptr && PyWeakref_GetRef(sourceTypeRef, &type) < 0)
+        PyErr_Clear();
+    return reinterpret_cast<PyTypeObject *>(type);
+}
+
+// Freed from tp_free, so the thread is attached here.
+PySideSignalInstanceShared::~PySideSignalInstanceShared()
+{
+    Py_XDECREF(sourceTypeRef);
+}
+#endif
+
 static void signalInstanceFree(void *vself)
 {
     auto *pySelf = reinterpret_cast<PyObject *>(vself);
@@ -818,11 +844,9 @@ static PyObject *signalDescrGet(PyObject *self, PyObject *obj, PyObject * /*type
     // PYSIDE-68-bis: It is important to respect the already cached instance.
     Shiboken::AutoDecRef name(Py_BuildValue("s", signal->data->signalName.data()));
     auto *dict = SbkObject_GetDict_NoRef(obj);
-    auto *inst = PyDict_GetItem(dict, name);
-    if (inst) {
-        Py_INCREF(inst);
+    auto *inst = PepDict_GetItemOwned(dict, name);
+    if (inst)
         return inst;
-    }
     inst = reinterpret_cast<PyObject *>(PySide::Signal::initialize(signal, name, obj));
     PyObject_SetAttr(obj, name, inst);
     return inst;
@@ -871,27 +895,59 @@ static inline PyObject *_getRealCallable(PyObject *func)
     return func;
 }
 
-// This function returns a borrowed reference.
+// This function returns a borrowed reference, and a new one in the
+// free-threaded build.
 static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
 {
+#ifdef Py_GIL_DISABLED
+    if (inst->d->homonymousMethodPvt)
+        return Py_NewRef(inst->d->homonymousMethodPvt);
+#else
     if (inst->d->homonymousMethodPvt)
         return inst->d->homonymousMethodPvt;
+#endif
 
     // PYSIDE-1730: We are searching methods with the same name not only at the same place,
     // but walk through the whole mro to find a hidden method with the same name.
     auto signalName = inst->d->signalName;
     Shiboken::AutoDecRef name(Shiboken::String::fromCString(signalName));
-    auto *mro = inst->d->shared->sourceType->tp_mro;
-    const Py_ssize_t n = PyTuple_Size(mro);
+    // The loop looks up a dict key and calls _getRealCallable(), so the
+    // tuple has to stand for the whole walk, not just for the size.
+#ifdef Py_GIL_DISABLED
+    // Held for the whole walk. A type that is gone has no method.
+    Shiboken::AutoDecRef sourceType(
+        reinterpret_cast<PyObject *>(inst->d->shared->acquireSourceType()));
+    if (sourceType.isNull())
+        return nullptr;
+    PepMroRef mro(reinterpret_cast<PyTypeObject *>(sourceType.object()));
+#else
+    PepMroRef mro(inst->d->shared->sourceType);
+#endif
+    if (mro.isNull()) {
+        // Null means "no homonymous method"; the error must not stay set.
+        Shiboken::Errors::storeErrorOrPrint();
+        return nullptr;
+    }
+    const Py_ssize_t n = PyTuple_Size(mro.object());
 
     for (Py_ssize_t idx = 0; idx < n; idx++) {
-        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro.object(), idx));
         Shiboken::AutoDecRef tpDict(PepType_GetDict(sub_type));
+#ifdef Py_GIL_DISABLED
+        // Owned: the answer outlives the walk, and the class can drop it.
+        // See "Dictionary lookups own their result" in the free-threading notes.
+        Shiboken::AutoDecRef hom(PepDict_GetItemOwned(tpDict, name));
+        if (!hom.isNull() && PyCallable_Check(hom) != 0) {
+            if (auto *realFunc = _getRealCallable(hom))
+                return Py_NewRef(realFunc);
+        }
+#else
         auto *hom = PyDict_GetItem(tpDict, name);
         if (hom != nullptr && PyCallable_Check(hom) != 0) {
             if (auto *realFunc = _getRealCallable(hom))
                 return realFunc;
         }
+#endif
     }
     return nullptr;
 }
@@ -901,15 +957,32 @@ static PyObject *signalInstanceCall(PyObject *self, PyObject *args, PyObject *kw
     auto *PySideSignal = reinterpret_cast<PySideSignalInstance *>(self);
     if (isSourceDeleted(PySideSignal))
         return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
+#ifdef Py_GIL_DISABLED
+    Shiboken::AutoDecRef homRef(_getHomonymousMethod(PySideSignal));
+    auto *hom = homRef.object();
+#else
     auto *hom = _getHomonymousMethod(PySideSignal);
+#endif
     if (!hom) {
         PyErr_Format(PyExc_TypeError, "native Qt signal instance '%s' is not callable",
                      PySideSignal->d->signalName.constData());
         return nullptr;
     }
 
+#ifdef Py_GIL_DISABLED
+    // A test replaces the method in the class here from another thread.
+    SBK_FAILPOINT("signal-homonym-before-bind");
+    // Held across the call; a type that is gone leaves the choice to the
+    // QObject heuristics.
+    Shiboken::AutoDecRef sourceType(
+        reinterpret_cast<PyObject *>(PySideSignal->d->shared->acquireSourceType()));
+    auto *source = PySide::getWrapperForQObject(sender(PySideSignal),
+        sourceType.isNull() ? PySide::qObjectType()
+                            : reinterpret_cast<PyTypeObject *>(sourceType.object()));
+#else
     auto *source = PySide::getWrapperForQObject(sender(PySideSignal),
                                                 PySideSignal->d->shared->sourceType);
+#endif
     if (source == nullptr)
         return PyErr_Format(PyExc_RuntimeError, msgSourceDeleted);
     Shiboken::AutoDecRef homonymousMethod(PepExt_Type_CallDescrGet(hom, source, nullptr));
@@ -997,7 +1070,13 @@ void updateSourceObject(PyObject *source)
     // constructor's own lease. See ConstructorTailLease.
     SBK_FAILPOINT("ctor-after-publish");
 
-    Shiboken::AutoDecRef mroIterator(PyObject_GetIter(source->ob_type->tp_mro));
+    // The iterator owns the tuple afterwards; the holder covers the load.
+    PepMroRef mro(Py_TYPE(source));
+    if (mro.isNull()) {
+        Shiboken::Errors::storeErrorOrPrint();
+        return;
+    }
+    Shiboken::AutoDecRef mroIterator(PyObject_GetIter(mro.object()));
 
     if (mroIterator.isNull())   // Not iterable
        return;
@@ -1012,18 +1091,26 @@ void updateSourceObject(PyObject *source)
         Py_ssize_t pos = 0;
         auto *type = reinterpret_cast<PyTypeObject *>(mroItem.object());
         Shiboken::AutoDecRef tpDict(PepType_GetDict(type));
-        while (PyDict_Next(tpDict, &pos, &key, &value)) {
+        Shiboken::AutoDecRef items(PepDict_IterationSnapshot(tpDict));
+        if (items.isNull()) {
+            PyErr_Clear();
+            continue;
+        }
+        while (PyDict_Next(items, &pos, &key, &value)) {
             if (PyObject_TypeCheck(value, PySideSignal_TypeF())) {
                 // PYSIDE-1751: We only insert an instance into the instance dict, if a signal
                 //              of the same name is in the mro. This is the equivalent action
                 //              as PyObject_SetAttr, but filtered by existing signal names.
-                if (!PyDict_GetItem(dict, key)) {
+                if (PyDict_Contains(dict, key) != 1) {
                     auto *inst = PyObject_New(PySideSignalInstance, PySideSignalInstance_TypeF());
                     Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(inst));
                     auto *si = reinterpret_cast<PySideSignalInstance *>(signalInstance.object());
                     auto shared = std::make_shared<PySideSignalInstanceShared>();
                     shared->source = PySide::convertToQObject(source, false);
                     shared->sourceType = Py_TYPE(source);
+#ifdef Py_GIL_DISABLED
+                    shared->rememberSourceType();
+#endif
                     instanceInitialize(si, key, reinterpret_cast<PySideSignal *>(value),
                                        shared, 0);
                     if (PyDict_SetItem(dict, key, signalInstance) == -1)
@@ -1155,6 +1242,9 @@ PySideSignalInstance *initialize(PySideSignal *self, PyObject *name, PyObject *o
     auto shared = std::make_shared<PySideSignalInstanceShared>();
     shared->source = PySide::convertToQObject(object, false);
     shared->sourceType = Py_TYPE(object);
+#ifdef Py_GIL_DISABLED
+    shared->rememberSourceType();
+#endif
     instanceInitialize(instance, name, self, shared, 0);
     return instance;
 }
@@ -1185,6 +1275,9 @@ PySideSignalInstance *newObjectFromMethod(QObject *sourceQObject, PyObject *sour
     auto shared = std::make_shared<PySideSignalInstanceShared>();
     shared->source = sourceQObject;
     shared->sourceType = Py_TYPE(source);
+#ifdef Py_GIL_DISABLED
+    shared->rememberSourceType();
+#endif
     for (const QMetaMethod &m : methods) {
         PySideSignalInstance *item = PyObject_New(PySideSignalInstance, PySideSignalInstance_TypeF());
         if (!root)
@@ -1211,10 +1304,8 @@ static void _addSignalToWrapper(PyTypeObject *wrapperType, const char *signalNam
 {
     Shiboken::AutoDecRef tpDict(PepType_GetDict(wrapperType));
     auto *typeDict = tpDict.object();
-    if (auto *homonymousMethod = PyDict_GetItemString(typeDict, signalName)) {
-        Py_INCREF(homonymousMethod);
+    if (auto *homonymousMethod = PepDict_GetItemStringOwned(typeDict, signalName))
         signal->homonymousMethod = homonymousMethod;
-    }
     PyDict_SetItemString(typeDict, signalName, reinterpret_cast<PyObject *>(signal));
 }
 
@@ -1272,8 +1363,19 @@ void registerSignals(PyTypeObject *pyObj, const QMetaObject *metaObject)
 
 PyObject *getObject(PySideSignalInstance *signal)
 {
+#ifdef Py_GIL_DISABLED
+    if (auto *qSender = sender(signal)) {
+        // As in signalInstanceCall().
+        Shiboken::AutoDecRef sourceType(
+            reinterpret_cast<PyObject *>(signal->d->shared->acquireSourceType()));
+        return getWrapperForQObject(qSender,
+            sourceType.isNull() ? PySide::qObjectType()
+                                : reinterpret_cast<PyTypeObject *>(sourceType.object()));
+    }
+#else
     if (auto *qSender = sender(signal))
         return getWrapperForQObject(qSender, signal->d->shared->sourceType);
+#endif
     return nullptr;
 }
 

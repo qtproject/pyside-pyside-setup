@@ -22,6 +22,7 @@ import subprocess
 import sys
 import threading
 import time
+import tracemalloc
 import weakref
 
 import fpharness as fp
@@ -29,7 +30,295 @@ from fpharness import (FREE_THREADED, Failpoint, FailpointThrow, Shiboken,
                        Test, counterproof, gil_enabled, qml_create, qml_engine,
                        qt_app, run_threads)
 from PySide6.QtCore import (QByteArray, QObject, QRecursiveMutex, SIGNAL,
-                            Qt, SLOT)
+                            Qt, Signal, SLOT)
+
+
+def test_signal_instance_leaves_its_type_collectable() -> str:
+    """A class that keeps a bound signal of its own. See README."""
+    def build():
+        class Holder(QObject):
+            fired = Signal()
+
+        holder = Holder()
+        # Class -> bound signal -> remembered type -> class. Only the last
+        # edge is the record's, and the collector cannot see it.
+        Holder.saved = holder.fired
+        del holder
+        return weakref.ref(Holder)
+
+    ref = build()
+    gc.collect()
+    if ref() is not None:
+        return "FAIL: the class survived a collection"
+    return "ok"
+
+
+_capsule_types = {}
+
+
+def _capsule_classes():
+    """One RepFile: Qt refuses a second class of the same name."""
+    if "rep" in _capsule_types:
+        return _capsule_types["rep"]
+    try:
+        from PySide6.QtRemoteObjects import RepFile
+    except ImportError:
+        return None
+    rep = RepFile("""
+POD Point{int x, int y}
+class Simple
+{
+    PROP(int i = 2);
+    PROP(float f = -1. READWRITE);
+    PROP(QString text READWRITE);
+    SLOT(void reset());
+};
+""")
+    _capsule_types["rep"] = (rep.source["Simple"], rep.replica["Simple"],
+                             rep.pod["Point"])
+    return _capsule_types["rep"]
+
+
+def test_capsule_method_owns_its_instance() -> str:
+    """G80: a bound capsule method outlives its object. See README."""
+    if not FREE_THREADED:
+        return "skipped: a build with a GIL keeps the borrowed instance"
+    classes = _capsule_classes()
+    if classes is None:
+        return "skipped: QtRemoteObjects is not in this build"
+    Source = classes[0]
+
+    source = Source()
+    ref = weakref.ref(source)
+    method = source.reset
+    del source
+    gc.collect()
+    if ref() is None:
+        return "FAIL: the object died under its bound method"
+    try:
+        method()
+    except NotImplementedError:
+        pass
+    del method
+    gc.collect()
+    if ref() is not None:
+        return "FAIL: the object outlived its bound method"
+
+    # Instance -> dict -> bound method -> instance: the last edge must be
+    # one the collector can see.
+    source = Source()
+    ref = weakref.ref(source)
+    source.saved = source.reset
+    del source
+    gc.collect()
+    if ref() is not None:
+        return "FAIL: a method kept in the instance dict was not collected"
+
+    # Whatever holds the instance must not be writable from Python.
+    source = Source()
+    ref = weakref.ref(source)
+    method = source.reset
+    try:
+        method.__module__ = None
+    except AttributeError:
+        pass
+    del source
+    gc.collect()
+    if ref() is None:
+        return "FAIL: the method let go of its object through __module__"
+    return "ok"
+
+
+def test_capsule_access_does_not_leak() -> str:
+    """G80: every access to a capsule method or property. See README."""
+    if not FREE_THREADED:
+        return "skipped: a build with a GIL keeps the old payload"
+    classes = _capsule_classes()
+    if classes is None:
+        return "skipped: QtRemoteObjects is not in this build"
+    Source, Replica, Point = classes
+    source, replica, point = Source(), Replica(), Point(1, 2)
+    accesses = {
+        "method": lambda: replica.reset,
+        "getter": lambda: replica.i,
+        "setter": lambda: setattr(source, "f", 1.5),
+        "pod getter": lambda: point.y,
+    }
+    source.f = 1.5
+    if (replica.i, source.f, point.y) != (2, 1.5, 2):
+        return "FAIL: a handler read the wrong instance or arguments"
+    count = 10000
+    for name, access in accesses.items():
+        access()
+        gc.collect()
+        tracemalloc.start()
+        before = tracemalloc.get_traced_memory()[0]
+        for _ in range(count):
+            access()
+        gc.collect()
+        grown = tracemalloc.get_traced_memory()[0] - before
+        tracemalloc.stop()
+        if grown > 50000:
+            return f"FAIL: {name} kept {grown} bytes over {count} accesses"
+    return "ok"
+
+
+def test_source_property_read_as_copy() -> str:
+    """G84: a source property read while another thread sets it. See README."""
+    if not FREE_THREADED:
+        return "skipped: a build with a GIL has no such race"
+    classes = _capsule_classes()
+    if classes is None:
+        return "skipped: QtRemoteObjects is not in this build"
+    source = classes[0]()
+    source.text = "before"     # the instance's list no longer shares the type's
+    result = {}
+    with Failpoint("source-property-after-read") as point:
+        reader = threading.Thread(target=lambda: result.update(text=source.text))
+        reader.start()
+        if not point.wait_until_reached():
+            return "FAIL: the getter never reached the failpoint"
+        source.text = "after"
+        point.release()
+        reader.join(timeout=10)
+        if reader.is_alive():
+            return "FAIL: the reading thread did not come back"
+    if result.get("text") != "before":
+        return f"FAIL: the getter returned {result.get('text')!r}, set after its read"
+    if source.text != "after":
+        return "FAIL: the setter was lost"
+    return "ok"
+
+
+def test_source_without_property_list() -> str:
+    """G85: a source whose property list is gone. See README."""
+    if not FREE_THREADED:
+        return "skipped: a build with a GIL keeps the old code"
+    # A regression crashes, so the scenario runs in a process of its own.
+    if os.environ.get("FAILPOINT_PROPERTY_LIST_CHILD") != "1":
+        env = dict(os.environ, FAILPOINT_PROPERTY_LIST_CHILD="1")
+        proc = subprocess.run([sys.executable, __file__, "source-property-missing"],
+                              env=env, capture_output=True, text=True,
+                              timeout=fp.CHILD_TIMEOUT)
+        if proc.returncode == 0:
+            return "ok"
+        return fp._reason(proc.stdout + proc.stderr) or f"FAIL: rc {proc.returncode}"
+
+    classes = _capsule_classes()
+    if classes is None:
+        return "skipped: QtRemoteObjects is not in this build"
+    for replacement in (None, 42):
+        source = classes[0]()
+        if replacement is None:
+            del source.__PROPERTIES__
+        else:
+            source.__PROPERTIES__ = replacement
+        for access in (lambda: source.text, lambda: setattr(source, "text", "x")):
+            try:
+                access()
+            except RuntimeError:
+                continue
+            return f"FAIL: no error with __PROPERTIES__ = {replacement!r}"
+    return "ok"
+
+
+def test_metaclass_tuples_are_checked() -> str:
+    """A3: a metaclass answers __mro__ and __bases__ with nonsense. See README."""
+    if not FREE_THREADED:
+        return "skipped: a build with a GIL reads the type's own slots"
+    # A regression crashes, so the scenario runs in a process of its own.
+    if os.environ.get("FAILPOINT_METACLASS_TUPLE_CHILD") != "1":
+        env = dict(os.environ, FAILPOINT_METACLASS_TUPLE_CHILD="1")
+        proc = subprocess.run([sys.executable, __file__, "metaclass-tuples"],
+                              env=env, capture_output=True, text=True,
+                              timeout=fp.CHILD_TIMEOUT)
+        if proc.returncode == 0:
+            return "ok"
+        return fp._reason(proc.stdout + proc.stderr) or f"FAIL: rc {proc.returncode}"
+
+    from PySide6.QtCore import Property
+    qt_app()
+
+    class BadMro(type(QObject)):
+        @property
+        def __mro__(cls):
+            return (cls, 1, object)
+
+    class Walked(QObject, metaclass=BadMro):
+        pass
+
+    class SelfBase(type(QObject)):
+        @property
+        def __bases__(cls):
+            return (cls,)
+
+    class Holder(QObject):
+        @Property(int)
+        def val(self):
+            return 7
+
+    # val is Holder's: the lookup for it recurses over Looped's __bases__.
+    class Looped(Holder, metaclass=SelfBase):
+        pass
+
+    _KEEP_ALIVE.extend((Walked, Looped))
+    for ask in (lambda: Walked.tr("text"), lambda: Looped().property("val")):
+        try:
+            ask()
+        except TypeError:
+            pass
+    return "ok"
+
+
+def test_signal_homonym_owned() -> str:
+    """A4: the method a signal call found is replaced before it is bound. See README."""
+    if not FREE_THREADED:
+        return "skipped: a build with a GIL keeps the borrowed lookup"
+    # A regression reads a freed function, so this runs on its own.
+    if os.environ.get("FAILPOINT_HOMONYM_CHILD") != "1":
+        env = dict(os.environ, FAILPOINT_HOMONYM_CHILD="1")
+        proc = subprocess.run([sys.executable, __file__, "signal-homonym"],
+                              env=env, capture_output=True, text=True,
+                              timeout=fp.CHILD_TIMEOUT)
+        if proc.returncode == 0:
+            return "ok"
+        return fp._reason(proc.stdout + proc.stderr) or f"FAIL: rc {proc.returncode}"
+
+    qt_app()
+
+    def make_ping():
+        def ping(self):
+            return "base"
+        return ping
+
+    # Built at runtime, so the class dict holds its only reference.
+    Base = type("Base", (QObject,), {"ping": make_ping()})
+    Sub = type("Sub", (Base,), {"ping": Signal()})
+    obj = Sub()
+    answer = []
+
+    def call():
+        try:
+            answer.append(obj.ping())
+        except BaseException as exc:      # noqa: BLE001
+            answer.append(repr(exc))
+
+    with Failpoint("signal-homonym-before-bind") as point:
+        caller = threading.Thread(target=call)
+        caller.start()
+        if not point.wait_until_reached():
+            return "FAIL: the signal call never reached the failpoint"
+        Base.ping = lambda self: "replacement"
+        gc.collect()
+        # Functions of the same size: freed memory is reused by the next one.
+        ballast = [(lambda self: "ballast") for _ in range(20000)]  # noqa: F841
+        point.release()
+        caller.join(timeout=10)
+        if caller.is_alive():
+            return "FAIL: the calling thread did not come back"
+    if answer != ["base"]:
+        return f"FAIL: the call answered {answer}, not the method it found"
+    return "ok"
 
 
 def test_weakrefs_while_deallocating() -> str:
@@ -1685,6 +1974,218 @@ def test_metaobject_commit_race() -> str:
     return f"ok (both signals in one meta object, {indexes})"
 
 
+def _parked_virtual(cls, pool):
+    """Start one runnable of cls on a pool thread, to park in getOverride()."""
+    work = cls()
+    work.setAutoDelete(False)
+    pool.start(work)
+    return work
+
+
+def test_mro_snapshot_is_owned() -> str:
+    """FT3: the walk in getOverride() owns the tuple it walks. See README."""
+    import sys
+    from PySide6.QtCore import QRunnable, QThreadPool
+    qt_app()
+
+    ran = threading.Event()
+
+    class Work(QRunnable):
+        def run(self):
+            ran.set()
+
+    pool = QThreadPool.globalInstance()
+    with Failpoint("mro-after-snapshot", timeout_ms=30000) as point:
+        _parked_virtual(Work, pool)
+        if not point.wait_until_reached():
+            return "FAIL: the virtual never reached the failpoint"
+        parked = sys.getrefcount(Work.__mro__)
+        point.release()
+        if not pool.waitForDone(30000):
+            return "FAIL: the pool thread did not come back"
+    released = sys.getrefcount(Work.__mro__)
+
+    if not ran.is_set():
+        return "FAIL: the override never ran, so nothing walked the mro"
+    if parked <= released:
+        return (f"FAIL: the parked walk held no reference to __mro__ "
+                f"({parked} parked, {released} afterwards)")
+    return (f"ok (the parked walk held {parked - released} reference(s) to "
+            f"__mro__ that the finished walk gave back)")
+
+
+def test_mro_snapshot_survives_bases_swap() -> str:
+    """FT3: __bases__ is assigned under a virtual's mro walk. See README."""
+    from PySide6.QtCore import QRunnable, QThreadPool
+    qt_app()
+
+    ran = threading.Event()
+
+    class Mid1(QRunnable):
+        pass
+
+    class Mid2(QRunnable):
+        pass
+
+    class Work(Mid1):
+        def run(self):
+            ran.set()
+
+    # A walk that strays into a decoy finds run() as an inherited default.
+    decoy = type("Decoy", (object,), {"run": Work.run})
+    width = len(Work.__mro__)
+
+    pool = QThreadPool.globalInstance()
+    with Failpoint("mro-after-snapshot", timeout_ms=30000) as point:
+        _parked_virtual(Work, pool)
+        if not point.wait_until_reached():
+            return "FAIL: the virtual never reached the failpoint"
+
+        Work.__bases__ = (Mid2,)
+        # Required: only the tracing collector frees a deferred-refcount mro.
+        gc.collect()
+        ballast = [tuple([decoy] * width) for _ in range(2000)]
+
+        point.release()
+        if not pool.waitForDone(30000):
+            return "FAIL: the pool thread did not come back"
+
+    if not ran.is_set():
+        return ("FAIL: the override did not run - the walk resolved against "
+                "something other than the mro it started on")
+    return (f"ok (__bases__ swapped, old mro collected and {len(ballast)} "
+            f"decoys allocated over it, the walk still found the override)")
+
+
+def test_bases_snapshot_survives_bases_swap() -> str:
+    """FT3: __bases__ is assigned under a property lookup. See README."""
+    from PySide6.QtCore import Property
+    qt_app()
+
+    class Holder(QObject):
+        @Property(int)
+        def val(self):
+            return 7
+
+    class Other(QObject):
+        pass
+
+    class Sub(Holder):
+        pass
+
+    obj = Sub()
+    answer = []
+
+    def ask():
+        answer.append(obj.property("val"))
+
+    decoy = type("Decoy", (object,), {})
+    with Failpoint("bases-after-snapshot", timeout_ms=30000) as point:
+        asker = threading.Thread(target=ask)
+        asker.start()
+        if not point.wait_until_reached():
+            return "FAIL: the property lookup never reached the failpoint"
+
+        Sub.__bases__ = (Other,)
+        # No collection needed: the old bases tuple falls at once.
+        ballast = [(decoy,) for _ in range(2000)]
+
+        point.release()
+        asker.join(timeout=30)
+        if asker.is_alive():
+            return "FAIL: the asking thread did not come back"
+
+    if answer != [7]:
+        return (f"FAIL: the lookup answered {answer}, not [7] - it resolved "
+                f"against something other than the bases it started on")
+    return (f"ok (__bases__ swapped, old tuple released and {len(ballast)} "
+            f"decoys allocated over it, the walk still found the property)")
+
+
+def test_shadowed_mro_is_not_dropped() -> str:
+    """A metaclass answers __mro__ with an unshared tuple. See README."""
+    if not FREE_THREADED:
+        return "skipped: the holder has one path in a build with a GIL"
+
+    class ShadowMeta(type(QObject)):
+        @property
+        def __mro__(cls):
+            # A fresh tuple per access, held by nobody else, valid to walk.
+            return (cls, QObject, object)
+
+    class Shadowed(QObject, metaclass=ShadowMeta):
+        pass
+
+    # Kept alive on purpose: destroying such a type crashes.
+    # See README.
+    _KEEP_ALIVE.append(Shadowed())
+
+    # The preconditions, asked directly: sys.getrefcount() cannot say
+    # "one owner" on this build.
+    real = type.__dict__["__mro__"].__get__(Shadowed)
+    shadowing = Shadowed.__mro__ is not real
+    fresh = Shadowed.__mro__ is not Shadowed.__mro__
+
+    # QObject.tr() walks the mro in qObjectTr().
+    answers = {Shadowed.tr("some text") for _ in range(50)}
+
+    if not shadowing:
+        return ("FAIL: __mro__ still answers the type's own tuple, so this "
+                "run is not asking what it was written for")
+    if not fresh:
+        return ("FAIL: the descriptor hands out the same tuple twice, so "
+                "something holds it and dropping it would be harmless")
+    if answers != {"some text"}:
+        return f"FAIL: tr() answered {answers}, not the source text"
+    return ("ok (50 walks over a tuple built per access and held by nobody, "
+            "none of them dropped it)")
+
+
+def test_a_failed_override_lookup_is_not_cached() -> str:
+    """A failed mro lookup is not cached as "no override". See README."""
+    if not FREE_THREADED:
+        return "skipped: the free-threaded cache is what this asks about"
+    from PySide6.QtCore import QRunnable, QThreadPool
+
+    # Armed only after the class exists: creating it reads __mro__.
+    failing = [False]
+
+    class RaisingMeta(type(QObject)):
+        @property
+        def __mro__(cls):
+            if failing[0]:
+                failing[0] = False
+                raise MemoryError("once, on purpose")
+            return type.__dict__["__mro__"].__get__(cls)
+
+    ran = []
+
+    class Work(QRunnable, metaclass=RaisingMeta):
+        def run(self):
+            ran.append(1)
+
+    _KEEP_ALIVE.append(Work)
+    # The instance too, so that the raise lands in the override lookup.
+    work = Work()
+    work.setAutoDelete(False)
+    _KEEP_ALIVE.append(work)
+
+    pool = QThreadPool.globalInstance()
+    failing[0] = True
+    for _ in range(2):
+        pool.start(work)
+        if not pool.waitForDone(30000):
+            return "FAIL: the pool thread did not come back"
+
+    if failing[0]:
+        return "FAIL: the lookup never reached the raising metaclass"
+    if not ran:
+        return ("FAIL: the override never ran - the failed lookup was "
+                "cached as 'no override'")
+    return (f"ok (the first lookup raised, the override ran {len(ran)} "
+            f"time(s) afterwards)")
+
+
 def _cpp_deleted(obj) -> bool:
     """Whether the wrapper has lost its C++ object. Takes no lease, so it
     answers for a claimed object too, where isValid() says False either way."""
@@ -2024,6 +2525,16 @@ TESTS = {
     # No proof-* row, on purpose.
     # See the README.
     "mi-pointer": Test(test_multiple_inheritance_pointer),
+    # A guard, no proof-* row: see the README.
+    "signal-type-collectable": Test(test_signal_instance_leaves_its_type_collectable),
+    "capsule-method-owns-instance": Test(test_capsule_method_owns_its_instance),
+    "capsule-access-no-leak": Test(test_capsule_access_does_not_leak),
+    "source-property-copy": Test(test_source_property_read_as_copy),
+    "proof-source-property-copy": Test(lambda: counterproof(
+        "SourcePropertyCopy", "source-property-copy")),
+    "source-property-missing": Test(test_source_without_property_list),
+    "metaclass-tuples": Test(test_metaclass_tuples_are_checked),
+    "signal-homonym": Test(test_signal_homonym_owned),
     "leased-receiver": Test(test_generated_call_uses_the_leased_pointer),
     "proof-leased-receiver": Test(lambda: counterproof(
         "LeaseSnapshot", "leased-receiver")),
@@ -2080,6 +2591,19 @@ TESTS = {
     "qml-placement-unwinds": Test(test_qml_placement_unwinds),
     "native-preflight": Test(test_native_preflight),
     "hierarchy-snapshot": Test(test_hierarchy_snapshot),
+    "mro-snapshot-owns": Test(test_mro_snapshot_is_owned),
+    "mro-snapshot": Test(test_mro_snapshot_survives_bases_swap),
+    # Counter-proof for the window (mro-snapshot), not the refcount.
+    "proof-mro-snapshot": Test(lambda: counterproof("MroSnapshot",
+                                                    "mro-snapshot")),
+    "bases-snapshot": Test(test_bases_snapshot_survives_bases_swap),
+    # No proof-* rows for these two.
+    # See README.
+    "shadowed-mro": Test(test_shadowed_mro_is_not_dropped),
+    "failed-override-lookup": Test(test_a_failed_override_lookup_is_not_cached),
+    # The same bit on the other field.
+    "proof-bases-snapshot": Test(lambda: counterproof("MroSnapshot",
+                                                      "bases-snapshot")),
     "type-mutation": Test(test_type_mutation_during_destruction),
     "lock-order": Test(test_lock_order),
     # The two above have to fail once their measure is taken away, or they are

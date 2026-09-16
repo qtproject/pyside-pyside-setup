@@ -41,12 +41,27 @@ extern "C"
   * handler method (which should look like a standard PyMethodDef method) should
   * parse it into the payload (the "lambda variables") and the actual instance
   * (the "self").
+  *
+  * Both pointers are borrowed. In the free-threaded build the function that
+  * carries the payload holds the instance, see capsuleMethodPayload(), and
+  * the payload capsule holds the descriptor that owns `payload`.
   */
 struct CapsuleDescriptorData
 {
     PyObject *self;
     PyObject *payload;
 };
+
+#ifdef Py_GIL_DISABLED
+/**
+ * The payload capsule of a capsule method in the free-threaded build, where
+ * the function's self is a tuple of the instance and the payload capsule.
+ *
+ * @param self The self a handler receives.
+ * @return The payload capsule, borrowed from \p self, or nullptr.
+ */
+PyObject *capsuleMethodPayload(PyObject *self);
+#endif
 
 /**
  * The new type defining a descriptor that stores a PyCapsule.  This is used to

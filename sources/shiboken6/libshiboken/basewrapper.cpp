@@ -1365,15 +1365,26 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
     // Note: This special case was implemented for duck-punching, which happens
     // in the instance dict. It does not work with properties.
     // This is not cached to avoid leaking. FIXME PYSIDE 7: Remove (PYSIDE-2916)?
-    if (PyObject *method = PyDict_GetItem(wrapper_dict, pyMethodName)) {
-        Py_INCREF(method);
+    if (PyObject *method = PepDict_GetItemOwned(wrapper_dict, pyMethodName))
         return method;
-    }
 
     auto *pyOverride = Shiboken::BindingManager::getOverride(wrapper, pyMethodName);
     if (pyOverride == nullptr) {
-        Py_INCREF(Py_None);
-        resultCache.publish(Py_None);
+        // A failed mro lookup also answers nullptr, and the cache is
+        // permanent for this object: cache "no override" only without an
+        // error, or a passing failure disables the override for good.
+        //
+        // Under Py_GIL_DISABLED only. Errors::occurred() un-parks an error
+        // that storeErrorOrPrint() stashed earlier, so asking here would move
+        // the point at which a GIL build raises it - on the virtual dispatch
+        // of every wrapper.
+#ifdef Py_GIL_DISABLED
+        if (Shiboken::Errors::occurred() == nullptr)
+#endif
+        {
+            Py_INCREF(Py_None);
+            resultCache.publish(Py_None);
+        }
 #ifdef Py_GIL_DISABLED
         wrapperRef.reset();
 #endif

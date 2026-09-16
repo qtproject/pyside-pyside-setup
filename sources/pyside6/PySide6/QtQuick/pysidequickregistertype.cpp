@@ -9,6 +9,7 @@
 #include <pyside_p.h>
 #include <sbkpython.h>
 #include <sbkconverter.h>
+#include <sbkerrors.h>
 #include <sbkpep.h>
 
 #include <QtQuick/QQuickPaintedItem>
@@ -21,7 +22,13 @@
 bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, const char *classPtrName)
 {
     PyTypeObject *classPyType = Shiboken::Conversions::getPythonTypeObject(classPtrName);
-    bool isDerived = PySequence_Contains(pyObjType->tp_mro,
+    // PySequence_Contains() compares, and a comparison can run Python code.
+    PepMroRef mro(pyObjType);
+    if (mro.isNull()) {
+        Shiboken::Errors::storeErrorOrPrint();
+        return false;
+    }
+    bool isDerived = PySequence_Contains(mro.object(),
                                          reinterpret_cast<PyObject *>(classPyType));
     return isDerived;
 }
@@ -49,7 +56,12 @@ bool quickRegisterType(PyObject *pyObj, QQmlPrivate::RegisterTypeAndRevisions *t
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
     PyTypeObject *qQuickItemPyType =
             Shiboken::Conversions::getPythonTypeObject("QQuickItem*");
-    bool isQuickItem = PySequence_Contains(pyObjType->tp_mro,
+    PepMroRef mro(pyObjType);
+    if (mro.isNull()) {
+        Shiboken::Errors::storeErrorOrPrint();
+        return false;
+    }
+    bool isQuickItem = PySequence_Contains(mro.object(),
                                            reinterpret_cast<PyObject *>(qQuickItemPyType));
 
     // Register only classes that inherit QQuickItem or its children.

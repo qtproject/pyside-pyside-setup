@@ -83,14 +83,14 @@ static bool isCompiledHelper()
     if (globals.isNull())
         return false;
 
-    if (PyDict_GetItem(globals.object(), PyMagicName::compiled()) != nullptr)
+    if (PyDict_Contains(globals.object(), PyMagicName::compiled()) == 1)
         return true;
     globals.reset(nullptr);
 
     // __compiled__ may not be set in initialization phases, check builtins
     static PyObject *nuitkaDir = Shiboken::String::createStaticString("__nuitka_binary_exe");
     Shiboken::AutoDecRef builtins(PepEval_GetFrameBuiltins());
-    return !builtins.isNull() && PyDict_GetItem(builtins.object(), nuitkaDir) != nullptr;
+    return !builtins.isNull() && PyDict_Contains(builtins.object(), nuitkaDir) == 1;
 }
 
 bool isCompiled()

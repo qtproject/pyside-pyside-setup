@@ -183,9 +183,14 @@ static void formatPyDict(PyObject *obj, std::ostream &str)
 {
     PyObject *key{};
     PyObject *value{};
+    Shiboken::AutoDecRef items(PepDict_IterationSnapshot(obj));
+    if (items.isNull()) {
+        PyErr_Clear();
+        return;
+    }
     Py_ssize_t pos = 0;
     str << '{';
-    while (PyDict_Next(obj, &pos, &key, &value) != 0) {
+    while (PyDict_Next(items.object(), &pos, &key, &value) != 0) {
         if (pos > 1)
             str << ", ";
         if (PyUnicode_Check(key))
@@ -512,10 +517,10 @@ bool listToArgcArgv(PyObject *argList, int *argcIn, char ***argvIn, const char *
 
         const char *appNameC = nullptr;
         Shiboken::AutoDecRef globals(PepEval_GetFrameGlobals());
-        if (!globals.isNull())  {
-            if (PyObject *appName = PyDict_GetItem(globals, Shiboken::PyMagicName::file()))
-                appNameC = Shiboken::String::toCString(appName);
-        }
+        Shiboken::AutoDecRef appName(globals.isNull() ? nullptr
+            : PepDict_GetItemOwned(globals, Shiboken::PyMagicName::file()));
+        if (!appName.isNull())
+            appNameC = Shiboken::String::toCString(appName);
         if (appNameC == nullptr)
             appNameC = defaultAppName ? defaultAppName : "PySideApplication";
         argv[0] = strDup(appNameC);
