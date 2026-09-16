@@ -1443,6 +1443,9 @@ A mechanism that no scenario can take away does not get a bit. The readiness
 flag on lazily created types is one such, and so is `Shiboken::CacheSlot`:
 they are covered by the suites, not by the A/B harness.
 
+`check_bit_coverage.py` in the failpoint test directory checks the list above
+against the tree: a bit with neither a `proof-*` nor an exemption fails it.
+
 ## Testing
 
 Free-threading specific tests skip themselves unless the GIL is actually

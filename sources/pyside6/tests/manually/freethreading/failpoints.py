@@ -2755,9 +2755,8 @@ TESTS = {
     "type-mutation": Test(test_type_mutation_during_destruction),
     "lock-order": Test(test_lock_order),
     # The two above have to fail once their measure is taken away, or they are
-    # not testing it. Nothing else here can be asked that way: the remaining
-    # measures are assertions, which abort rather than fail, or they are
-    # invariants no switch can remove.
+    # not testing it. Bits demonstrated another way are listed in
+    # check_bit_coverage.py.
     "proof-qml-type": Test(lambda: counterproof("QmlPlacementType",
                                                 "qml-placement")),
     "proof-qml-scope": Test(lambda: counterproof("QmlPlacementFree",

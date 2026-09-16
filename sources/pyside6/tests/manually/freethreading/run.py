@@ -360,8 +360,15 @@ def main() -> int:
     print()
     dirty = [s for s in scenarios
              if verdicts[(s, "locked")][0] or verdicts[(s, "locked")][1]]
+    # An error counts as evidence like a crash or a hang: what a debug build
+    # reports as a failing assertion, a release interpreter reports as the
+    # scenario's own error message. Only a run that shows nothing at all
+    # proves nothing. Found on 3.14t, where method_receiver_dead answered
+    # 60err/60 unlocked against ok/60 locked and was called inconclusive.
     silent = [s for s in scenarios
-              if SCENARIOS[s].proof and verdicts[(s, "unlocked")][0] == 0]
+              if SCENARIOS[s].proof
+              and verdicts[(s, "unlocked")][0] == 0
+              and verdicts[(s, "unlocked")][1] == 0]
 
     if dirty:
         print("FAILED: not clean with the lock -> " + " ".join(dirty))

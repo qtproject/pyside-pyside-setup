@@ -38,6 +38,12 @@ through `PYSIDE6_OPTION_FT` (`sbkftoptions.h`), and the tests named
 require it to fail there. If it still passes, the test is not testing what
 its name says and the `proof-*` cell is what says so.
 
+`check_bit_coverage.py` holds that rule against the tree: every bit in
+`sbkftoptions.h` has a `proof-*` that clears it, or an exemption with the
+reason it is demonstrated elsewhere; every `proof-*` clears a bit the enum
+has and proves a registered test; and the entries add up to the `test_*`
+functions.
+
 One test is expected to FAIL. It holds a finding that belongs to another
 work package, and the line comes out of the registry the day that package is
 done. A run that does not reach the defect reports *skipped*, not ok.

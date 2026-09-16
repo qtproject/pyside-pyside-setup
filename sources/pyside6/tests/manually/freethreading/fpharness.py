@@ -280,6 +280,22 @@ def _run_without(cleared: list[str], test: str) -> tuple[int, str]:
     return rc, out
 
 
+def _reason(out: str) -> str:
+    """The verdict in a child's output: the last line with FAIL or "skipped:",
+    from that mark on. Output can follow the verdict, so not simply the last
+    line.
+    """
+    lines = out.strip().splitlines()
+    if not lines:
+        return ""
+    for line in reversed(lines):
+        for mark in ("FAIL", "skipped:"):
+            index = line.find(mark)
+            if index >= 0:
+                return line[index:].strip()
+    return lines[-1].strip()
+
+
 def counterproof(option: str, test: str, context: str = "") -> str:
     """Assert that test fails once option is taken away.
 
@@ -307,10 +323,10 @@ def counterproof(option: str, test: str, context: str = "") -> str:
     # clears nothing ("~0x0").
     rc, out = _run_without(cleared, test)
     if rc == SKIP:
-        tail = out.strip().splitlines()[-1] if out.strip() else ""
+        tail = _reason(out)
         return f"skipped: {test} did not run ({tail[:60]})"
     if rc != 0:
-        tail = out.strip().splitlines()[-1] if out.strip() else ""
+        tail = _reason(out)
         where = f" without {context}" if context else ""
         return (f"FAIL: {test} does not even pass{where}, so nothing here "
                 f"is about {option}: {tail[:60]}")
@@ -322,13 +338,13 @@ def counterproof(option: str, test: str, context: str = "") -> str:
     # nothing - a release build with no failpoints, a tree without the sample
     # binding, a tree without QtQml.
     if rc == SKIP:
-        tail = out.strip().splitlines()[-1] if out.strip() else ""
+        tail = _reason(out)
         return f"skipped: {test} did not run ({tail[:60]})"
     if rc == 0:
         return (f"FAIL: {test} still passes without {without}, so it does not "
                 f"test it")
     how = ("crashed" if rc < 0 else "hung" if rc == 124 else f"failed (rc {rc})")
-    tail = out.strip().splitlines()[-1] if out.strip() else ""
+    tail = _reason(out)
     return f"ok ({test} {how} without {without}: {tail[:60]})"
 
 
