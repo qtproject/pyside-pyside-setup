@@ -34,6 +34,7 @@
 #endif
 
 #include <algorithm>
+#include <atomic>
 #include <cctype>
 #include <cstddef>
 #include <cstdlib>
@@ -64,6 +65,100 @@ static BaseWrapperGlobals *baseWrapperGlobals()
     static BaseWrapperGlobals result;
     return &result;
 }
+
+#ifdef Py_GIL_DISABLED
+
+// ---- Destruction claims ----------------------------------------------------
+// See "Destruction claims follow the parent graph" in the free-threading notes.
+
+// Claims accepted and not extracted yet. Written under the state lock, read
+// without it: while it is zero, an object's own flag is the whole answer.
+static std::atomic<int> &waitingClaims()
+{
+    static std::atomic<int> instance{0};
+    return instance;
+}
+
+// Defined further below. Declared inside its namespace: a second declaration
+// at file scope would make calls from within Shiboken::Object ambiguous.
+namespace Shiboken::Object
+{
+static std::vector<SbkObject *> collectOwnedLocked(SbkObject *root);
+} // namespace Shiboken::Object
+
+static SbkObject *parentOfLocked(SbkObject *self)
+{
+    SBK_ASSERT_STATE_LOCKED();
+    auto *pInfo = self->d->parentInfo;
+    return pInfo != nullptr ? pInfo->parent : nullptr;
+}
+
+/// Whether a destruction claim covers \a self - its own, or one made on an
+/// object it is currently a descendant of.
+static bool isClaimedLocked(SbkObject *self)
+{
+    SBK_ASSERT_STATE_LOCKED();
+    if (self->d->directDestruction)
+        return true;
+    // Nothing waits, so nothing can be inherited. This holds only because
+    // every write of directDestruction except the waiting root's covers the
+    // whole owned set below the node (stampOwnedSetLocked(),
+    // keepClaimThroughTeardownLocked(), claimDeallocLocked()): a descendant
+    // left to the derivation
+    // would lose its claim right here.
+    if (waitingClaims().load(std::memory_order_relaxed) == 0
+        || !Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::ClaimByAncestry)) {
+        return false;
+    }
+    // Tortoise and hare: setParent() accepts a cycle, and a set of seen nodes
+    // would allocate inside a transaction.
+    SbkObject *slow = self;
+    SbkObject *fast = self;
+    for (;;) {
+        for (int step = 0; step < 2; ++step) {
+            fast = parentOfLocked(fast);
+            if (fast == nullptr)
+                return false;
+            if (fast->d->directDestruction)
+                return true;
+        }
+        slow = parentOfLocked(slow);
+        if (slow == fast)
+            return false;   // a cycle, and no claim anywhere in it
+    }
+}
+
+/// isClaimedLocked() for a caller that holds no lock. The two unlocked reads
+/// may be stale, so the answer is advisory, like isValid() in general; the
+/// answer that gates a call is taken in acquireCallLeaseLocked().
+static bool isClaimed(SbkObject *self)
+{
+    SBK_ASSERT_STATE_UNLOCKED();
+    if (self->d->directDestruction)
+        return true;
+    if (waitingClaims().load(std::memory_order_relaxed) == 0)
+        return false;
+    Shiboken::StateLockGuard guard;
+    return isClaimedLocked(self);
+}
+
+/// Stamp the claim \a child derives onto its whole owned set, before the edge
+/// is removed because the parent is torn down (B6-1). Called from the two
+/// sites that detach for a teardown; removeParentLocked() cannot tell one
+/// from a reparent.
+/// See "A teardown keeps the claim" in the free-threading notes.
+static void keepClaimThroughTeardownLocked(SbkObject *child)
+{
+    SBK_ASSERT_STATE_LOCKED();
+    if (!Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::ClaimThroughTeardown))
+        return;
+    if (!isClaimedLocked(child))
+        return;
+    for (SbkObject *o : Shiboken::Object::collectOwnedLocked(child))
+        o->d->directDestruction = true;
+}
+
+#endif // Py_GIL_DISABLED
 
 namespace Shiboken
 {
@@ -192,6 +287,29 @@ void setDestroyQApplication(DestroyQAppHook func)
     DestroyQApplication = func;
 }
 
+#ifdef Py_GIL_DISABLED
+// The instance dict pointer, which CPython's generic attribute code reads
+// and writes too.
+// See "The instance dictionary is published once" in the free-threading notes.
+static PyObject *loadDictAcquire(PyObject **field)
+{
+#  ifndef Py_LIMITED_API
+    return static_cast<PyObject *>(_Py_atomic_load_ptr_acquire(field));
+#  else
+    return *field;
+#  endif
+}
+
+static void storeDictRelease(PyObject **field, PyObject *dict)
+{
+#  ifndef Py_LIMITED_API
+    _Py_atomic_store_ptr_release(field, dict);
+#  else
+    *field = dict;
+#  endif
+}
+#endif // Py_GIL_DISABLED
+
 // PYSIDE-535: Use the C API in PyPy instead of `op->ob_dict`, directly
 LIBSHIBOKEN_API PyObject *SbkObject_GetDict_NoRef(PyObject *op)
 {
@@ -203,11 +321,40 @@ LIBSHIBOKEN_API PyObject *SbkObject_GetDict_NoRef(PyObject *op)
     return ret;
 #else
     auto *sbkObj = reinterpret_cast<SbkObject *>(op);
+#  ifdef Py_GIL_DISABLED
+    // Created as CPython creates a tp_dictoffset dict, and never replaced, so
+    // the borrow lasts as long as the wrapper.
+    // See "The instance dictionary is published once" in the free-threading notes.
+    if (Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::DictPublishOnce)) {
+        PyObject *dict = loadDictAcquire(&sbkObj->ob_dict);
+        if (dict == nullptr) {
+            Shiboken::GilState state;
+            SBK_FAILPOINT("dict-before-publish");
+            PyCriticalSection section;
+            PyCriticalSection_Begin(&section, op);
+            dict = sbkObj->ob_dict;
+            if (dict == nullptr) {
+                dict = PyDict_New();
+                storeDictRelease(&sbkObj->ob_dict, dict);
+            }
+            PyCriticalSection_End(&section);
+        }
+        return dict;
+    }
+    // DictPublishOnce cleared: a plain test and store.
+    if (!sbkObj->ob_dict) {
+        Shiboken::GilState state;
+        SBK_FAILPOINT("dict-before-publish");
+        sbkObj->ob_dict = PyDict_New();
+    }
+    return sbkObj->ob_dict;
+#  else
     if (!sbkObj->ob_dict) {
         Shiboken::GilState state;
         sbkObj->ob_dict = PyDict_New();
     }
     return sbkObj->ob_dict;
+#  endif
 #endif
 }
 
@@ -353,11 +500,29 @@ static int SbkObject_tp_clear(PyObject *self)
     // delete it a second time. The reference cycle is broken by clearing the
     // instance dict below, and the parent link is torn down when the parent
     // itself is cleared or deallocated.
+#ifdef Py_GIL_DISABLED
+    // No precheck: parentInfo is published under the state lock, and every
+    // helper below reads it there and does nothing without one.
+    // See "Who may read parentInfo" in the free-threading notes.
+    _detachChildren(sbkSelf, true);
+#else
     if (sbkSelf->d->parentInfo)
         _detachChildren(sbkSelf, true);
+#endif
 
     Shiboken::Object::clearReferences(sbkSelf);
 
+#ifdef Py_GIL_DISABLED
+    // The contents go, which breaks the cycle; the dict stays until the
+    // wrapper is freed.
+    // See "The instance dictionary is published once" in the free-threading notes.
+    SBK_FAILPOINT("clear-before-dict");
+    if (Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::DictPublishOnce)) {
+        if (PyObject *dict = loadDictAcquire(&sbkSelf->ob_dict))
+            PyDict_Clear(dict);
+        return 0;
+    }
+#endif
     if (sbkSelf->ob_dict)
         Py_CLEAR(sbkSelf->ob_dict);
     return 0;
@@ -439,6 +604,28 @@ struct DyingChild
 // Defined with the other state-lock transactions, declared here: both
 // destruction paths need it, and this is the first of them.
 static std::vector<DyingChild> collectDyingChildren(SbkObject *root);
+
+// A deallocation whose destructor waits for the last lease in its owned set.
+// The wrapper is freed by then and is a key only; the lease holders are
+// pinned, because the edges that led to them are gone.
+// See "The deallocator claims the owned set" in the free-threading notes.
+struct PendingDealloc
+{
+    SbkObject *wrapper;
+    PyTypeObject *type; // a reference
+    bool multicpp;
+    bool deleteInMainThread;
+    Shiboken::DestructorEntries entries;
+    Shiboken::DestructorEntry entry;
+    std::vector<void *> retiredCptrs;
+    std::vector<DyingChild> children;
+    std::vector<SbkObject *> busy; // references
+    std::vector<SbkObject *> stamped; // references
+};
+
+static bool claimDeallocLocked(SbkObject *self, PendingDealloc &pending);
+static void releaseDeallocStamps(const std::vector<SbkObject *> &stamped);
+static void releaseDeallocStampsInMainThread(std::vector<SbkObject *> &&stamped);
 } // namespace Shiboken::Object
 
 // Free-threaded twin of the deallocation path. Kept here, not in the
@@ -543,12 +730,41 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     // Check that Python is still initialized as sometimes this is called by a static destructor
     // after Python interpeter is shutdown.
     SBK_FAILPOINT("dealloc-before-weakrefs");
-    if (sbkObj->weakreflist && Py_IsInitialized())
+    // PyObject_ClearWeakRefs() checks the list itself, under its lock.
+    // See "The weakref list head is CPython's" in the free-threading notes.
+    if (Py_IsInitialized())
         PyObject_ClearWeakRefs(pyObj);
 
     SBK_FAILPOINT("dealloc-before-destroy");
 
     bool deferredDeletion = false;
+    std::vector<SbkObject *> stamped;
+    // The destructor takes the owned set along: no new lease from here, and
+    // a lease still open gets the destructor.
+    // See "The deallocator claims the owned set" in the free-threading notes.
+    if (canDelete
+        && Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::DeallocClaim)) {
+        Shiboken::Object::PendingDealloc pending{sbkObj, pyType, sotp->is_multicpp != 0,
+                                                 sotp->delete_in_main_thread != 0,
+                                                 std::move(entries), {sotp->cpp_dtor, cptr},
+                                                 std::move(retiredCptrs), std::move(children),
+                                                 {}, {}};
+        bool handedToLease = false;
+        {
+            Shiboken::StateLockGuard guard;
+            handedToLease = Shiboken::Object::claimDeallocLocked(sbkObj, pending);
+        }
+        if (handedToLease) {
+            canDelete = false;
+            deferredDeletion = true;
+        } else {
+            entries = std::move(pending.entries);
+            retiredCptrs = std::move(pending.retiredCptrs);
+            children = std::move(pending.children);
+            stamped = std::move(pending.stamped);
+        }
+    }
+
     if (canDelete && sotp->delete_in_main_thread
         && Shiboken::currentThreadId() != Shiboken::mainThreadId()) {
         if (sotp->is_multicpp) {
@@ -569,6 +785,8 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
             bindingManager.retireAfterDeletionInMainThread(child.wrapper, child.cptrs,
                                                            child.type);
         }
+        if (!stamped.empty())
+            Shiboken::Object::releaseDeallocStampsInMainThread(std::move(stamped));
         Py_AddPendingCall(mainThreadDeletionHandler, nullptr);
         canDelete = false;
         deferredDeletion = true;
@@ -616,6 +834,7 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
             bindingManager.retireWrapper(sbkObj, retiredCptrs.data(), pyType);
         for (const auto &child : children)
             bindingManager.retireWrapper(child.wrapper, child.cptrs.data(), child.type);
+        Shiboken::Object::releaseDeallocStamps(stamped);
     }
     // The child pins go back last and with no lock held: this can be a
     // child's final reference, and its deallocator re-enters the binding
@@ -939,7 +1158,7 @@ static PyObject *_setupNew(PyObject *obSelf, PyTypeObject *subtype)
     d->cppObjectCreated = false;
     d->isQAppSingleton = false;
 #ifdef Py_GIL_DISABLED
-    d->pendingDestruction = false;
+    d->directDestruction = false;
     d->activeCalls = 0;
     d->constructingSlots = 0;
 #endif
@@ -1208,6 +1427,9 @@ void _detachChildren(SbkObject *obj, bool keepReference)
             if (pInfo == nullptr || pInfo->children.empty())
                 break;
             first = *pInfo->children.begin();
+            // Still under the lock and still attached: the last moment at
+            // which the child can be seen to derive obj's claim.
+            keepClaimThroughTeardownLocked(first);
             Py_INCREF(reinterpret_cast<PyObject *>(first));
         }
         // Mark child as invalid
@@ -1235,10 +1457,15 @@ void _detachChildren(SbkObject *obj, bool keepReference)
 
 void _destroyParentInfo(SbkObject *obj, bool keepReference)
 {
+#ifdef Py_GIL_DISABLED
+    _detachChildren(obj, keepReference);
+    Shiboken::Object::removeParent(obj, false);
+#else
     if (obj->d->parentInfo) {
         _detachChildren(obj, keepReference);
         Shiboken::Object::removeParent(obj, false);
     }
+#endif
 }
 
 }
@@ -2103,7 +2330,8 @@ bool isValid(PyObject *pyObj)
     if (Py_TYPE(reinterpret_cast<PyObject *>(type)) != SbkObjectType_TypeF())
         return true;
 
-    auto *priv = reinterpret_cast<SbkObject *>(pyObj)->d;
+    auto *self = reinterpret_cast<SbkObject *>(pyObj);
+    auto *priv = self->d;
 
     if (!priv->cppObjectCreated && isUserType(pyObj)) {
         PyErr_Format(PyExc_RuntimeError,
@@ -2126,7 +2354,7 @@ bool isValid(PyObject *pyObj)
     // Shiboken.isValid() disagree with what the next call does. A wrapper
     // subclass keeps validCppObject set through that, which is why the flag
     // above does not catch it.
-    if (priv->pendingDestruction) {
+    if (isClaimed(self)) {
         PyErr_Format(PyExc_RuntimeError,
                      "libshiboken: Internal C++ object (%s) already deleted.",
                      Py_TYPE(pyObj)->tp_name);
@@ -2161,9 +2389,9 @@ bool isValid(SbkObject *pyObj, bool throwPyError)
     }
 
 #ifdef Py_GIL_DISABLED
-    // See the overload above: pending destruction refuses every lease, so the
-    // object is deleted for every purpose a caller has.
-    if (priv->pendingDestruction) {
+    // See the overload above: a claimed object refuses every lease, so it is
+    // deleted for every purpose a caller has.
+    if (isClaimed(pyObj)) {
         if (throwPyError)
             PyErr_Format(PyExc_RuntimeError,
                          "libshiboken: Internal C++ object (%s) already deleted.",
@@ -2627,11 +2855,16 @@ void clearReferences(SbkObject *self)
 // destructor, no other lock. Anything of that kind goes into the
 // DeferredActions list and runs after the unlock.
 
+static void stampOwnedSetLocked(SbkObject *root);
+
 static void **extractDestructionLocked(SbkObject *self, DeferredActions &deferred,
                                        const DestructorFunctions &dtors)
 {
     SBK_ASSERT_STATE_LOCKED();
     auto *priv = self->d;
+    // The claim covers exactly what is about to be destroyed, and from here it
+    // is no longer derived from edges that may still move.
+    stampOwnedSetLocked(self);
     auto *sotp = PepType_SOTP(Shiboken::pyType(self));
     // The destructors were gathered before the lock; only the instance
     // pointers are read here. The type cannot have changed under a wrapper,
@@ -2812,18 +3045,38 @@ static bool ownedSetIsBusyLocked(SbkObject *root)
                        [](SbkObject *o) { return o->d->activeCalls != 0; });
 }
 
-// Mark the whole owned set, so no new lease is handed out anywhere in it, and
-// report whether one is still open.
-static bool markOwnedSetPendingLocked(SbkObject *root)
+// Accept a destruction claim on root, so no new lease is handed out anywhere
+// in what its destructor would take, and report whether one is still open.
+//
+// Recorded on root alone; the members derive it, see isClaimedLocked().
+// Without ClaimByAncestry the whole set is marked here, root included.
+static bool claimRootLocked(SbkObject *root)
 {
     SBK_ASSERT_STATE_LOCKED();
+    const bool byAncestry =
+        Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::ClaimByAncestry);
+    root->d->directDestruction = true;
     const auto owned = collectOwnedLocked(root);
     bool busy = false;
     for (SbkObject *o : owned) {
-        o->d->pendingDestruction = true;
+        if (!byAncestry)
+            o->d->directDestruction = true;
         busy |= o->d->activeCalls != 0;
     }
     return busy;
+}
+
+// A claim stops waiting and its destructors are about to run: record it on
+// every member of the set as it stands now. Invalidation hands the children
+// back, so from here the claim cannot be derived from their edges any more.
+// Without ClaimByAncestry, claimRootLocked() has already marked the set.
+static void stampOwnedSetLocked(SbkObject *root)
+{
+    SBK_ASSERT_STATE_LOCKED();
+    if (!Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::ClaimByAncestry))
+        return;
+    for (SbkObject *o : collectOwnedLocked(root))
+        o->d->directDestruction = true;
 }
 
 // Take out the roots that have become free. Called on the lease-release path.
@@ -2843,7 +3096,167 @@ static std::vector<SbkObject *> takeReadyRootsLocked()
     return ready;
 }
 
-void callCppDestructors(SbkObject *pyObj)
+// Deallocations waiting for a lease, the deallocator's counterpart of
+// pendingRoots(). Guarded by the state lock, and normally empty.
+static std::vector<PendingDealloc> &pendingDeallocs()
+{
+    static std::vector<PendingDealloc> instance;
+    return instance;
+}
+
+// The deallocator's claim on what self's destructor takes along. Stamped on
+// the whole set at once: the teardown removes the edges a derived claim
+// would need. A new lease is refused from here, so the members with a lease
+// open now are the only ones that can hold the destructor back. If there are
+// any, they are pinned and the destructor goes to the last of them.
+//
+// The graph says what the destructor should take, not what it does: an edge
+// from the return value heuristic, QQmlComponent::create() for one, is not
+// deleted by the parent. A member with a C++ wrapper can survive with a valid
+// wrapper, so the ones stamped here are pinned, and releaseDeallocStamps()
+// gives the survivors their leases back.
+// See "The deallocator claims the owned set" in the free-threading notes.
+static bool claimDeallocLocked(SbkObject *self, PendingDealloc &pending)
+{
+    SBK_ASSERT_STATE_LOCKED();
+    auto *pInfo = self->d->parentInfo;
+    if (pInfo == nullptr || pInfo->children.empty())
+        return false; // the object alone, and it is at refcount zero
+    // Prepare, then commit: every allocation before the first stamp.
+    const auto owned = collectOwnedLocked(self);
+    std::vector<SbkObject *> busy;
+    for (SbkObject *o : owned) {
+        if (o != self && o->d->activeCalls != 0)
+            busy.push_back(o);
+    }
+    pending.stamped.reserve(owned.size());
+    if (!busy.empty())
+        pendingDeallocs().reserve(pendingDeallocs().size() + 1);
+    for (SbkObject *o : owned) {
+        // Only a stamp this claim makes is taken back; an earlier one stays.
+        if (o != self && o->d->containsCppWrapper && !o->d->directDestruction) {
+            Py_INCREF(reinterpret_cast<PyObject *>(o));
+            pending.stamped.push_back(o);
+        }
+        o->d->directDestruction = true;
+    }
+    if (busy.empty())
+        return false;
+    for (SbkObject *o : busy)
+        Py_INCREF(reinterpret_cast<PyObject *>(o));
+    Py_INCREF(reinterpret_cast<PyObject *>(pending.type));
+    pending.busy = std::move(busy);
+    pendingDeallocs().push_back(std::move(pending));
+    return true;
+}
+
+// Past the destructor. A member it deleted went through Object::destroy()
+// and has no pointer left; one that still has it survived, and is callable
+// again. Drops the pins.
+static void releaseDeallocStamps(const std::vector<SbkObject *> &stamped)
+{
+    SBK_ASSERT_STATE_UNLOCKED();
+    SBK_ASSERT_NO_RAW_LOCK();
+    if (stamped.empty())
+        return;
+    {
+        StateLockGuard guard;
+        for (SbkObject *o : stamped) {
+            if (o->d->validCppObject && o->d->cptr != nullptr)
+                o->d->directDestruction = false;
+        }
+    }
+    for (SbkObject *o : stamped)
+        Py_DECREF(reinterpret_cast<PyObject *>(o));
+}
+
+static void runDeallocStampRelease(void *data)
+{
+    auto *stamped = static_cast<std::vector<SbkObject *> *>(data);
+    releaseDeallocStamps(*stamped);
+    delete stamped;
+}
+
+// Queued behind the destructors of a deallocation handed to the main thread.
+static void releaseDeallocStampsInMainThread(std::vector<SbkObject *> &&stamped)
+{
+    BindingManager::instance().addToDeletionInMainThread(
+        {runDeallocStampRelease, new std::vector<SbkObject *>(std::move(stamped))});
+}
+
+static std::vector<PendingDealloc> takeReadyDeallocsLocked()
+{
+    SBK_ASSERT_STATE_LOCKED();
+    auto &pending = pendingDeallocs();
+    std::vector<PendingDealloc> ready;
+    if (pending.empty())
+        return ready;
+    ready.reserve(pending.size());
+    for (auto it = pending.begin(); it != pending.end(); ) {
+        const bool busy = std::any_of(it->busy.begin(), it->busy.end(),
+                                      [](SbkObject *o) { return o->d->activeCalls != 0; });
+        if (busy) {
+            ++it;
+        } else {
+            ready.push_back(std::move(*it));
+            it = pending.erase(it);
+        }
+    }
+    return ready;
+}
+
+// The rest of SbkDeallocWrapperCommon() for a destructor that waited: the
+// same steps in the same order, with no lock held.
+static void finishDealloc(PendingDealloc &pending)
+{
+    SBK_ASSERT_STATE_UNLOCKED();
+    SBK_ASSERT_NO_RAW_LOCK();
+    auto &bindingManager = BindingManager::instance();
+    if (pending.deleteInMainThread && currentThreadId() != mainThreadId()) {
+        if (pending.multicpp) {
+            for (const auto &e : pending.entries)
+                bindingManager.addToDeletionInMainThread(e);
+        } else {
+            bindingManager.addToDeletionInMainThread(pending.entry);
+        }
+        if (!pending.retiredCptrs.empty()) {
+            bindingManager.retireAfterDeletionInMainThread(pending.wrapper, pending.retiredCptrs,
+                                                           pending.type);
+        }
+        for (const auto &child : pending.children) {
+            bindingManager.retireAfterDeletionInMainThread(child.wrapper, child.cptrs,
+                                                           child.type);
+        }
+        if (!pending.stamped.empty())
+            releaseDeallocStampsInMainThread(std::move(pending.stamped));
+        Py_AddPendingCall(mainThreadDeletionHandler, nullptr);
+    } else {
+        if (pending.multicpp) {
+            callDestructor(pending.entries);
+        } else {
+            ThreadStateSaver threadSaver;
+            if (Py_IsInitialized())
+                threadSaver.save();
+            pending.entry.destructor(pending.entry.cppInstance);
+        }
+        if (!pending.retiredCptrs.empty()) {
+            bindingManager.retireWrapper(pending.wrapper, pending.retiredCptrs.data(),
+                                         pending.type);
+        }
+        for (const auto &child : pending.children)
+            bindingManager.retireWrapper(child.wrapper, child.cptrs.data(), child.type);
+        releaseDeallocStamps(pending.stamped);
+    }
+    for (const auto &child : pending.children) {
+        Py_DECREF(reinterpret_cast<PyObject *>(child.wrapper));
+        Py_DECREF(reinterpret_cast<PyObject *>(child.type));
+    }
+    for (SbkObject *o : pending.busy)
+        Py_DECREF(reinterpret_cast<PyObject *>(o));
+    Py_DECREF(reinterpret_cast<PyObject *>(pending.type));
+}
+
+static void callCppDestructorsImpl(SbkObject *pyObj, bool onlyIfOwned)
 {
     SBK_ASSERT_STATE_UNLOCKED();
     SBK_ASSERT_NO_RAW_LOCK();
@@ -2861,16 +3274,19 @@ void callCppDestructors(SbkObject *pyObj)
         // Idempotent: a concurrent Shiboken.delete() of the same object may
         // already have destroyed it or have destruction pending. Running the
         // destructor again would null-deref / double-free.
-        if (priv->cptr == nullptr || !priv->validCppObject || priv->pendingDestruction)
+        if (priv->cptr == nullptr || !priv->validCppObject || isClaimedLocked(pyObj))
+            return;
+        if (onlyIfOwned && !priv->hasOwnership)
             return;
         if (priv->isQAppSingleton && DestroyQApplication) {
             destroyQApp = true;
-        } else if (markOwnedSetPendingLocked(pyObj)) {
+        } else if (claimRootLocked(pyObj)) {
             // A call is in flight somewhere in what this destructor would take
             // with it. Pinned and put aside; the release that empties the set
             // finishes it.
             Py_INCREF(reinterpret_cast<PyObject *>(pyObj));
             pendingRoots().push_back(pyObj);
+            waitingClaims().fetch_add(1, std::memory_order_relaxed);
             leftToLease = true;
         } else {
             cptrs = extractDestructionLocked(pyObj, deferred, dtors);
@@ -2889,6 +3305,16 @@ void callCppDestructors(SbkObject *pyObj)
     // removed from the registry and invalidated *before* the C++ destructor
     // runs, so no thread can look it up while the destructor is in progress.
     finishDestruction(pyObj, deferred, cptrs);
+}
+
+void callCppDestructors(SbkObject *pyObj)
+{
+    callCppDestructorsImpl(pyObj, false);
+}
+
+void callCppDestructorsIfOwned(SbkObject *pyObj)
+{
+    callCppDestructorsImpl(pyObj, true);
 }
 
 // The C++ side gave up the object: the wrapper's C++ instance is gone or is
@@ -2925,10 +3351,10 @@ void destroy(SbkObject *self, void *cppData)
         hasParent = hasParentInfo && pInfo->parent != nullptr;
     }
 
-    if (hasParentInfo) {
-        // Check for children information and make all invalid if they exists
-        _destroyParentInfo(self, true);
-    }
+    // No check-then-act on the flag read above: the helper reads parentInfo
+    // under the lock itself.
+    // See "Who may read parentInfo" in the free-threading notes.
+    _destroyParentInfo(self, true);
 
     // Without a parent the object may still be alive.
     bool dropExtraRef = false;
@@ -2992,10 +3418,7 @@ void deallocData(SbkObject *self, bool cleanup)
     // wrapper destructor. All three take the state lock themselves.
     if (cleanup) {
         removeParent(self);
-
-        if (self->d->parentInfo)
-            _destroyParentInfo(self, true);
-
+        _destroyParentInfo(self, true);
         clearReferences(self);
     }
 
@@ -3048,7 +3471,7 @@ static LeaseFailure acquireCallLeaseLocked(SbkObject *self, int slot,
         && PepType_SOTP(Py_TYPE(reinterpret_cast<PyObject *>(self)))->is_user_type) {
         return LeaseFailure::NotInitialized;
     }
-    if (!priv->validCppObject || priv->pendingDestruction || priv->cptr == nullptr)
+    if (!priv->validCppObject || priv->cptr == nullptr || isClaimedLocked(self))
         return LeaseFailure::Deleted;
     ++priv->activeCalls;
     // The canonical pointer keys the call guard, the adjusted one is what
@@ -3073,6 +3496,67 @@ static void *rereadPointerAfterLease(SbkObject *self, PyTypeObject *desiredType)
     return cppPointer(self, desiredType);
 }
 
+// A waiting root whose last lease came back: extract and destroy it, then
+// drop the pin it was queued with.
+static void finishReadyRoot(SbkObject *root)
+{
+    DeferredActions deferred;
+    void **cptrs = nullptr;
+    const auto dtors = getDestructorFunctions(Shiboken::pyType(root));
+    {
+        StateLockGuard guard;
+        // A queued root can wait long: a child with an open lease may have
+        // joined its set meanwhile. Then it waits again, pin and count kept.
+        if (ownedSetIsBusyLocked(root)) {
+            pendingRoots().push_back(root);
+            return;
+        }
+        // The same test the immediate path makes: collectInvalidateLocked()
+        // can have cleared validCppObject without detaching the pointers,
+        // and destroying those again would be a double free.
+        if (root->d->validCppObject && root->d->cptr != nullptr)
+            cptrs = extractDestructionLocked(root, deferred, dtors);
+        // The claim has stopped waiting either way. Counted down here and
+        // not where takeReadyRootsLocked() took it off the queue: until
+        // the extraction has stamped the members, they still inherit it
+        // from this root.
+        waitingClaims().fetch_sub(1, std::memory_order_relaxed);
+    }
+    if (cptrs != nullptr)
+        finishDestruction(root, deferred, cptrs);
+    // The pin. No lock held: this can run a destructor.
+    Py_DECREF(reinterpret_cast<PyObject *>(root));
+}
+
+// Entries of the main thread's deletion queue. deferredDeleteQObject()
+// drains that queue from other threads, detached: such a caller only puts
+// the entry back, before touching anything Python.
+static bool requeuedForMainThread(void (*run)(void *), void *data)
+{
+    if (currentThreadId() == mainThreadId())
+        return false;
+    BindingManager::instance().addToDeletionInMainThread({run, data});
+    Py_AddPendingCall(mainThreadDeletionHandler, nullptr);
+    return true;
+}
+
+static void runReadyRoot(void *root)
+{
+    if (requeuedForMainThread(runReadyRoot, root))
+        return;
+    Shiboken::Errors::Stash errorStash;
+    finishReadyRoot(static_cast<SbkObject *>(root));
+}
+
+static void runReadyDealloc(void *data)
+{
+    if (requeuedForMainThread(runReadyDealloc, data))
+        return;
+    Shiboken::Errors::Stash errorStash;
+    std::unique_ptr<PendingDealloc> pending(static_cast<PendingDealloc *>(data));
+    finishDealloc(*pending);
+}
+
 static void releaseCallLease(SbkObject *self)
 {
     SBK_ASSERT_STATE_UNLOCKED();
@@ -3081,41 +3565,54 @@ static void releaseCallLease(SbkObject *self)
     // wrapper between the native call and the lease coming back.
     SBK_FAILPOINT("lease-before-release");
     std::vector<SbkObject *> ready;
+    std::vector<PendingDealloc> readyDeallocs;
 
     {
         StateLockGuard guard;
-        // Not filtered by this object's own pendingDestruction: a child that
-        // was reparented into a waiting set after the fact never got the flag,
-        // yet its lease is what pins the root. The normal case stays one
+        // Not filtered by whether this object is claimed: a lease taken before
+        // the claim, or before the edge that brought it in, is what pins the
+        // root and it has to be counted out here. The normal case stays two
         // empty().
-        if (--self->d->activeCalls == 0 && !pendingRoots().empty())
-            ready = takeReadyRootsLocked();
+        if (--self->d->activeCalls == 0) {
+            if (!pendingRoots().empty())
+                ready = takeReadyRootsLocked();
+            if (!pendingDeallocs().empty())
+                readyDeallocs = takeReadyDeallocsLocked();
+        }
     }
 
-    if (ready.empty())
+    if (ready.empty() && readyDeallocs.empty())
         return;
 
     // A lease is released on every exit of a generated wrapper, a raised
     // exception included, and the destruction below calls into Python.
     Shiboken::Errors::Stash errorStash;
 
+    // A type destroyed in the main thread waits in its queue, pinned and still
+    // claimed, and takes what follows it along, so the order holds.
+    // See "A deferred destruction keeps the main thread" in the free-threading notes.
+    auto &bindingManager = BindingManager::instance();
+    bool queued = false;
     for (SbkObject *root : ready) {
-        DeferredActions deferred;
-        void **cptrs = nullptr;
-        const auto dtors = getDestructorFunctions(Shiboken::pyType(root));
-        {
-            StateLockGuard guard;
-            // The same test the immediate path makes: collectInvalidateLocked()
-            // can have cleared validCppObject without detaching the pointers,
-            // and destroying those again would be a double free.
-            if (root->d->validCppObject && root->d->cptr != nullptr)
-                cptrs = extractDestructionLocked(root, deferred, dtors);
-        }
-        if (cptrs != nullptr)
-            finishDestruction(root, deferred, cptrs);
-        // The pin. No lock held: this can run a destructor.
-        Py_DECREF(reinterpret_cast<PyObject *>(root));
+        queued |= PepType_SOTP(Shiboken::pyType(root))->delete_in_main_thread
+                  && currentThreadId() != mainThreadId();
+        if (queued)
+            bindingManager.addToDeletionInMainThread({runReadyRoot, root});
+        else
+            finishReadyRoot(root);
     }
+    // After the roots: a waiting root inside a deallocation's set goes first,
+    // the order the two requests came in.
+    for (auto &pending : readyDeallocs) {
+        if (queued) {
+            bindingManager.addToDeletionInMainThread(
+                {runReadyDealloc, new PendingDealloc(std::move(pending))});
+        } else {
+            finishDealloc(pending);
+        }
+    }
+    if (queued)
+        Py_AddPendingCall(mainThreadDeletionHandler, nullptr);
 }
 
 /// Whether pyObj is a wrapper instance and needs a lease.
@@ -3398,6 +3895,7 @@ static void collectInvalidateLocked(SbkObject *self, std::set<SbkObject *> &seen
 
             // if the parent not is a wrapper class, then remove children from him, because We do not know when this object will be destroyed
             if (!self->d->validCppObject) {
+                keepClaimThroughTeardownLocked(child);
                 plan.detachChildren.push_back(child);
                 pinForPlan(reinterpret_cast<PyObject *>(child), pins);
             }
@@ -3741,6 +4239,11 @@ void setParent(PyObject *parent, PyObject *child)
 
     //Avoid destroy child during reparent operation
     Py_INCREF(child);
+
+    // Leases held, native parent changed, the binding graph still shows the
+    // old edge. No test arms this yet (B6-2).
+    // See the failpoint test README.
+    SBK_FAILPOINT("parent-before-commit");
 
     DeferredActions deferred;
     SetParentResult result{};

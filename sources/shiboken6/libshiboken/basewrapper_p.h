@@ -73,17 +73,22 @@ struct SbkObjectPrivate
     Shiboken::RelaxedFlag validCppObject;
     Shiboken::RelaxedFlag cppObjectCreated;
     Shiboken::RelaxedFlag isQAppSingleton;
-    /// Set once Shiboken.delete() has been requested. No new call lease is
-    /// handed out from that point on, so the object is unreachable for new
+    /// A destruction claim this object carries itself: Shiboken.delete() was
+    /// requested on it, or a native destructor is about to take its C++
+    /// instance (stamped at extraction and at a teardown detach). No new call
+    /// lease is handed out for a claimed object, so it is unreachable for new
     /// calls while in-flight calls finish. Destruction from the C++ side
     /// cannot defer and clears validCppObject and cptr instead, which refuses
-    /// a lease just the same.
-    /// State lock.
+    /// a lease just the same. State lock.
     ///
-    /// One-way: nothing clears it again. A wrapper marked here is refused for
+    /// One-way: nothing clears it again. A wrapper claimed here is refused for
     /// good, even where a build with a GIL would let the call through - into
     /// memory the C++ destructor has freed.
-    Shiboken::RelaxedFlag pendingDestruction;
+    ///
+    /// A waiting claim on a parent is not copied here but derived through the
+    /// current parent chain. Ask isClaimedLocked() in basewrapper.cpp, not
+    /// this flag.
+    Shiboken::RelaxedFlag directDestruction;
     /// Number of C++ calls currently using cptr under a call lease. The C++
     /// object is not destroyed while this is non-zero; the last lease release
     /// runs a destruction that was requested meanwhile. State lock.

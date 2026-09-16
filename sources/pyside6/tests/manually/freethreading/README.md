@@ -55,7 +55,9 @@ B7-2: the deallocator clears weakrefs while another thread holds references.
 One thread drops the last strong reference and parks inside deallocation,
 just before the weakrefs are cleared. A second thread then operates on every
 kind of reference to the dying object. Every callback must run at most once,
-and the referent must be dead when it does.
+and the referent must be dead when it does. The list head is no longer read
+before the call.
+See "The weakref list head is CPython's" in the free-threading notes.
 
 The object is created in the worker, not in the test body: CPython's biased
 reference counting makes the creating thread the owner, and a `del` in
@@ -268,6 +270,48 @@ The method is therefore bound before the failpoint is armed, and then the
 test parks where it always meant to: inside the call, with the lease held.
 The destruction is deferred, the call returns its value.
 
+### teardown-vs-call - a guard, no proof row
+
+Application teardown against a call in flight. A thread holds a lease inside
+`objectName()` on a QObject Python owns and parks; the main thread deletes
+the application, which walks every wrapper. The object must not be destroyed
+while the call runs, the call must return its value, and the destructor must
+run once the lease is back. `destroyed` is connected directly: the deferred
+destructor runs on the thread that releases the last lease, and nothing
+would deliver a queued call.
+
+Deleting the application ends it for the rest of the process, so the test
+runs itself in a child process. Without the claim it dies with SIGSEGV.
+See "Teardown claims what Python owns" in the free-threading notes.
+
+### deferred-widget-dtor - a guard, no proof row
+
+A `Shiboken.delete()` of a `QWidget` deferred behind a lease. A worker holds
+a lease inside `objectName()` and parks, the main thread deletes the widget,
+the worker returns. `destroyed`, connected directly, must fire on the main
+thread; without the queue it fires on the worker. A child process with an
+offscreen `QApplication`; skipped where the build has no QtWidgets.
+See "A deferred destruction keeps the main thread" in the free-threading notes.
+
+### dict-first-access, proof-dict-first-access
+
+Two first accesses to an instance dict. One thread asks for `__dict__` and
+parks after finding none; the main thread sets an attribute, which makes
+CPython create the dict. The reader must come back with that dict, attribute
+included. A QObject wrapper cannot race here - its constructor creates the
+dict before the object is published - so the test uses `QByteArray` and a
+Python subclass of it.
+
+### dict-survives-clear, proof-dict-survives-clear
+
+`tp_clear` against a reader. A wrapper in a cycle of its own is collected on
+a worker, which parks in `tp_clear` before the dict; the main thread takes
+the wrapper out of the map with `wrapInstance()` and holds its dict. After
+the clear that dict must still be the object's, and empty. Run for a plain
+QObject wrapper and for a Python subclass, whose `tp_clear` is CPython's
+`subtype_clear()` handing on to ours.
+See "The instance dictionary is published once" in the free-threading notes.
+
 ### mi-pointer - an equivalence, and no proof row
 
 A lease asked for a base type computes that base's pointer itself: the
@@ -317,6 +361,59 @@ The object is kept alive until the process ends. Destroying a wrapper type
 with its own metaclass crashes the interpreter, with a GIL and with every
 bit cleared - a separate defect that would otherwise end the run before it
 reports.
+
+### claim-moves-out, proof-claim-ancestry
+
+B6-1: a child that leaves a claimed parent leaves the claim behind.
+
+A thread parks in `child.setParent(None)` with its lease taken, while the
+binding graph still reads `parent -> child`. `Shiboken.delete(parent)` finds
+that call open in the owned set and puts the destruction aside. Released, the
+thread removes the edge, and its lease release runs the destruction without
+the child. The test expects the child to be callable and deletable.
+
+`proof-claim-ancestry` clears `ClaimByAncestry`: the request marks the whole
+owned set once, the child keeps the mark of a parent it has left, and every
+call on it raises.
+
+### claim-survives-teardown, proof-claim-teardown
+
+B6-1 from the other side: a child detached *because* its parent is torn down
+has to keep the claim, since the parent's C++ destructor takes it along.
+
+The root is `sample.ObjectType.create()`, built by C++: `Shiboken.invalidate()`
+detaches children only from a root without `containsCppWrapper`, and every
+object built from Python has one. Child and grandchild are `ObjectType`
+subclasses, which keep `validCppObject`. A leased call on the child makes
+`Shiboken.delete(root)` wait; `Shiboken.invalidate(root)` then hands the
+children back, and the lease release skips the extraction because the root is
+already invalid. The test expects the child to stay refused, and the
+grandchild once no claim waits any more.
+
+`proof-claim-teardown` clears `ClaimThroughTeardown`, and the child is
+admitted again. Clearing `ClaimByAncestry` would not show it: that marks the
+whole set at request time, and the row passes.
+
+The grandchild check guards against a stamp that marks the detached child but
+not its subtree. It has no bit of its own: with `ClaimThroughTeardown` cleared
+the child check fails first.
+
+### B6-2, a child that moves in - no test yet
+
+A child that joins a claimed parent derives the claim once the edge is
+published. The window to test is between that commit and the release of the
+leases the publishing thread still holds, and nothing Python-visible runs in
+it. Reaching it needs two threads parked at once, at `parent-before-commit`
+and at `lease-before-release`.
+
+`sbkfailpoint.cpp` has one armed name, one parked name and one release flag
+for the whole process. Arming a second point forgets that the first holds a
+thread, and releasing either name disarms both. Both points have to hold
+their thread. Any window that needs two parked threads is out of reach.
+
+The harness needs per-point arming, parking and release first. A short
+timeout on the first point is no substitute: it enforces the order but hands
+the result to a deadline.
 
 ### two-thread-ctor, proof-ctor-commit
 
@@ -660,4 +757,37 @@ Expected: the delete is deferred while the parker waits, the victim's
 `proof-conversion-leases` clears `ConversionLeasesKept`: the delete runs at
 once and the parker is left on a daemon thread - released, the native loop
 would call `event()` on freed memory.
+
+### dealloc-waits-for-lease, proof-dealloc-claim
+
+Dropping the last reference to a Python-owned parent runs its C++ destructor
+from the deallocator, and that destructor deletes the children. A thread
+holds a lease on a child through `Shiboken.VoidPtr(child)`, parked at
+`lease-after-acquire`, and the main thread drops the parent. `VoidPtr` copies
+the pointer and reads nothing behind it, so the run without the bit reports
+rather than crashes.
+
+Expected: `destroyed` of the child, connected directly, has not fired while
+the lease is open, and fires once afterwards on the thread that released it.
+
+`proof-dealloc-claim` clears `DeallocClaim`: the deallocator destroys the
+owned set without looking, and `destroyed` fires under the open lease.
+
+### dealloc-claim-survivor - a guard, no proof row
+
+The deallocator's claim stamps the owned set as the binding graph has it, and
+the graph can be wrong: `QQmlComponent.create()` parents the object on the
+component, whose destructor leaves it alone. A `Placed` object has a C++
+wrapper and survives with a valid one, so the stamp has to be taken back once
+the destructor is past.
+
+Both paths are asked: a component dropped with no lease open, where the
+destructor runs in the deallocator, and one dropped while a `VoidPtr` lease on
+the survivor is parked, where it runs from the release and has to be refused
+while it waits, which shows it took that path. Expected: both survivors valid
+and answering their name.
+
+No `proof-*` row: the take-back has no bit, and clearing `DeallocClaim` drops
+the waiting path with the stamp, so the test would fail because nothing was
+refused - `dealloc-waits-for-lease`'s question, not this one.
 

@@ -102,11 +102,31 @@ enum Option : int
     /// the wrapper's pointer array a second time, after the transaction -
     /// where a concurrent Object::destroy() has already detached it.
     LeaseSnapshot = 0x8000,
+    /// A waiting claim covers only the object it was requested on;
+    /// the rest of the owned set derives the claim from the current parent
+    /// chain, so a child moving out leaves it behind and one moving in picks
+    /// it up. Cleared, the request marks the whole owned set once.
+    ClaimByAncestry = 0x10000,
+    /// A child detached because its parent is torn down keeps the claim it
+    /// derived. Cleared, the claim goes with the edge, and a child that keeps
+    /// validCppObject is callable while the parent's destructor frees it.
+    /// Only meaningful with ClaimByAncestry.
+    ClaimThroughTeardown = 0x20000,
     /// A lease taken inside an argument's conversion - on a container
     /// element, on a wrapper passed as void * - is kept until the native call
     /// has returned. Cleared, it ends with the conversion, and a concurrent
     /// Shiboken.delete() frees the element before the call uses its pointer.
-    ConversionLeasesKept = 0x1000000
+    ConversionLeasesKept = 0x1000000,
+    /// The deallocator claims what the parent's destructor takes along, and
+    /// hands that destructor to the last lease when a call on a child is
+    /// still open. Cleared, it destroys the owned set without looking, and a
+    /// child is freed under a call in flight.
+    DeallocClaim = 0x2000000,
+    /// The instance dict is created under the object's critical section, as
+    /// CPython creates it, and never replaced: tp_clear empties it. Cleared,
+    /// a first access can overwrite a dict another thread created, and
+    /// tp_clear releases the dict under a reader.
+    DictPublishOnce = 0x10000000
 };
 
 /// Whether opt is enabled. The environment is read once, on first use.

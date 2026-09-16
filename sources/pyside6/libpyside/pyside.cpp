@@ -457,18 +457,11 @@ static void destructionVisitor(SbkObject *pyObj, void *data)
     auto *ob = reinterpret_cast<PyObject *>(pyObj);
     if (pyObj != pyQApp && PyObject_TypeCheck(ob, pyQObjectType)) {
 #ifdef Py_GIL_DISABLED
-        // Teardown reaches every wrapper, and other threads may still be
-        // calling into them. The lease refuses while a call is in flight, and
-        // an object left standing at shutdown is the better outcome: the
-        // alternative is destroying it under a running call. No guard - the
-        // destructor runs with the thread state released, and holding a
-        // critical section across that is what the guard must not do.
-        Shiboken::Object::CallLease lease{ob, Shiboken::Object::CallLease::Guard::Omit};
-        if (!lease) {
-            PyErr_Clear();   // the lease set a RuntimeError; teardown ignores it
-            return;
-        }
-#endif // Py_GIL_DISABLED
+        // Shiboken.delete() for what Python owns: a call in flight defers the
+        // destructor to its last lease.
+        // See "Teardown claims what Python owns" in the free-threading notes.
+        Shiboken::Object::callCppDestructorsIfOwned(pyObj);
+#else
         if (Shiboken::Object::hasOwnership(pyObj) && Shiboken::Object::isValid(pyObj, false)) {
             Shiboken::Object::setValidCpp(pyObj, false);
 
@@ -476,6 +469,7 @@ static void destructionVisitor(SbkObject *pyObj, void *data)
             Shiboken::callCppDestructor<QObject>(Shiboken::Object::cppPointer(pyObj, pyQObjectType));
             Py_END_ALLOW_THREADS
         }
+#endif
     }
 
 };
@@ -767,7 +761,7 @@ void *nextQObjectMemoryAddr(PyTypeObject *forType)
     // Identity, not PyType_IsSubtype(): QML calls the registered type itself,
     // so the awaited constructor sees exactly that type. What it cannot turn
     // away is a second object of the *same* type, built there before the
-    // awaited one - see the QML paragraph in doc/developer/freethreading.md.
+    // awaited one - see the QML sections of the free-threading notes.
     if (forType != nullptr && top.expectedType != nullptr
         && forType != top.expectedType && placementTypeGate()) {
         return nullptr;
@@ -1270,7 +1264,14 @@ void deferredDeleteQObject(void *cppSelf)
         return;
     }
 
+#ifdef Py_GIL_DISABLED
+    // Only this object, here: draining the queue would run the other entries
+    // on this thread, detached.
+    // See "A deferred destruction keeps the main thread" in the free-threading notes.
+    Shiboken::callCppDestructor<QObject>(cppSelf);
+#else
     auto &bm = Shiboken::BindingManager::instance();
     bm.addToDeletionInMainThread({Shiboken::callCppDestructor<QObject>, cppSelf});
     bm.runDeletionInMainThread();
+#endif
 }

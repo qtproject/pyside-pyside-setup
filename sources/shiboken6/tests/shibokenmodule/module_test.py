@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import sys
+import sysconfig
 import unittest
 
 from pathlib import Path
@@ -85,6 +86,13 @@ class TestShiboken(unittest.TestCase):
         Shiboken.dump(obj)   # deleted
         Shiboken.dump(p)     # child deleted
         Shiboken.dump(obj2)  # parent deleted
+
+    @unittest.skipUnless(sysconfig.get_config_var("Py_GIL_DISABLED"),
+                         "the tree walk is refused in a free-threaded build only")
+    def testDumpTreeRefusedFreeThreaded(self):
+        """See "Who may read parentInfo" in the free-threading notes."""
+        with self.assertRaises(NotImplementedError):
+            Shiboken.dumpTree(ObjectType())
 
     def testDelete(self):
         obj = ObjectType()

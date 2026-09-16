@@ -17,6 +17,9 @@ from __future__ import annotations
 
 import ctypes
 import gc
+import os
+import subprocess
+import sys
 import threading
 import time
 import weakref
@@ -25,7 +28,8 @@ import fpharness as fp
 from fpharness import (FREE_THREADED, Failpoint, Shiboken, Test, counterproof,
                        gil_enabled, qml_create, qml_engine, qt_app,
                        run_threads)
-from PySide6.QtCore import QByteArray, QObject, QRecursiveMutex, SIGNAL, SLOT
+from PySide6.QtCore import (QByteArray, QObject, QRecursiveMutex, SIGNAL,
+                            Qt, SLOT)
 
 
 def test_weakrefs_while_deallocating() -> str:
@@ -507,6 +511,199 @@ def test_destroy_while_call_in_flight() -> str:
     return "ok"
 
 
+def test_teardown_waits_for_a_call_in_flight() -> str:
+    """Application teardown against an open call. See README."""
+    # Deleting the application ends it for every later test, so the scenario
+    # runs in a process of its own.
+    if os.environ.get("FAILPOINT_TEARDOWN_CHILD") != "1":
+        env = dict(os.environ, FAILPOINT_TEARDOWN_CHILD="1")
+        proc = subprocess.run([sys.executable, __file__, "teardown-vs-call"],
+                              env=env, capture_output=True, text=True,
+                              timeout=fp.CHILD_TIMEOUT)
+        if proc.returncode == 0:
+            return "ok"
+        return fp._reason(proc.stdout + proc.stderr) or f"FAIL: rc {proc.returncode}"
+
+    app = qt_app()
+    obj = QObject()                       # Python owns it: teardown deletes it
+    obj.setObjectName("leased")
+    bound = obj.objectName
+    destroyed = []
+    # Direct: the deferred destructor runs where the last lease is released,
+    # and there is no event loop to deliver a queued call.
+    obj.destroyed.connect(lambda: destroyed.append(True), Qt.DirectConnection)
+    result = {}
+
+    with Failpoint("lease-after-acquire") as point:
+        def call():
+            try:
+                result["name"] = bound()
+            except BaseException as exc:      # noqa: BLE001
+                result["error"] = repr(exc)
+
+        caller = threading.Thread(target=call)
+        caller.start()
+        if not point.wait_until_reached():
+            return "FAIL: the call never reached the failpoint"
+
+        Shiboken.delete(app)                  # destroyQCoreApplication()
+        early = bool(destroyed)
+
+        point.release()
+        caller.join(timeout=5)
+        if caller.is_alive():
+            return "FAIL: the calling thread did not come back"
+
+    if early:
+        return "FAIL: teardown destroyed the object under a running call"
+    if "error" in result:
+        return f"FAIL: the leased call raised {result['error']}"
+    if result.get("name") != "leased":
+        return f"FAIL: the leased call returned {result.get('name')!r}"
+    for _ in range(100):                      # a deferral may be queued
+        if destroyed:
+            return "ok"
+        time.sleep(0.01)
+    return "FAIL: the deferred destruction never ran"
+
+
+def test_deferred_widget_destruction_in_main_thread() -> str:
+    """A deferred destruction of a type that asks for the main thread."""
+    # A QApplication, and one that is deleted at the end: a process of its
+    # own, as for teardown-vs-call.
+    if os.environ.get("FAILPOINT_WIDGET_CHILD") != "1":
+        try:
+            import PySide6.QtWidgets  # noqa: F401
+        except ImportError:
+            return "skipped: QtWidgets is not in this build"
+        env = dict(os.environ, FAILPOINT_WIDGET_CHILD="1",
+                   QT_QPA_PLATFORM="offscreen")
+        proc = subprocess.run([sys.executable, __file__, "deferred-widget-dtor"],
+                              env=env, capture_output=True, text=True,
+                              timeout=fp.CHILD_TIMEOUT)
+        if proc.returncode == 0:
+            return "ok"
+        return fp._reason(proc.stdout + proc.stderr) or f"FAIL: rc {proc.returncode}"
+
+    from PySide6.QtWidgets import QApplication, QWidget
+    app = QApplication([])                # noqa: F841
+    widget = QWidget()
+    widget.setObjectName("leased")
+    bound = widget.objectName
+    threads = []
+    widget.destroyed.connect(lambda: threads.append(threading.current_thread()),
+                             Qt.DirectConnection)
+    result = {}
+
+    with Failpoint("lease-after-acquire") as point:
+        def call():
+            try:
+                result["name"] = bound()
+            except BaseException as exc:      # noqa: BLE001
+                result["error"] = repr(exc)
+
+        caller = threading.Thread(target=call)
+        caller.start()
+        if not point.wait_until_reached():
+            return "FAIL: the call never reached the failpoint"
+        Shiboken.delete(widget)               # deferred behind the lease
+        point.release()
+        caller.join(timeout=5)
+        if caller.is_alive():
+            return "FAIL: the calling thread did not come back"
+
+    for _ in range(100):                      # the main thread's queue
+        if threads:
+            break
+        time.sleep(0.01)
+    if "error" in result:
+        return f"FAIL: the leased call raised {result['error']}"
+    if not threads:
+        return "FAIL: the deferred destruction never ran"
+    if threads[0] is not threading.main_thread():
+        return f"FAIL: the widget was destroyed on {threads[0].name}"
+    return "ok"
+
+
+class _DictHolder(QObject):
+    """A Python subclass: its tp_clear is CPython's subtype_clear."""
+
+
+def _dict_first_access(obj) -> str:
+    seen = {}
+    with Failpoint("dict-before-publish") as point:
+        def read():
+            seen["dict"] = obj.__dict__
+
+        reader = threading.Thread(target=read)
+        reader.start()
+        if not point.wait_until_reached():
+            return "FAIL: the first access never reached the failpoint"
+        # CPython creates the dict for a generic setattr, under the
+        # object's critical section, while the reader waits.
+        obj.marker = 1
+        point.release()
+        reader.join(timeout=5)
+        if reader.is_alive():
+            return "FAIL: the reading thread did not come back"
+    if seen["dict"] is not obj.__dict__:
+        return "FAIL: the object got two dicts, one of them lost"
+    if "marker" not in obj.__dict__:
+        return "FAIL: the attribute set meanwhile is gone"
+    return "ok"
+
+
+class _DictValue(QByteArray):
+    """A wrapper without signals, whose dict is made on first access."""
+
+
+def test_dict_first_access() -> str:
+    """Two first accesses to the instance dict. See README."""
+    # Not a QObject: its constructor creates the dict before the object is
+    # published, so there is no first access to race.
+    for make in (QByteArray, _DictValue):
+        result = _dict_first_access(make())
+        if result != "ok":
+            return f"{result} ({make.__name__})"
+    return "ok"
+
+
+def _dict_survives_clear(make) -> str:
+    gc.collect()
+    obj = make()
+    obj.cycle = obj                          # only the collector frees it
+    address = Shiboken.getCppPointer(obj)[0]
+    del obj
+    held = {}
+    with Failpoint("clear-before-dict") as point:
+        collector = threading.Thread(target=gc.collect)
+        collector.start()
+        if not point.wait_until_reached():
+            return "FAIL: tp_clear never reached the failpoint"
+        # The world runs again: the map hands out the wrapper tp_clear is on.
+        wrapper = Shiboken.wrapInstance(address, QObject)
+        held["dict"] = wrapper.__dict__
+        point.release()
+        collector.join(timeout=10)
+        if collector.is_alive():
+            return "FAIL: the collecting thread did not come back"
+    if held["dict"] is not wrapper.__dict__:
+        return "FAIL: tp_clear replaced the dict a reader holds"
+    if held["dict"]:
+        return "FAIL: tp_clear left the dict's contents"
+    wrapper.__dict__.clear()
+    return "ok"
+
+
+def test_dict_survives_clear() -> str:
+    """tp_clear against a reader of the instance dict. See README."""
+    for make in (QObject, _DictHolder):
+        result = _dict_survives_clear(make)
+        if result != "ok":
+            return f"{result} ({make.__name__})"
+    return "ok"
+
+
 def test_multiple_inheritance_pointer() -> str:
     """The lease's multiple-inheritance pointer arithmetic. See README."""
     try:
@@ -667,6 +864,106 @@ def test_derived_metatype_takes_a_lease() -> str:
     if got != address:
         return (f"FAIL: the lease handed out {got:#x}, not the {address:#x} "
                 "the wrapper holds")
+    return "ok"
+
+
+def test_claim_follows_a_child_that_moves_out() -> str:
+    """B6-1: a child that leaves a claimed parent. See README."""
+    qt_app()
+    parent = QObject()
+    child = QObject()
+    child.setObjectName("child")
+    child.setParent(parent)
+
+    # Bound before arming: the lookup takes a lease of its own.
+    # See lease-vs-destroy.
+    detach = child.setParent
+
+    with Failpoint("lease-after-acquire") as point:
+        mover = threading.Thread(target=lambda: detach(None))
+        mover.start()
+        if not point.wait_until_reached():
+            return "FAIL: the reparenting call never reached the failpoint"
+
+        # The graph still reads parent -> child: the destruction is put aside.
+        Shiboken.delete(parent)
+
+        point.release()
+        mover.join(timeout=5)
+        if mover.is_alive():
+            return "FAIL: the reparenting thread did not come back"
+
+    # The lease release ran the destruction, with the child out of the set.
+    if Shiboken.isValid(parent):
+        return "FAIL: the parent survived its own deletion"
+    # Asked before calling anything: a refused wrapper would raise.
+    if not Shiboken.isValid(child):
+        return ("FAIL: the child that moved out is refused - it carries the "
+                "claim of a parent it no longer has")
+    if child.parent() is not None:
+        return "FAIL: the child is still in the parent it left"
+    answered = child.objectName()
+    if answered != "child":
+        return f"FAIL: the child answers {answered!r}"
+    Shiboken.delete(child)
+    if Shiboken.isValid(child):
+        return "FAIL: the child that moved out cannot be deleted either"
+    return "ok"
+
+
+def test_claim_survives_a_teardown_detach() -> str:
+    """B6-1, the other direction: a teardown detach keeps the claim. See README."""
+    try:
+        import sample
+    except ImportError:
+        return "skipped: this build has no sample binding"
+
+    class Sub(sample.ObjectType):    # containsCppWrapper: stays valid
+        pass
+
+    root = sample.ObjectType.create()   # C++ built it: no wrapper of its own
+    child = Sub()
+    child.setParent(root)
+    # The stamp has to reach the grandchild too.
+    # See README.
+    grand = Sub()
+    grand.setParent(child)
+
+    # Bound before the point is armed, as lease-vs-destroy explains.
+    call = child.objectName
+
+    with Failpoint("lease-after-acquire") as point:
+        holder = threading.Thread(target=call)
+        holder.start()
+        if not point.wait_until_reached():
+            return "FAIL: the leased call never reached the failpoint"
+
+        # A lease is open in the set: the destruction waits, the child derives.
+        Shiboken.delete(root)
+        derived = not Shiboken.isValid(child)
+
+        # Invalidated without extraction: the children are handed back.
+        Shiboken.invalidate(root)
+        kept = not Shiboken.isValid(child)
+
+        point.release()
+        holder.join(timeout=5)
+        if holder.is_alive():
+            return "FAIL: the leased call did not come back"
+
+    # Asked once no claim waits and nothing is derived any more.
+    kept_deep = not Shiboken.isValid(grand)
+
+    if not derived:
+        return "FAIL: the child never derived the waiting claim"
+    if not kept:
+        return ("FAIL: the child lost the claim when its parent was torn "
+                "down - a lease on it would be granted while that parent's "
+                "destructor takes its C++ instance")
+    if not kept_deep:
+        return ("FAIL: the grandchild lost the claim once the last one "
+                "stopped waiting - the stamp reached its parent and left "
+                "it to a derivation that is no longer made")
     return "ok"
 
 
@@ -1364,10 +1661,133 @@ def test_container_element_lease_is_kept() -> str:
     return "ok - the delete waited for the call that held the element"
 
 
+def test_dealloc_waits_for_a_child_lease() -> str:
+    """A parent's last reference goes while a call on its child is open. See README."""
+    from PySide6.QtCore import Qt
+
+    destroyed: list[int] = []
+    # Created on this thread, so that the del below deallocates here.
+    parent = QObject()
+    child = QObject(parent)
+    child.destroyed.connect(lambda: destroyed.append(threading.get_ident()),
+                            Qt.ConnectionType.DirectConnection)
+    address = Shiboken.getCppPointer(child)[0]
+    result = {}
+
+    with Failpoint("lease-after-acquire") as point:
+        # VoidPtr and not a method: it copies the pointer and reads nothing
+        # behind it, so the run without the bit reports instead of crashing.
+        def read():
+            try:
+                result["address"] = int(Shiboken.VoidPtr(child))
+            except BaseException as exc:      # noqa: BLE001
+                result["error"] = repr(exc)
+
+        reader = threading.Thread(target=read)
+        reader.start()
+        if not point.wait_until_reached():
+            return "FAIL: the read never reached the failpoint"
+
+        del parent
+        during = list(destroyed)
+
+        point.release()
+        reader.join(timeout=5)
+        if reader.is_alive():
+            return "FAIL: the reading thread did not come back"
+
+    if during:
+        return ("FAIL: the parent's destructor took the child while a call "
+                "on it held a lease")
+    if "error" in result:
+        return f"FAIL: the leased read raised {result['error']}"
+    if result.get("address") != address:
+        return f"FAIL: the lease handed out {result.get('address')!r}"
+    if destroyed != [reader.ident]:
+        return (f"FAIL: the destructor did not run once, from the lease "
+                f"release (ran on {destroyed}, reader {reader.ident})")
+    if Shiboken.isValid(child):
+        return "FAIL: the child is still valid after its parent's destructor"
+    return "ok - the destructor waited and ran from the lease release"
+
+
+def test_dealloc_claim_releases_a_survivor() -> str:
+    """A child the parent's destructor leaves alive stays usable. See README."""
+    if not fp.QML_READY:
+        return "skipped: QtQml not available"
+    from PySide6.QtCore import QUrl
+    from PySide6.QtQml import QQmlComponent
+
+    engine = qml_engine()
+
+    def create():
+        component = QQmlComponent(engine)
+        component.setData(b"import QtQml\nimport FailpointTest 1.0\nPlaced { }",
+                          QUrl())
+        return component, component.create()
+
+    # No lease open: the destructor runs inside the deallocator.
+    component, inline = create()
+    del component
+
+    # A lease open on the survivor: the destructor waits for it.
+    component, waited = create()
+    result = {}
+    with Failpoint("lease-after-acquire") as point:
+        def read():
+            try:
+                result["address"] = int(Shiboken.VoidPtr(waited))
+            except BaseException as exc:      # noqa: BLE001
+                result["error"] = repr(exc)
+
+        reader = threading.Thread(target=read)
+        reader.start()
+        if not point.wait_until_reached():
+            return "FAIL: the read never reached the failpoint"
+        del component
+        # Shows that this half took the waiting path at all.
+        refused = not Shiboken.isValid(waited)
+        point.release()
+        reader.join(timeout=5)
+        if reader.is_alive():
+            return "FAIL: the reading thread did not come back"
+
+    if "error" in result:
+        return f"FAIL: the leased read raised {result['error']}"
+    if not refused:
+        return "FAIL: the survivor was not claimed while the destructor waited"
+    for how, obj in (("inline", inline), ("after the lease", waited)):
+        if obj is None:
+            return f"FAIL: QML created nothing ({how})"
+        if not Shiboken.isValid(obj):
+            return (f"FAIL: the survivor of a destructor run {how} is still "
+                    "refused - the claim was not taken back")
+        if obj.objectName() != "placed":
+            return f"FAIL: the survivor ({how}) answers {obj.objectName()!r}"
+    return "ok - both survivors are usable once the destructor is past"
+
+
 TESTS = {
     "weakrefs": Test(test_weakrefs_while_deallocating),
     # Was an expected FAIL on a wrong explanation; see the docstring.
     "lease-vs-destroy": Test(test_destroy_while_call_in_flight),
+    # A guard, no proof-* row: see the README.
+    "teardown-vs-call": Test(test_teardown_waits_for_a_call_in_flight),
+    "deferred-widget-dtor": Test(test_deferred_widget_destruction_in_main_thread),
+    "dict-first-access": Test(test_dict_first_access),
+    "proof-dict-first-access": Test(lambda: counterproof(
+        "DictPublishOnce", "dict-first-access")),
+    "dict-survives-clear": Test(test_dict_survives_clear),
+    "proof-dict-survives-clear": Test(lambda: counterproof(
+        "DictPublishOnce", "dict-survives-clear")),
+    "claim-moves-out": Test(test_claim_follows_a_child_that_moves_out),
+    "proof-claim-ancestry": Test(lambda: counterproof("ClaimByAncestry",
+                                                      "claim-moves-out")),
+    "claim-survives-teardown": Test(test_claim_survives_a_teardown_detach),
+    # Its own bit: without ClaimByAncestry this row would pass.
+    # See README.
+    "proof-claim-teardown": Test(lambda: counterproof("ClaimThroughTeardown",
+                                                      "claim-survives-teardown")),
     "replacement-while-dying": Test(test_replacement_wrapper_while_dying),
     "two-thread-ctor": Test(test_two_threads_one_constructor),
     "lease-snapshot": Test(test_lease_carries_the_pointer_it_validated),
@@ -1461,9 +1881,14 @@ TESTS = {
     "container-element-lease": Test(test_container_element_lease_is_kept),
     "proof-conversion-leases": Test(lambda: counterproof(
         "ConversionLeasesKept", "container-element-lease")),
+    "dealloc-waits-for-lease": Test(test_dealloc_waits_for_a_child_lease),
+    "proof-dealloc-claim": Test(lambda: counterproof(
+        "DeallocClaim", "dealloc-waits-for-lease")),
+    # No proof-* row, on purpose.
+    # See the README.
+    "dealloc-claim-survivor": Test(test_dealloc_claim_releases_a_survivor),
 }
 
 
 if __name__ == "__main__":
-    import sys
     sys.exit(fp.main(TESTS))

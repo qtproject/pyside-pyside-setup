@@ -41,6 +41,9 @@ static constexpr std::array KnownFailpoints = {
     "ctor-before-publish",       // setCppPointer(), between the check and the write
     "hierarchy-mid-traversal",   // in the class graph, one iterator alive
     "metaobject-before-commit",  // instance builder built, not committed yet
+    "parent-before-commit",      // leases held, the new edge not published yet
+    "dict-before-publish",       // instance dict found missing, not created yet
+    "clear-before-dict",         // tp_clear, children detached, the dict to come
 };
 #else
 // A build with a GIL has none of these windows: no lease, and a deallocator

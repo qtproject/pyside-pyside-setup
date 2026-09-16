@@ -49,6 +49,12 @@ void _debugFormat(std::ostream &s, SbkObject *self)
         s << " [wasCreatedByPython]";
     s << (isValueType(self) ? " [value]" : " [object]");
 
+#ifdef Py_GIL_DISABLED
+    // The graph and the referred objects are published under the state lock;
+    // read them there, to the end. Not callable while holding it.
+    // See "Who may read parentInfo" in the free-threading notes.
+    StateLockGuard guard;
+#endif
     if (d->parentInfo) {
         if (auto *parent = d->parentInfo->parent)
             s << ", parent=" << reinterpret_cast<PyObject *>(parent)->ob_type->tp_name
@@ -128,6 +134,7 @@ static void info_format_referredObjects(std::ostream &s, SbkObject *self, const 
     }
 }
 
+#ifndef Py_GIL_DISABLED
 static void dumpTreeRecursion(std::ostream &s, SbkObject *self, unsigned depth = 0)
 {
     const std::string indent(4 * depth, ' ');
@@ -141,12 +148,21 @@ static void dumpTreeRecursion(std::ostream &s, SbkObject *self, unsigned depth =
         }
     }
 }
+#endif // !Py_GIL_DISABLED
 
 std::string dumpTree(SbkObject *self)
 {
+#ifdef Py_GIL_DISABLED
+    // The walk reads the children with no lock, and the preamble it runs per
+    // child may not hold one.
+    // See "Who may read parentInfo" in the free-threading notes.
+    static_cast<void>(self);
+    return "dumpTree() is not available in a free-threaded build";
+#else
     std::ostringstream s;
     dumpTreeRecursion(s, self, 0);
     return s.str();
+#endif
 }
 
 std::string info(SbkObject *self)
@@ -154,6 +170,10 @@ std::string info(SbkObject *self)
     std::ostringstream s;
     const std::string indent;
     info_format_preamble(s, self, indent);
+#ifdef Py_GIL_DISABLED
+    // As in _debugFormat(): the rest reads what the state lock publishes.
+    StateLockGuard guard;
+#endif
     info_format_parent(s, self, indent);
     info_format_children(s, self, indent);
     info_format_referredObjects(s, self, indent);

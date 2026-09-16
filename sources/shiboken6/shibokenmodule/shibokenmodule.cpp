@@ -86,12 +86,18 @@ if (!Shiboken::Object::checkType(%1)) {
 
 
 // @snippet dump-tree
+#ifdef Py_GIL_DISABLED
+// See "Who may read parentInfo" in the free-threading notes.
+PyErr_SetString(PyExc_NotImplementedError,
+                "dumpTree() is not available in a free-threaded build");
+#else
 if (!Shiboken::Object::checkType(%1)) {
     %PYARG_0 = Shiboken::String::fromCString("Ordinary Python type.");
 } else {
     std::string str = Shiboken::Object::dumpTree(reinterpret_cast<SbkObject *>(%1));
     %PYARG_0 = Shiboken::String::fromCString(str.c_str());
 }
+#endif
 // @snippet dump-tree
 
 // @snippet replacemoduledict

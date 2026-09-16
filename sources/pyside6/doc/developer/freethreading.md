@@ -43,6 +43,9 @@ package's handoff. The names this change uses:
 | FT4 | carrying leases and pointer snapshots to their final use |
 | FT8 | restoring the short raw-lock contract - this series |
 | B5-1 | a lease holder reading the pointer array after its transaction |
+| B6-1 | a child moved out of a pending parent refused for good |
+| B6-2 | a child moved into a pending parent left unclaimed |
+| FT7 | pending destruction that stays right while the graph changes |
 
 Every statement stands without them. They are here so that a reader who has
 the review can find the passage a sentence came from.
@@ -532,6 +535,202 @@ one wrapper: it parks the first thread where it is about to publish and
 counts the parent's children while it is there. That is
 `proof-constructor-claim`.
 
+### Destruction claims follow the parent graph
+
+`Shiboken.delete()` claims the object it names and everything its C++
+destructor takes along, and a claimed object gets no new lease. The claim is
+recorded on the named object only. Every other member derives it from the
+parent chain it hangs in when asked:
+
+    claimed(x) = x->d->directDestruction || claimed(parent(x))
+
+That lets a waiting claim follow the graph. A child that moves out of a
+claimed parent is free again once the edge is gone (B6-1), one that moves in
+is claimed once the edge is published (B6-2), and both happen in the
+transaction that changes the edge. When the destruction is extracted, the
+claim is stamped onto every member of the set as it stands then, because
+invalidation hands the children back and their edges no longer say it.
+
+A process-wide count of waiting claims is read without the lock. While it is
+zero, an object's own flag is the whole answer and no chain is walked. That
+is only correct because every stamp is transitive: except for the claim on
+a waiting root, whatever sets `directDestruction` on a node sets it on the
+whole owned set below it, since the count drops to zero exactly when those
+C++ instances are about to go.
+
+Generated code cannot add a member behind the stamp: `setParent()` is
+emitted while the receiver and argument leases are held, and the claim
+refuses them. Hand-written glue that sets a parent without a lease, such as
+the layout ownership in `qtwidgets.cpp`, can still publish an edge there.
+
+Bit `ClaimByAncestry`; cleared, the request marks the whole owned set once:
+a child that moved out stays refused, one that moved in is admitted. B6-2
+has no failpoint test yet; the test README says what the harness lacks.
+
+### A teardown keeps the claim
+
+A child detached *because* its parent is torn down is not reparented: the
+parent's C++ destructor is about to take it along. If the claim went with the
+edge, a child that keeps `validCppObject`, as a wrapper subclass does, would
+be callable over memory that destructor frees. `invalidate()` is where it
+shows, because the lease release then finds the root invalid, skips the
+extraction, and the stamp never runs.
+
+The two sites that detach for a teardown, `_detachChildren()` and
+`collectInvalidateLocked()`, therefore stamp the claim the child derives onto
+its owned set while the edge still exists. `removeParentLocked()` does not:
+`giveOwnershipBack` is false in the first site but true in the second and in
+a reparent, so it cannot tell them apart. That also keeps B6-1 safe, since a
+reparent has no way to keep the claim.
+
+Bit `ClaimThroughTeardown`; cleared, the claim goes with the edge.
+
+### The deallocator claims the owned set
+
+Dropping the last reference to a Python-owned parent runs its C++ destructor
+from the deallocator, children and all. The binding performs that destruction
+but never asked about leases, so a call in flight on a child lost its object.
+
+In one transaction before `deallocData()` the deallocator now stamps the
+claim on the whole owned set and looks for a lease open in it; a derived
+claim would not do, since the teardown removes the edges it derives from.
+With none open the stamp alone refuses the lease a wrapper-subclass child
+could still take between the teardown and the destructor. With one, the
+destructor goes to the last of them, and since the stamp refuses new ones
+those are the only leases that can hold it back. The wrapper is at refcount
+zero and freed a moment later, so it cannot be pinned the way a waiting root
+is: the record carries what the deallocator would have used, the destructors,
+the tombstones and a reference per leased member. The release runs it after
+the waiting roots, on the main thread's queue where the type asks for that.
+
+Bit `DeallocClaim`; cleared, the deallocator destroys the owned set without
+looking, and `dealloc-waits-for-lease` sees `destroyed` fire under a lease.
+
+### The deallocator's stamp is taken back
+
+Unlike the stamp of `Shiboken.delete()`, this one is taken back where it was
+wrong. The binding graph says what the destructor should take, not what it
+does: `QQmlComponent.create()` makes the component the parent of the object
+through the return value heuristic, and the component's destructor leaves
+that object alone. A member with a C++ wrapper can outlive the destructor
+with a valid wrapper, so the claim pins the ones it stamps.
+
+Once the destructor is past - inline, after the last lease, or behind it in
+the main thread's queue - a member that still has its pointer gets its leases
+back; one the destructor deleted went through `Object::destroy()` and has
+none. Until then a survivor is refused like a dying member, and a lease open
+on it holds the destructor back.
+
+There is no bit for the take-back; `dealloc-claim-survivor` guards it.
+
+### Teardown claims what Python owns
+
+Deleting the application walks every wrapper and destroys the QObjects
+Python owns. That walk took a call lease on each and then tested ownership
+and validity without the lock - but a lease does not refuse a call in
+flight, it joins it. Another thread inside a call on the same object then
+had the destructor run under it.
+
+Under free threading the walk asks for the same claim `Shiboken.delete()`
+takes, with the ownership test inside the transaction:
+`callCppDestructorsIfOwned()`. An object nobody is calling is destroyed at
+once; one with a call in flight is claimed, refuses new leases, and its
+destructor runs when the last lease comes back - on that thread, as a
+deferred `Shiboken.delete()` does. An object C++ owns is left alone, as
+before.
+
+There is no bit: the lease was not a measure, it was the defect.
+`teardown-vs-call` guards it.
+
+### A deferred destruction keeps the main thread
+
+A destruction that waits for a lease runs when the last lease comes back, on
+the thread that returns it. `QWidget`, `QWindow` and `QQuickItem` are
+destroyed in the main thread (`delete-in-main-thread`), and the deallocator
+already sends them there; the lease release did not. A `Shiboken.delete()`
+of a widget from the main thread then destroyed it on a worker.
+
+Under free threading a ready root of such a type goes into the same queue the
+deallocator uses, pinned and still claimed, and takes the roots and
+deallocations released after it along, so their order holds. The main
+thread finishes it from a pending call. `deferredDeleteQObject()` used to
+drain the whole queue on its own thread, detached; it now deletes only its
+own object, and an entry that still meets another thread puts itself back.
+A child with an open lease can join the set while the root waits, so the
+set is tested again before the extraction. Finalization drains pending calls
+before the exit handlers run. Any other QObject is still destroyed where the
+lease comes back, as the deallocator destroys it where the last reference
+goes.
+
+There is no bit: the queue is not a trade-off. `deferred-widget-dtor` guards
+it.
+
+### The instance dictionary is published once
+
+A wrapper's `ob_dict` sits at `tp_dictoffset`, so CPython's generic
+attribute code creates and reads it as well. Shiboken's helper created it
+with a plain test and store, and a first access racing a `setattr` could
+overwrite the dict CPython had just published, attribute and all. The
+collector runs `tp_clear` with the world running again, and our map can hand
+the object out in between: `tp_clear` released the dict under whoever read
+it, CPython's own lock-free read included.
+
+Under free threading the helper creates the dict the way CPython does, under
+the object's critical section and published with a release store, and
+nothing replaces it afterwards: `tp_clear` empties it, which breaks the
+cycle, and the dict goes with the wrapper. A borrowed dict therefore lives as
+long as the wrapper its caller holds. An object taken out of the map during
+that window survives with its children, references and dict cleared.
+
+Bit `DictPublishOnce`; cleared, the plain store and release come back.
+`proof-dict-first-access` then loses an attribute set meanwhile, and
+`proof-dict-survives-clear` sees `tp_clear` replace the dict a reader holds.
+
+### The weakref list head is CPython's
+
+The deallocator tested `sbkObj->weakreflist` before calling
+`PyObject_ClearWeakRefs()`. That head is the one piece of a dying object's
+state another thread may still touch: a weakref operation reaches the
+referent's list under CPython's own hashed weakref lock, and the plain load
+races it. What the load sees can also be stale enough to skip the call, and
+with it the synchronized clearing and the callbacks.
+
+The test is gone under free threading. `PyObject_ClearWeakRefs()` makes the
+empty check itself, atomically and under that lock, so the precheck bought
+nothing but the race. The call stays behind `Py_IsInitialized()`, which is
+about static destruction and not about weakrefs.
+
+There is no bit: the precheck was an optimization, not a measure, and taking
+it back is the race itself. `weakrefs` is the guard that parks a thread
+between the last reference and the clearing.
+
+### Who may read parentInfo
+
+`setParentLocked()` publishes a freshly allocated `ParentInfo` with a plain
+store under the state lock, and several readers used the field without it.
+`SbkObject_tp_clear()`, `_destroyParentInfo()` and `deallocData()` tested it
+before calling a helper; `destroy()` read it under the lock and acted on the
+answer after. A clear runs with the world restarted, so a native callback can
+install a first parent under it - the load races the store, and a null read
+skips a child that is attached by the time the detaching would have happened.
+
+Under free threading the prechecks are gone and the helper is called
+unconditionally. Every helper below reads the field inside a transaction and
+does nothing when it is null: `_detachChildren()` and `detachFirstChild()`
+break on it, `removeParentLocked()` returns. The diagnostics, `Object::info()`
+behind `shiboken6.dump()` and `_debugFormat()` behind `debugSbkObject`, walk
+the children and the referred objects under the lock, so neither may be
+called while holding it. `shiboken6.dumpTree()` raises `NotImplementedError`
+instead: it formats each child with the lock released, which is not safe
+against the child set changing under it.
+
+`tp_traverse()` keeps its plain reads, because the collector stops the world
+around them.
+
+There is no bit: the readers were saving a lock acquisition, not trading a
+guarantee. No failpoint test carries this - the defect is a data race with no
+divergent outcome to observe, so TSan is what shows it.
+
 ### The class hierarchy publishes snapshots
 
 `addClassInheritance()` mutated the graph under no lock while
@@ -886,8 +1085,8 @@ set, and a scenario on its own can stay clean hundreds of times.
 Repetition is a poor way to reach a window of a few instructions. A failpoint
 is a named place where a test stops one thread, so the second one arrives in
 the order the test wants, every time - a test that fails on an unfixed
-revision rather than in one run out of fourteen. Twelve of them exist, eleven
-in libshiboken and one in libpyside, either side of the windows that matter:
+revision rather than in one run out of fourteen. They sit either side of the
+windows that matter, for example:
 before weakrefs are cleared, before the C++ destructor runs, once the wrapper
 is gone and only that destructor is left, once the destructor is past and the
 tombstone is still standing, before a parent's destructor deletes the children
@@ -895,8 +1094,8 @@ it has just handed back, after a lease is taken and before it is handed back,
 before `destroy()` detaches `cptr` and again where `destroy()` is past but
 the memory is not, between the check and the write in `setCppPointer()`,
 inside a traversal of the class-inheritance graph with one iterator alive,
-and between the lookup that misses an instance meta object and the commit
-that publishes one.
+between the lookup that misses an instance meta object and the commit that
+publishes one, and before `setParent()` publishes a new edge.
 `Shiboken.failpointNames()` lists what a build has; a release build has none
 and the tests skip.
 

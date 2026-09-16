@@ -422,6 +422,13 @@ LIBSHIBOKEN_API bool wasCreatedByPython(SbkObject *pyObj);
  */
 LIBSHIBOKEN_API void callCppDestructors(SbkObject *pyObj);
 
+#ifdef Py_GIL_DISABLED
+/// callCppDestructors() for an object Python owns, with the ownership check
+/// in the same transaction as the claim; for application teardown.
+/// See "Teardown claims what Python owns" in the free-threading notes.
+LIBSHIBOKEN_API void callCppDestructorsIfOwned(SbkObject *pyObj);
+#endif
+
 /**
  *  Return true if the Python is responsible for deleting the underlying C++ object.
  */
