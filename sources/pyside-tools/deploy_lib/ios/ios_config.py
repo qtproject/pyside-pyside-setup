@@ -114,6 +114,15 @@ class IOSConfig(Config):
         super().__init__(config_file=config_file, source_file=source_file, dry_run=dry_run,
                          existing_config_file=existing_config_file, name=name)
 
+        # A relative "input_file" in the spec is relative to the spec, but Config
+        # resolves it against the current working directory, so running with only -c
+        # from elsewhere points at a file that does not exist. Caught here because
+        # otherwise it surfaces much later as a failing copy phase in Xcode.
+        if not self.source_file.is_file():
+            raise RuntimeError(f"[DEPLOY] Entrypoint {self.source_file} does not exist. "
+                               "Run pyside6-ios-deploy from the project directory, or pass "
+                               "the entrypoint explicitly.")
+
         if ios_data.wheel_pyside:
             self.wheel_pyside = ios_data.wheel_pyside
         else:
