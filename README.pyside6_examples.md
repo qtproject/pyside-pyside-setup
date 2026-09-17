@@ -12,11 +12,12 @@ design process. We welcome any contribution conforming to the
 This is a wheel containing the [PySide6](https://pypi.org/project/PySide6)
 examples, from all the modules.
 
-Because some examples exercise Qt WebEngine, this wheel depends on
+Because some examples exercise Qt WebEngine and Qt Pdf, this wheel depends on
 [PySide6_Essentials](https://pypi.org/project/PySide6_Essentials),
 [PySide6_Addons](https://pypi.org/project/PySide6_Addons), and
-[PySide6_WebEngine](https://pypi.org/project/PySide6_WebEngine), and installing
-it will pull in all three.
+[PySide6_WebEngine](https://pypi.org/project/PySide6_WebEngine), and
+[PySide6_Pdf](https://pypi.org/project/PySide6_Pdf), and installing
+it will pull in all four.
 
 ### Documentation and Bugs
 

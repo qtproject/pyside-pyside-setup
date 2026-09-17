@@ -1,4 +1,4 @@
-# PySide6 Addons
+# PySide6 Pdf
 
 PySide6 is the official Python module from the
 [Qt for Python project](https://wiki.qt.io/Qt_for_Python),
@@ -12,48 +12,8 @@ design process. We welcome any contribution conforming to the
 This is a complementary wheel for [PySide6](https://pypi.org/project/PySide6),
 it includes the following Qt modules:
 
-* Qt3DAnimation
-* Qt3DCore
-* Qt3DExtras
-* Qt3DInput
-* Qt3DLogic
-* Qt3DRender
-* QtAxContainer
-* QtBluetooth
-* QtCanvasPainter
-* QtCharts
-* QtDataVisualization
-* QtGraphs
-* QtGraphsWidgets
-* QtMultimedia
-* QtMultimediaWidgets
-* QtNetworkAuth
-* QtNfc
-* QtPositioning
-* QtQuick3D
-* QtRemoteObjects
-* QtScxml
-* QtSensors
-* QtSerialPort
-* QtSerialBus
-* QtSpatialAudio
-* QtStateMachine
-* QtTextToSpeech
-* QtVirtualKeyboard
-* QtWebChannel
-* QtWebSockets
-* QtHttpServer
-* QtLocation
-* QtAsyncio
-* QtWebView
-
-On Linux, `QtWebView` has no native backend and relies on Qt WebEngine to
-render web content. Install the optional `webengine` extra to pull in
-[PySide6_WebEngine](https://pypi.org/project/PySide6-WebEngine) alongside it:
-
-```
-pip install PySide6-Addons[webengine]
-```
+* QtPdf
+* QtPdfWidgets
 
 ### Documentation and Bugs
 

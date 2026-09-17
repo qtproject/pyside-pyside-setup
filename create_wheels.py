@@ -19,7 +19,8 @@ from build_scripts.wheel_files import (ModuleData,  # type: ignore
                                        set_pyside_package_path,
                                        wheel_files_pyside_addons,
                                        wheel_files_pyside_essentials,
-                                       wheel_files_pyside_webengine)
+                                       wheel_files_pyside_webengine,
+                                       wheel_files_pyside_pdf)
 from build_scripts.log import log
 from build_scripts.utils import available_pyside_tools
 
@@ -32,8 +33,10 @@ PYSIDE_DESCRIPTION = "Python bindings for the Qt cross-platform application and 
 # dependencies, add for completeness.
 WHEEL_DEPENDENCIES: dict[str, list[str]] = {
     "PySide6": ["PySide6_Essentials", "PySide6_Addons"],
-    "PySide6_Examples": ["PySide6_Essentials", "PySide6_Addons", "PySide6_WebEngine"],
+    "PySide6_Examples": ["PySide6_Essentials", "PySide6_Addons", "PySide6_WebEngine",
+                         "PySide6_Pdf"],
     "PySide6_WebEngine": ["PySide6_Addons"],
+    "PySide6_Pdf": ["PySide6_Essentials"],
     "PySide6_Addons": ["PySide6_Essentials"],
     "PySide6_Essentials": ["shiboken6"],
     "shiboken6": [],
@@ -260,6 +263,8 @@ def generate_setup_py(artifacts: Path, setup: SetupData,
         fext = "PySide6/Qt3DCore"
     elif _name == "PySide6_WebEngine":
         fext = "PySide6/WebEngineCore"
+    elif _name == "PySide6_Pdf":
+        fext = "PySide6/QtPdf"
     else:
         fext = "Shiboken"
 
@@ -267,7 +272,7 @@ def generate_setup_py(artifacts: Path, setup: SetupData,
     # we force the name to be PySide6 for the package_name,
     # so we can take the files from that packaged-directory
     if setup.name in ("PySide6_Essentials", "PySide6_Addons",
-                      "PySide6_Examples", "PySide6_WebEngine"):
+                      "PySide6_Examples", "PySide6_WebEngine", "PySide6_Pdf"):
         _name = "PySide6"
 
     with open(artifacts / "setup.py.base", encoding="utf-8") as f:
@@ -393,6 +398,20 @@ def wheel_pyside6_webengine(package_path: Path) -> tuple[SetupData, list[ModuleD
     )
 
     data = wheel_files_pyside_webengine()
+
+    return setup, data
+
+
+def wheel_pyside6_pdf(package_path: Path) -> tuple[SetupData, list[ModuleData]]:
+    setup = SetupData(
+        name="PySide6_Pdf",
+        version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
+        description=f"{PYSIDE_DESCRIPTION} (Pdf)",
+        readme="README.pyside6_pdf.md",
+        console_scripts=[],
+    )
+
+    data = wheel_files_pyside_pdf()
 
     return setup, data
 
@@ -549,6 +568,7 @@ if __name__ == "__main__":
         "PySide6_Essentials": wheel_pyside6_essentials,
         "PySide6_Addons": wheel_pyside6_addons,
         "PySide6_WebEngine": wheel_pyside6_webengine,
+        "PySide6_Pdf": wheel_pyside6_pdf,
         "PySide6": wheel_pyside6,
     }
     if not options.no_examples:

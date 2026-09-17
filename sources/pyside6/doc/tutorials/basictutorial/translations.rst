@@ -228,6 +228,6 @@ The example can then be run in German:
 
 .. code-block:: bash
 
-    LANG=de python main.py
+    LANG=de_DE.UTF-8 python main.py
 
 .. _GNU gettext: https://docs.python.org/3/library/gettext.html

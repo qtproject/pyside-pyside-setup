@@ -20,6 +20,7 @@ ${QtNetwork_GEN_DIR}/qhostaddress_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhostinfo_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhstspolicy_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttp1configuration_wrapper.cpp
+${QtNetwork_GEN_DIR}/qhttpheaderrangeset_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttpheaders_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttpmultipart_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttppart_wrapper.cpp

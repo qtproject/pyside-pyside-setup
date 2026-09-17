@@ -1,11 +1,10 @@
 # Copyright (C) 2026 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
-# Qt-Security score:critical reason:handling-untrusted-data
+# Qt-Security score:significant reason:build-tool
 
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from zipfile import ZipFile
 
 
 @dataclass
@@ -39,19 +38,3 @@ def get_xcframework_python_version(xcframework_path: Path) -> str | None:
         if match and entry.is_dir():
             return match.group(1)
     return None
-
-
-def safe_extractall(archive: ZipFile, target_path: Path) -> None:
-    """
-    Extract all members of a zip archive into target_path, checking that each entry
-    resolves inside target_path to prevent path traversal attacks.
-    """
-    resolved_target = target_path.resolve()
-    for member in archive.infolist():
-        member_path = (target_path / member.filename).resolve()
-        if not member_path.is_relative_to(resolved_target):
-            raise RuntimeError(
-                f"[DEPLOY] Refusing to extract '{member.filename}': "
-                f"path resolves outside the extraction directory"
-            )
-        archive.extract(member, target_path)
