@@ -166,6 +166,14 @@ Style {
         }
     }
 
+    delayButton {
+        padding: 0
+        indicator {
+            color: "transparent"
+            border.width: 0
+        }
+    }
+
     pane {
         padding: 20
         background.delegate: null
@@ -203,6 +211,18 @@ Style {
                 border.width: 1.5
                 image.color: myTheme.accentForeground.normal
                 color: myTheme.accentBackground.normal
+            }
+        }
+    }
+
+    dial {
+        indicator {
+            width: 184
+            height: 184
+            radius: 255
+            foreground {
+                width: 8
+                height: 8
             }
         }
     }
