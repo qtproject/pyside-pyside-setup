@@ -209,8 +209,6 @@ def wheel_files_pyside_addons() -> list[ModuleData]:
         module_QtMultimediaWidgets(),
         module_QtNetworkAuth(),
         module_QtNfc(),
-        module_QtPdf(),
-        module_QtPdfWidgets(),
         module_QtPositioning(),
         module_QtQuick3D(),
         module_QtRemoteObjects(),
@@ -241,6 +239,15 @@ def wheel_files_pyside_webengine() -> list[ModuleData]:
         module_QtWebEngineCore(),
         module_QtWebEngineQuick(),
         module_QtWebEngineWidgets(),
+    ]
+    return files
+
+
+# PySide Pdf wheel
+def wheel_files_pyside_pdf() -> list[ModuleData]:
+    files = [
+        module_QtPdf(),
+        module_QtPdfWidgets(),
     ]
     return files
 
