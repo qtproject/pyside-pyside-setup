@@ -13,7 +13,7 @@ from typing import Any, Callable, TypeVar
 
 import asyncio
 import collections.abc
-import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 import contextvars
 import enum
 import os
@@ -210,7 +210,7 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
 
         # Starting with Python 3.11, this must be an instance of
         # ThreadPoolExecutor.
-        self._default_executor = concurrent.futures.ThreadPoolExecutor()
+        self._default_executor = ThreadPoolExecutor()
 
         # The exception handler, if set with set_exception_handler(). The
         # exception handler is currently called in two places: One, if an
@@ -576,7 +576,7 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
 
     # Executing code in thread or process pools
 
-    def run_in_executor(self, executor: concurrent.futures.ThreadPoolExecutor | None,
+    def run_in_executor(self, executor: ThreadPoolExecutor | None,
                         func: Callable[[Unpack[_Ts]], _T],
                         *args: Unpack[_Ts]) -> asyncio.Future[_T]:
         if self.is_closed():
@@ -594,8 +594,8 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
         return asyncio.futures.wrap_future(executor.submit(wrapper.do), loop=self)
 
     def set_default_executor(self,
-                             executor: concurrent.futures.ThreadPoolExecutor | None) -> None:
-        if not isinstance(executor, concurrent.futures.ThreadPoolExecutor):
+                             executor: ThreadPoolExecutor | None) -> None:
+        if not isinstance(executor, ThreadPoolExecutor):
             raise TypeError("The executor must be a ThreadPoolExecutor")
         self._default_executor = executor
 
