@@ -132,7 +132,10 @@ def main(main_file: Path = None, name: str = None, wheel_pyside: Path = None,
             pbxproj_path.write_text(pbxproj.generate(config, qml_plugins, qt_deps))
             logging.info(f"[DEPLOY] Wrote {pbxproj_path}")
 
-        logging.info(f"[DEPLOY] Done. Open with:\n  open {proj_dir}")
+        print(f"[DEPLOY] Xcode project created for {config.target_description} "
+              f"  {proj_dir}\n\n"
+              f"Open it with:\n"
+              f"  open {proj_dir}")
     except Exception:
         print(f"Exception occurred: {traceback.format_exc()}")
 

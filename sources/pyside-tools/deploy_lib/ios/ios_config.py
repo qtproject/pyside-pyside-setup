@@ -4,7 +4,7 @@
 
 import logging
 import re
-import subprocess
+from functools import cached_property
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -16,12 +16,13 @@ from .python_xcframework import download_python_support
 
 def _unpack_wheel(wheel_path: Path, dest_parent: Path, package_name: str) -> Path:
     """
-    Unpack a wheel's <package_name>/ directory into dest_parent, caching
-    on dest_parent/<package_name> already existing (wheels can be large and
-    generate() is meant to be re-run often).
+    Unpack a wheel's <package_name>/ directory into dest_parent. An existing
+    directory is reused as is; delete dest_parent to force a fresh unpack.
     """
     dest = dest_parent / package_name
     if dest.is_dir():
+        logging.info(f"[DEPLOY] Reusing the previously unpacked {package_name} in {dest}. "
+                     f"Delete {dest_parent} to unpack the wheels again.")
         return dest
     dest_parent.mkdir(parents=True, exist_ok=True)
     with ZipFile(wheel_path) as archive:
@@ -48,50 +49,6 @@ def _qt_deployment_target(qt_ios: Path) -> str | None:
         r'set\(CMAKE_OSX_DEPLOYMENT_TARGET\s+"([\d.]+)"', toolchain.read_text()
     )
     return m.group(1) if m else None
-
-
-# Apple's Mach-O LC_BUILD_VERSION platform codes
-_PLATFORM_IOS = 2   # device
-_PLATFORM_IOS_SIMULATOR = 7  # simulator
-_PLATFORM_NAMES = {_PLATFORM_IOS: "device", _PLATFORM_IOS_SIMULATOR: "simulator"}
-
-
-def _slice_platform(binary: Path, arch: str) -> int | None:
-    """
-    The LC_BUILD_VERSION platform code for one arch slice of a Mach-O
-    binary or static archive (each member .o carries its own copy; they're
-    all expected to agree, so the first match is used). Returns None if
-    that arch slice doesn't exist in the binary at all.
-    """
-    try:
-        output = subprocess.run(
-            ["otool", "-arch", arch, "-l", str(binary)],
-            capture_output=True, text=True, check=True,
-        ).stdout
-    except subprocess.CalledProcessError:
-        return None
-    except OSError as e:
-        raise ValueError(f"Failed to inspect {binary}: {e}") from e
-
-    m = re.search(r"LC_BUILD_VERSION\n\s+cmdsize \d+\n\s+platform (\d+)", output)
-    return int(m.group(1)) if m else None
-
-
-def _check_binary_matches_target(binary: Path, arch: str, simulator: bool, what: str) -> None:
-    platform = _slice_platform(binary, arch)
-    target = "simulator" if simulator else "device"
-    if platform is None:
-        raise ValueError(
-            f"{binary} does not contain an {arch} slice -- {what} doesn't "
-            f"have the architecture needed for the requested {target} target."
-        )
-    expected_platform = _PLATFORM_IOS_SIMULATOR if simulator else _PLATFORM_IOS
-    if platform != expected_platform:
-        actual = _PLATFORM_NAMES.get(platform, f"platform {platform}")
-        raise ValueError(
-            f"{binary}'s {arch} slice was built for {actual}, not {target} -- "
-            f"{what} doesn't match the requested target."
-        )
 
 
 def _default_bundle_id(name: str) -> str:
@@ -154,17 +111,23 @@ class IOSConfig(Config):
         # fixes them (eg: '...-ios_arm64_simulator.whl'), same as Android's
         # AndroidConfig._find_arch() deriving arch from the wheel name alone.
         wheel_target = get_wheel_ios_target(self.wheel_pyside)
-        # TODO: check if there is a mismatch between shiboken and pyside
         if not wheel_target:
             raise RuntimeError(
                 f"[DEPLOY] Unable to determine target architecture from "
                 f"{self.wheel_pyside.name} -- expected a platform tag like "
                 f"'ios_arm64' or 'ios_arm64_simulator'"
             )
+        if get_wheel_ios_target(self.wheel_shiboken) != wheel_target:
+            raise RuntimeError(
+                f"[DEPLOY] {self.wheel_shiboken.name} does not target the same iOS "
+                f"platform as {self.wheel_pyside.name} -- both wheels must be built "
+                f"for the same arch and device/simulator target"
+            )
         self.arch, self.simulator = wheel_target
 
-        _check_binary_matches_target(self.qt_ios / "lib" / "QtCore.framework" / "QtCore",
-                                     self.arch, self.simulator, "this PySide6 wheel's bundled Qt")
+        # Device and simulator builds get their own subdirectory, so switching
+        # between them doesn't overwrite the other's project and unpacked wheels.
+        self._generated_files_path = self._generated_files_path / self.target_tag
 
         modls = self.get_value("qt", "modules")
         if modls:
@@ -263,13 +226,22 @@ class IOSConfig(Config):
             self.set_value("ios", "xcframework_path", str(self._xcframework_path))
 
     @property
+    def target_tag(self) -> str:
+        """The wheels' iOS platform tag, eg: 'ios_arm64', 'ios_arm64_simulator'"""
+        return f"ios_{self.arch}_simulator" if self.simulator else f"ios_{self.arch}"
+
+    @property
+    def target_description(self) -> str:
+        return f"{self.arch} {'simulator' if self.simulator else 'device'}"
+
+    @cached_property
     def pyside6_dir(self) -> Path:
         """PySide6/ package directory, unpacked from wheel_pyside. Both the
         Qt module archives and libpyside6.a/libpyside6qml.a sit directly
         here, along with the full embedded Qt-for-iOS kit under Qt/."""
         return _unpack_wheel(self.wheel_pyside, self.generated_files_path / "_wheels", "PySide6")
 
-    @property
+    @cached_property
     def shiboken_dir(self) -> Path:
         """shiboken6/ package directory, unpacked from wheel_shiboken.
         libshiboken6.a and Shiboken.a both sit directly here."""
