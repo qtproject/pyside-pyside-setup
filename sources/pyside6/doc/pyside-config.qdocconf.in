@@ -1,6 +1,7 @@
 buildversion              = @PYSIDE_QT_VERSION@
 navigation.homepage       = Qt for Python
 
+macro.nullopt           = "\\c{None}"
 macro.nullptr           = "\\c{None}"
 
 outputdir                 = @DOC_DATA_DIR@
