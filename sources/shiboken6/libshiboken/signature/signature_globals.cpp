@@ -24,7 +24,6 @@ using namespace Shiboken;
 
 extern "C" {
 
-// AXIVION DISABLE Style Qt-Generic-NoIrregularInclude: Required functionality
 static const char *PySide_CompressedSignaturePackage[] = {
 #include "embed/signature_inc.h"
     };
@@ -32,7 +31,6 @@ static const char *PySide_CompressedSignaturePackage[] = {
 static const unsigned char PySide_SignatureLoader[] = {
 #include "embed/signature_bootstrap_inc.h"
     };
-// AXIVION ENABLE Style Qt-Generic-NoIrregularInclude
 
 static void init_phase_1(safe_globals_struc *p)
 {
