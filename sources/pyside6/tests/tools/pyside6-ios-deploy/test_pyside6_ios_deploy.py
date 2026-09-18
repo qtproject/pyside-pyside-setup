@@ -186,10 +186,6 @@ class DeployTestBase(unittest.TestCase):
 
         cls.deploy_lib = importlib.import_module("deploy_lib")
         cls.ios_deploy = importlib.import_module("ios_deploy")
-        sys.modules["ios_deploy"] = cls.ios_deploy
-
-        # required for comparing long strings
-        cls.maxDiff = None
 
         # print no outputs to stdout
         sys.stdout = mock.MagicMock()
@@ -208,6 +204,7 @@ class DeployTestBase(unittest.TestCase):
     def tearDown(self) -> None:
         super().tearDown()
         os.chdir(self.current_dir)
+        self.config_file.unlink(missing_ok=True)
         shutil.rmtree(self.temp_example / "deployment", ignore_errors=True)
 
     @classmethod
@@ -237,9 +234,6 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
     @patch("deploy_lib.ios.pbxproj.generate")
     def test_config(self, mock_pbxproj, mock_info_plist, mock_main_mm, mock_resolve_deps,
                     mock_enabled_plugins, mock_resolve_qml):
-        mock_resolve_qml.return_value = []
-        mock_enabled_plugins.return_value = []
-        mock_resolve_deps.return_value = mock.MagicMock()
         mock_main_mm.return_value = "// generated main.mm"
         mock_info_plist.return_value = b"<plist/>"
         mock_pbxproj.return_value = "// generated project.pbxproj"
@@ -276,8 +270,6 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
         pbxproj_path = out_dir / "iosApp.xcodeproj" / "project.pbxproj"
         self.assertEqual(pbxproj_path.read_text(), "// generated project.pbxproj")
 
-        self.config_file.unlink()
-
     def test_downloads_xcframework_when_not_provided(self):
         with patch("deploy_lib.ios.ios_config.download_python_support") as mock_download:
             mock_download.return_value = self.xcframework_path
@@ -289,7 +281,6 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         self.assertEqual(config_obj.get_value("ios", "xcframework_path"),
                          str(self.xcframework_path.resolve()))
-        self.config_file.unlink()
 
     def test_missing_wheel_shiboken(self):
         with patch("builtins.print") as mock_print:
@@ -298,7 +289,6 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
                                  xcframework_path=self.xcframework_path, init=True)
         printed = " ".join(str(call) for call in mock_print.call_args_list)
         self.assertIn("Unable to find shiboken6 iOS wheel", printed)
-        self.config_file.unlink()
 
     def test_missing_wheel_pyside(self):
         with patch("builtins.print") as mock_print:
@@ -307,7 +297,6 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
                                  xcframework_path=self.xcframework_path, init=True)
         printed = " ".join(str(call) for call in mock_print.call_args_list)
         self.assertIn("Unable to find PySide6 iOS wheel", printed)
-        self.config_file.unlink()
 
     def test_wheels_target_different_platforms(self):
         simulator_wheel = (Path(self.temp_dir)
@@ -319,13 +308,10 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
                                  xcframework_path=self.xcframework_path, init=True)
         printed = " ".join(str(call) for call in mock_print.call_args_list)
         self.assertIn("does not target the same iOS platform", printed)
-        self.config_file.unlink()
 
     def test_no_entrypoint_file(self):
         with self.assertRaises(RuntimeError) as context:
-            self.ios_deploy.main(name="iosApp", wheel_pyside=self.pyside_wheel,
-                                 wheel_shiboken=self.shiboken_wheel,
-                                 xcframework_path=self.xcframework_path, init=True)
+            self.ios_deploy.main(name="iosApp")
 
         self.assertIn("No Python entrypoint file found", str(context.exception))
 
@@ -353,9 +339,6 @@ class TestPySide6IosDeployQml(DeployTestBase):
     @patch("deploy_lib.ios.pbxproj.generate")
     def test_config(self, mock_pbxproj, mock_info_plist, mock_main_mm, mock_resolve_deps,
                     mock_enabled_plugins, mock_resolve_qml, mock_qmlimportscanner):
-        mock_resolve_qml.return_value = []
-        mock_enabled_plugins.return_value = []
-        mock_resolve_deps.return_value = mock.MagicMock()
         mock_main_mm.return_value = "// generated main.mm"
         mock_info_plist.return_value = b"<plist/>"
         mock_pbxproj.return_value = "// generated project.pbxproj"
@@ -391,8 +374,6 @@ class TestPySide6IosDeployQml(DeployTestBase):
         self.assertEqual((out_dir / "Info.plist").read_bytes(), b"<plist/>")
         pbxproj_path = out_dir / "iosApp.xcodeproj" / "project.pbxproj"
         self.assertEqual(pbxproj_path.read_text(), "// generated project.pbxproj")
-
-        self.config_file.unlink()
 
 
 if __name__ == "__main__":
