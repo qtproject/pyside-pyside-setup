@@ -21,7 +21,6 @@ extern "C"
 using ToCppConversion = std::pair<IsConvertibleToCppFunc, PythonToCppFunc>;
 using ToCppConversionVector = std::vector<ToCppConversion>;
 
-// AXIVION DISABLE Style Qt-Generic-InitializeAllFieldsInConstructor: C-struct
 /**
  *  \internal
  *  Private structure of SbkConverter.
@@ -75,7 +74,6 @@ struct SbkConverter
      */
     ToCppConversionVector toCppConversions;
 };
-// AXIVION ENABLE Style Qt-Generic-InitializeAllFieldsInConstructor
 
 } // extern "C"
 

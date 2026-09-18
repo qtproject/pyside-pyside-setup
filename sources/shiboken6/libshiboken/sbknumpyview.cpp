@@ -5,7 +5,6 @@
 // included by sbknumpy.cpp to keep the numpy code in one TU
 
 # pragma once // Silence Axivion
-// AXIVION DISABLE Style Qt-Generic-NoFunctionDefinitionInHeader: Not included in any header
 
 #include "helper.h"
 #include <iostream>
@@ -267,6 +266,3 @@ std::ostream &operator<<(std::ostream &str, const View &v)
 }
 
 } //namespace Shiboken::Numpy
-
-// AXIVION ENABLE Style Qt-Generic-NoFunctionDefinitionInHeader
-// AXIVION ENABLE Style Qt-Generic-MissingIncludeGuard
