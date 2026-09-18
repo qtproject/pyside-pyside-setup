@@ -442,6 +442,9 @@ LIBSHIBOKEN_API void releaseOwnership(PyObject *pyObj);
  */
 LIBSHIBOKEN_API void releaseOwnership(SbkObject *sbkObj);
 
+/// Get the C++ pointer from a Python object.
+LIBSHIBOKEN_API void *cppPointer(SbkObject *pyObj);
+
 /**
  *   Get the C++ pointer of type \p desiredType from a Python object.
  */

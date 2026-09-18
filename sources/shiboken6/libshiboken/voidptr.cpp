@@ -89,7 +89,7 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
     // Shiboken::Object wrapper.
     if (Shiboken::Object::checkType(addressObject)) {
         auto *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
-        sbkSelf->cptr = sbkOther->d->cptr[0];
+        sbkSelf->cptr = Shiboken::Object::cppPointer(sbkOther);
         sbkSelf->size = size;
         sbkSelf->isWritable = isWritable > 0;
         return 0;
@@ -354,7 +354,7 @@ static PythonToCppFunc VoidPtrToCppIsConvertible(PyObject *pyIn)
 static void SbkObjectToCpp(PyObject *pyIn, void *cppOut)
 {
     auto *sbkIn = reinterpret_cast<SbkObject *>(pyIn);
-    *reinterpret_cast<void **>(cppOut) = sbkIn->d->cptr[0];
+    *reinterpret_cast<void **>(cppOut) = Shiboken::Object::cppPointer(sbkIn);
 }
 
 static PythonToCppFunc SbkObjectToCppIsConvertible(PyObject *pyIn)

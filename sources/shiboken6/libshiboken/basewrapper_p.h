@@ -127,6 +127,12 @@ struct SbkObjectTypePrivate
 
 namespace Shiboken
 {
+inline void *cppPointer(SbkObjectPrivate *d)
+{
+    assert(d->cptr != nullptr);
+    return d->cptr[0];
+}
+
 unsigned getNumberOfCppBaseClasses(PyTypeObject *baseType);
 
 std::vector<PyTypeObject *> getCppBaseClasses(PyTypeObject *baseType);

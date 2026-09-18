@@ -455,7 +455,7 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
                  for (const auto &e : entries)
                      bindingManager.addToDeletionInMainThread(e);
             } else {
-                Shiboken::DestructorEntry e{sotp->cpp_dtor, sbkObj->d->cptr[0]};
+                Shiboken::DestructorEntry e{sotp->cpp_dtor, Shiboken::cppPointer(sbkObj->d)};
                 bindingManager.addToDeletionInMainThread(e);
             }
             Py_AddPendingCall(mainThreadDeletionHandler, nullptr);
@@ -472,7 +472,7 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
             Shiboken::Object::deallocData(sbkObj, true);
             callDestructor(entries);
         } else {
-            void *cptr = sbkObj->d->cptr[0];
+            void *cptr = Shiboken::cppPointer(sbkObj->d);
             Shiboken::Object::deallocData(sbkObj, true);
 
             Shiboken::ThreadStateSaver threadSaver;
@@ -1354,7 +1354,7 @@ void callCppDestructors(SbkObject *pyObj)
     } else {
         Shiboken::ThreadStateSaver threadSaver;
         threadSaver.save();
-        sotp->cpp_dtor(pyObj->d->cptr[0]);
+        sotp->cpp_dtor(Shiboken::cppPointer(priv));
     }
 
     if (priv->validCppObject && priv->containsCppWrapper) {
@@ -1505,6 +1505,13 @@ void makeValid(SbkObject *self)
     }
 }
 
+void *cppPointer(SbkObject *pyObj)
+{
+    if (pyObj == nullptr || pyObj->d == nullptr)
+        return nullptr;
+    return Shiboken::cppPointer(pyObj->d);
+}
+
 void *cppPointer(SbkObject *pyObj, PyTypeObject *desiredType)
 {
     PyTypeObject *pyType = Shiboken::pyType(pyObj);
@@ -1519,8 +1526,10 @@ void *cppPointer(SbkObject *pyObj, PyTypeObject *desiredType)
 
 std::vector<void *> cppPointers(SbkObject *pyObj)
 {
+    if (pyObj == nullptr || pyObj->d == nullptr || pyObj->d->cptr == nullptr)
+        return {};
     const unsigned n = getNumberOfCppBaseClasses(Shiboken::pyType(pyObj));
-    std::vector<void *> ptrs(n);
+    std::vector<void *> ptrs(n, nullptr);
     for (unsigned i = 0; i < n; ++i)
         ptrs[i] = pyObj->d->cptr[i];
     return ptrs;
@@ -1617,7 +1626,8 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
     if (reinterpret_cast<const void *>(Shiboken::pyType(wrapper)) == reinterpret_cast<const void *>(instanceType))
         return wrapper;
 
-    if (!(wrapper->d && wrapper->d->cptr))
+    void *wrapperCptr = Shiboken::Object::cppPointer(wrapper);
+    if (wrapperCptr == nullptr)
         return nullptr;
 
     ParentInfo *pInfo = wrapper->d->parentInfo;
@@ -1627,9 +1637,8 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
     ChildrenList &children = pInfo->children;
 
     for (SbkObject *child : children) {
-        if (!(child->d && child->d->cptr))
-            continue;
-        if (child->d->cptr[0] == wrapper->d->cptr[0]) {
+        void *childCPtr = Shiboken::Object::cppPointer(child);
+        if (childCPtr != nullptr && childCPtr == wrapperCptr) {
             auto *childType = Shiboken::pyType(child);
             return reinterpret_cast<const void *>(childType) == reinterpret_cast<const void *>(instanceType)
                 ? child : findColocatedChild(child, instanceType);

@@ -32,10 +32,12 @@ void _debugFormat(std::ostream &s, SbkObject *self)
         s  << "[Invalid]";
         return;
     }
-    if (d->cptr) {
+    const auto cptrs = cppPointers(self);
+    if (!cptrs.empty() && cptrs[0]) {
         const std::vector<PyTypeObject *> bases = getBases(self);
+        assert(cptrs.size() == bases.size());
         for (size_t i = 0, size = bases.size(); i < size; ++i)
-            s << ", C++: " << bases[i]->tp_name << '/' << self->d->cptr[i];
+            s << ", C++: " << bases[i]->tp_name << '/' << cptrs[i];
     } else {
          s << " [Deleted]";
     }
@@ -63,12 +65,14 @@ void _debugFormat(std::ostream &s, SbkObject *self)
 static void info_format_preamble(std::ostream &s, SbkObject *self, const std::string &indent)
 {
     s << indent << "id................ " << self << '\n';
-    if (self->d && self->d->cptr) {
+    const auto cptrs = cppPointers(self);
+    if (!cptrs.empty() && cptrs[0] != nullptr) {
         const std::vector<PyTypeObject *> bases = getBases(self);
 
+        assert(cptrs.size() == bases.size());
         s << indent << "C++ address....... ";
         for (size_t i = 0, size = bases.size(); i < size; ++i)
-            s << bases[i]->tp_name << '/' << self->d->cptr[i] << ' ';
+            s << bases[i]->tp_name << '/' << cptrs[i] << ' ';
         s << "\n";
     }
     else {

@@ -147,7 +147,7 @@ struct SourceDefs
                 auto metaProperty = metaObject->property(callData->propertyIndex);
                 if (metaProperty.hasNotifySignal()) {
                     // We know our custom types don't have multiple cpp objects
-                    void *cptr = reinterpret_cast<SbkObject *>(self)->d->cptr[0];
+                    void *cptr = Shiboken::Object::cppPointer(reinterpret_cast<SbkObject *>(self));
                     auto *qObject = reinterpret_cast<QObject *>(cptr);
                     void *_args[] = {nullptr, variant.data()};
                     QMetaObject::activate(qObject, metaProperty.notifySignalIndex(), _args);
