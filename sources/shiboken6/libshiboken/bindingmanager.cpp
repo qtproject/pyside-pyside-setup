@@ -327,15 +327,11 @@ void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
 
 void BindingManager::unregisterWrapper(SbkObject *sbkObj)
 {
-    void **cptrs = sbkObj->d->cptr;
-    if (cptrs == nullptr)
-        return;
-    auto *sbkType = Shiboken::pyType(sbkObj);
-    auto *d = PepType_SOTP(sbkType);
-    const unsigned numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(sbkType) : 1u);
+    const auto cptrs = Shiboken::cppPointersSpan(sbkObj);
+    auto *d = PepType_SOTP(Shiboken::pyType(sbkObj));
 
     const int *mi_offsets = d != nullptr ? d->mi_offsets : nullptr;
-    for (unsigned i = 0; i < numBases; ++i) {
+    for (std::size_t i = 0, size = cptrs.size(); i < size; ++i) {
         if (cptrs[i] != nullptr)
             m_d->releaseWrapper(cptrs[i], sbkObj, mi_offsets);
     }

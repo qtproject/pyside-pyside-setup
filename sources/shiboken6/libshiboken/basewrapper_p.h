@@ -11,6 +11,11 @@
 
 #include <unordered_map>
 #include <set>
+#if __cplusplus >= 202002L
+#  include <span>
+#else
+#  include <sbkarrayspan_p.h>
+#endif
 #include <string>
 #include <vector>
 #include <iosfwd>
@@ -55,8 +60,6 @@ struct SbkObjectPrivate
 
     SbkObjectPrivate() noexcept = default;
 
-    /// Pointer to the C++ class.
-    void ** cptr;
     /// True when Python is responsible for freeing the used memory.
     unsigned int hasOwnership : 1;
     /// This is true when the C++ class of the wrapped object has a virtual destructor AND was created by Python.
@@ -68,11 +71,16 @@ struct SbkObjectPrivate
     /// PYSIDE-1470: Marked as true if this is the Q*Application singleton.
     /// This bit allows app deletion from shiboken?.delete() .
     unsigned int isQAppSingleton : 1;
+    /// Mirrored from SbkObjectTypePrivate; True for a Python class which inherits from several
+    /// C++ classes.
+    unsigned int is_multicpp : 1;
+
     /// Information about the object parents and children, may be null.
     Shiboken::ParentInfo *parentInfo;
     /// Manage reference count of objects that are referred to but not owned from.
     Shiboken::RefCountMap *referredObjects;
 
+protected:
     ~SbkObjectPrivate()
     {
         delete parentInfo;
@@ -80,6 +88,31 @@ struct SbkObjectPrivate
         delete referredObjects;
         referredObjects = nullptr;
     }
+};
+
+// Standard wrapped class
+struct SbkObjectPrivate1 : public SbkObjectPrivate
+{
+    LIBSHIBOKEN_DISABLE_COPY_MOVE(SbkObjectPrivate1)
+
+    SbkObjectPrivate1() noexcept = default;
+    ~SbkObjectPrivate1() = default;
+
+    /// Pointer to the C++ class.
+    void *cptr = nullptr;
+};
+
+// Python-created class using multiple wrapped C++ bases
+struct SbkObjectMultiInheritancePrivate : public SbkObjectPrivate
+{
+    LIBSHIBOKEN_DISABLE_COPY_MOVE(SbkObjectMultiInheritancePrivate)
+
+    explicit SbkObjectMultiInheritancePrivate(unsigned count) :
+        cptrs(count, nullptr) {}
+    ~SbkObjectMultiInheritancePrivate() = default;
+
+    /// Pointers to the C++ classes.
+    std::vector<void *> cptrs;
 };
 
 // TODO-CONVERTERS: to be deprecated/removed
@@ -129,9 +162,24 @@ namespace Shiboken
 {
 inline void *cppPointer(SbkObjectPrivate *d)
 {
-    assert(d->cptr != nullptr);
-    return d->cptr[0];
+    return d->is_multicpp ? static_cast<SbkObjectMultiInheritancePrivate *>(d)->cptrs[0]
+                          : static_cast<SbkObjectPrivate1 *>(d)->cptr;
 }
+
+#if __cplusplus >= 202002L
+using CPtrSpan = std::span<void *>;
+#else
+using CPtrSpan = ArraySpan<void *>;
+#endif
+
+/// Utility to return a span of the instance(s) C++ pointers
+CPtrSpan cppPointersSpan(SbkObject *ob);
+
+/// Utility to set the first C++ pointer (unchecked)
+void setCppPointer(SbkObject *ob, void *cptr);
+
+/// Utility to set instance(s) C++ pointers to nullptr
+void clearCppPointers(SbkObject *ob);
 
 unsigned getNumberOfCppBaseClasses(PyTypeObject *baseType);
 

@@ -69,6 +69,7 @@ pep384impl.cpp pep384impl.h pep384impl_p.h
 
 pyobjectholder.h
 sbkarrayconverter.cpp sbkarrayconverter.h sbkarrayconverter_p.h
+sbkarrayspan_p.h
 sbkbindingutils.cpp sbkbindingutils.h
 sbkcontainer.cpp sbkcontainer.h
 sbkconverter.cpp sbkconverter.h sbkconverter_p.h
@@ -188,6 +189,7 @@ install(FILES
         helper.h
         pyobjectholder.h
         sbkarrayconverter.h
+        sbkarrayspan_p.h
         sbkbindingutils.h
         sbkcontainer.h
         sbkconverter.h

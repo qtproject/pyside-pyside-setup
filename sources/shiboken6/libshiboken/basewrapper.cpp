@@ -53,6 +53,20 @@ static BaseWrapperGlobals *baseWrapperGlobals()
     return &result;
 }
 
+static inline void setBaseClassIndexError(PyTypeObject *type, PyTypeObject *desiredType)
+{
+    PyErr_Format(PyExc_RuntimeError,
+                 "libshiboken: \"%s\" is not a base class of \"%s\".",
+                 desiredType->tp_name, type->tp_name);
+}
+
+static inline void setAlreadyInitializedError(PyTypeObject *type, PyTypeObject *desiredType)
+{
+    PyErr_Format(PyExc_RuntimeError,
+                 "libshiboken: You can't initialize an \"%s\" object in class \"%s\" twice!",
+                 desiredType->tp_name, type->tp_name);
+}
+
 namespace Shiboken
 {
 // Walk through the first level of non-user-type Sbk base classes relevant for
@@ -110,8 +124,8 @@ using DestructorEntries = std::vector<DestructorEntry>;
 DestructorEntries getDestructorEntries(SbkObject *o)
 {
     DestructorEntries result;
-    void **cptrs = o->d->cptr;
-    walkThroughBases(Shiboken::pyType(o), [&result, cptrs](PyTypeObject *node) {
+    const auto cptrs = Shiboken::cppPointersSpan(o);
+    walkThroughBases(Shiboken::pyType(o), [&result, &cptrs](PyTypeObject *node) {
         auto *sotp = PepType_SOTP(node);
         auto index = result.size();
         result.push_back(DestructorEntry{sotp->cpp_dtor,
@@ -679,14 +693,18 @@ static PyObject *_setupNew(PyObject *obSelf, PyTypeObject *subtype)
     auto *self = reinterpret_cast<SbkObject *>(obSelf);
 
     Py_INCREF(obSubtype);
-    auto *d = new SbkObjectPrivate;
 
     auto *sotp = PepType_SOTP(sbkSubtype);
     const bool is_multicpp = sotp != nullptr && sotp->is_multicpp;
     const unsigned numBases = is_multicpp ? Shiboken::getNumberOfCppBaseClasses(subtype) : 1U;
+    assert(numBases >= 1);
 
-    d->cptr = new void *[numBases];
-    std::memset(static_cast<void*>(d->cptr), 0, sizeof(void *) * numBases);
+    SbkObjectPrivate *d = nullptr;
+    if (is_multicpp)
+        d = new SbkObjectMultiInheritancePrivate(numBases);
+    else
+        d = new SbkObjectPrivate1;
+
     d->hasOwnership = 1;
     d->containsCppWrapper = 0;
     d->validCppObject = 0;
@@ -694,6 +712,7 @@ static PyObject *_setupNew(PyObject *obSelf, PyTypeObject *subtype)
     d->referredObjects = nullptr;
     d->cppObjectCreated = 0;
     d->isQAppSingleton = 0;
+    d->is_multicpp = is_multicpp;
     self->ob_dict = nullptr;
     self->weakreflist = nullptr;
     self->d = d;
@@ -1086,6 +1105,35 @@ static void traverseSequence(PyObject *pyObj, Function func)
     }
 }
 
+CPtrSpan cppPointersSpan(SbkObject *ob)
+{
+    assert(ob->d != nullptr);
+    if (ob->d->is_multicpp) {
+        auto &cptrs = static_cast<SbkObjectMultiInheritancePrivate *>(ob->d)->cptrs;
+        return CPtrSpan{ cptrs.data(), cptrs.data() + cptrs.size() };
+    }
+    auto *d1 = static_cast<SbkObjectPrivate1 *>(ob->d);
+    return CPtrSpan{ &d1->cptr, &d1->cptr + 1 };
+}
+
+void setCppPointer(SbkObject *ob, void *cptr)
+{
+    if (ob->d->is_multicpp)
+        static_cast<SbkObjectMultiInheritancePrivate *>(ob->d)->cptrs[0] = cptr;
+    else
+        static_cast<SbkObjectPrivate1 *>(ob->d)->cptr = cptr;
+}
+
+void clearCppPointers(SbkObject *ob)
+{
+    if (ob->d->is_multicpp) {
+        auto &cptrs = static_cast<SbkObjectMultiInheritancePrivate *>(ob->d)->cptrs;
+        std::fill(cptrs.begin(), cptrs.end(), nullptr);
+    } else {
+        static_cast<SbkObjectPrivate1 *>(ob->d)->cptr = nullptr;
+    }
+}
+
 template <class Iterator>
 inline void decRefPyObjectList(Iterator i1, Iterator i2)
 {
@@ -1367,8 +1415,7 @@ void callCppDestructors(SbkObject *pyObj)
        invalidate doesn't */
     invalidate(pyObj);
 
-    delete[] priv->cptr;
-    priv->cptr = nullptr;
+    clearCppPointers(pyObj);
     priv->validCppObject = false;
 }
 
@@ -1514,46 +1561,55 @@ void *cppPointer(SbkObject *pyObj)
 
 void *cppPointer(SbkObject *pyObj, PyTypeObject *desiredType)
 {
-    PyTypeObject *pyType = Shiboken::pyType(pyObj);
-    auto *sotp = PepType_SOTP(pyType);
-    unsigned idx = 0;
-    if (sotp->is_multicpp)
-        idx = getTypeIndexOnHierarchy(pyType, desiredType);
-    if (pyObj->d->cptr)
-        return pyObj->d->cptr[idx];
-    return nullptr;
+    if (pyObj == nullptr || pyObj->d == nullptr)
+        return nullptr;
+    if (pyObj->d->is_multicpp == 0)
+        return static_cast<SbkObjectPrivate1 *>(pyObj->d)->cptr;
+    auto *mid = static_cast<SbkObjectMultiInheritancePrivate *>(pyObj->d);
+    const unsigned idx = getTypeIndexOnHierarchy(Shiboken::pyType(pyObj), desiredType);
+    if (idx >= mid->cptrs.size()) {
+        setBaseClassIndexError(Shiboken::pyType(pyObj), desiredType);
+        return nullptr;
+    }
+    return mid->cptrs[idx];
 }
 
 std::vector<void *> cppPointers(SbkObject *pyObj)
 {
-    if (pyObj == nullptr || pyObj->d == nullptr || pyObj->d->cptr == nullptr)
+    if (pyObj == nullptr || pyObj->d == nullptr)
         return {};
-    const unsigned n = getNumberOfCppBaseClasses(Shiboken::pyType(pyObj));
-    std::vector<void *> ptrs(n, nullptr);
-    for (unsigned i = 0; i < n; ++i)
-        ptrs[i] = pyObj->d->cptr[i];
-    return ptrs;
+    return pyObj->d->is_multicpp != 0
+               ? static_cast<SbkObjectMultiInheritancePrivate *>(pyObj->d)->cptrs
+               : std::vector<void *>(1, static_cast<SbkObjectPrivate1 *>(pyObj->d)->cptr);
 }
-
 
 bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
 {
     PyTypeObject *type = Shiboken::pyType(sbkObj);
-    unsigned idx = 0;
-    if (PepType_SOTP(type)->is_multicpp)
-        idx = getTypeIndexOnHierarchy(type, desiredType);
 
-    const bool alreadyInitialized = sbkObj->d->cptr[idx] != nullptr;
-    if (alreadyInitialized) {
-        PyErr_Format(PyExc_RuntimeError,
-                     "libshiboken: You can't initialize an %s object in class %s twice!",
-                     desiredType->tp_name, type->tp_name);
+    if (sbkObj->d->is_multicpp == 0) {
+        auto *d = static_cast<SbkObjectPrivate1 *>(sbkObj->d);
+        if (d->cptr != nullptr) {
+            setAlreadyInitializedError(type, desiredType);
+            return false;
+        }
+        d->cptr = cptr;
     } else {
-        sbkObj->d->cptr[idx] = cptr;
+        const unsigned idx = getTypeIndexOnHierarchy(type, desiredType);
+        auto *mid = static_cast<SbkObjectMultiInheritancePrivate *>(sbkObj->d);
+        if (idx >= mid->cptrs.size()) {
+            setBaseClassIndexError(type, desiredType);
+            return false;
+        }
+        if (mid->cptrs[idx] != nullptr) {
+            setAlreadyInitializedError(type, desiredType);
+            return false;
+        }
+        mid->cptrs[idx] = cptr;
     }
 
     sbkObj->d->cppObjectCreated = true;
-    return !alreadyInitialized;
+    return true;
 }
 
 bool isValid(PyObject *pyObj)
@@ -1714,7 +1770,7 @@ PyObject *newObjectForType(PyTypeObject *instanceType, void *cptr, bool hasOwner
         Py_IncRef(reinterpret_cast<PyObject *>(self));
     } else {
         self = reinterpret_cast<SbkObject *>(SbkObject_tp_new(instanceType, nullptr, nullptr));
-        self->d->cptr[0] = cptr;
+        Shiboken::setCppPointer(self, cptr);
         self->d->hasOwnership = hasOwnership;
         self->d->validCppObject = 1;
         bindingManager.registerWrapper(self, cptr);
@@ -1759,8 +1815,7 @@ void destroy(SbkObject *self, void *cppData)
         self->d->hasOwnership = false;
 
         // the cpp object instance was deleted
-        delete[] self->d->cptr;
-        self->d->cptr = nullptr;
+        clearCppPointers(self);
     }
 
     // After this point the object can be death do not use the self pointer bellow
@@ -1887,14 +1942,16 @@ void deallocData(SbkObject *self, bool cleanup)
         clearReferences(self);
     }
 
-    if (self->d->cptr) {
-        // Remove from BindingManager
-        Shiboken::BindingManager::instance().releaseWrapper(self);
-        delete[] self->d->cptr;
-        self->d->cptr = nullptr;
-        // delete self->d; PYSIDE-205: wrong!
-    }
-    delete self->d; // PYSIDE-205: always delete d.
+    // Remove from BindingManager
+    Shiboken::BindingManager::instance().releaseWrapper(self);
+    clearCppPointers(self);
+    // delete self->d; PYSIDE-205: wrong!
+
+    // PYSIDE-205: always delete d.
+    if (self->d->is_multicpp)
+        delete static_cast<SbkObjectMultiInheritancePrivate *>(self->d);
+    else
+        delete static_cast<SbkObjectPrivate1 *>(self->d);
     Py_XDECREF(self->ob_dict);
     PepExt_TypeCallFree(reinterpret_cast<PyObject *>(self));
 }
