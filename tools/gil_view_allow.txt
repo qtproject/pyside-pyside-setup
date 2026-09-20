@@ -1,0 +1,69 @@
+# Changes to code that a build with a GIL compiles, accepted one by one.
+#
+# The free-threading series is supposed to leave such a build alone;
+# `gil_view.py --check` fails for every file whose GIL view shows changed
+# code, unless a line here accepts exactly that change:
+#
+#     <path>  <digest printed by --check>  <why a GIL build may see this>
+#
+# The digest covers the changed code lines of the file, so an entry stops
+# matching as soon as the change grows - it is then reported as STALE ALLOW.
+# An entry nothing matches any more is reported as UNUSED ALLOW. Both fail.
+#
+# Only a rewrite that does the same thing in other words belongs here. A
+# difference a GIL build can observe does not: it goes behind
+# Py_GIL_DISABLED, or out of the series. What the helpers named below come
+# down to without Py_GIL_DISABLED:
+#
+#     PepDict_GetItemOwned(d, k)       Py_XNewRef(PyDict_GetItem(d, k))
+#     PepDict_GetItemStringOwned(d, k) Py_XNewRef(PyDict_GetItemString(d, k))
+#     PepDict_IterationSnapshot(d)     Py_NewRef(d)
+#     PepMroRef / PepBasesRef          the tp_mro / tp_bases slot, held for
+#                                      the walk, as find_name_in_mro() did
+#     SBK_FAILPOINT / SBK_FAILPOINT_THROW  the inventories are empty, so no
+#                                      point ever arms
+#
+# A holder answers null only where the slot is null, which no ready type has,
+# so the error branches those additions bring cannot be reached there.
+
+sources/pyside6/PySide6/QtCore/glue/core_snippets.cpp  bcee324902cb  qObjectTr() takes the mro through the holder; the null branch needs a null tp_mro
+sources/pyside6/PySide6/QtQuick/pysidequickregistertype.cpp  11ae844bfd40  both inheritance checks take the mro through the holder
+sources/pyside6/libpyside/dynamicqmetaobject.cpp  763974acd292  parsePythonType() walks the snapshot, which is the type dict itself
+sources/pyside6/libpyside/dynamicslot.cpp  345a5f0c1839  the slot is one class instead of two and the receiver work is conditional; the GIL build keeps its raw binding, its unbalanced compiled-method path and its weakref fallback
+sources/pyside6/libpyside/pyside.cpp  9e8e42468738  getHiddenDataFromQObject() takes the mro through the holder; the metatype record is only reindented
+sources/pyside6/libpyside/pysideproperty.cpp  a3309d92769f  getFromType() returns an owned result instead of a borrowed one, and its caller releases what it does not hand on
+sources/pyside6/libpyside/pysidesignal.cpp  e12438b291a4  owning dict lookups, mro holders, and PyDict_Contains() where a lookup only asked whether a key is there
+sources/pyside6/libpyside/pysidevariantutils.cpp  fd5c457f3fe9  resolveMetaType() takes the bases through the holder and keeps the tp_base fallback for a null slot
+sources/pyside6/libpyside/pysideweakref.cpp  2fead1622d7e  the callable is held by an AutoDecRef instead of by hand, same order
+sources/pyside6/libpyside/signalmanager.cpp  89e4ae839bea  the private-name walk takes the mro through the holder
+sources/pyside6/libpysideqml/pysideqmllistproperty.cpp  4d5d9a571c65  the element-type check takes the mro through the holder
+sources/pyside6/libpysideqml/pysideqmlregistertype.cpp  b28951a5ec1d  owning dict lookups; the referents stay alive through the dicts that hold them
+sources/pyside6/libpysideremoteobjects/pysidedynamicclass.cpp  ed87b6d4db4a  one owning dict lookup for the property capsule
+sources/shiboken6/libshiboken/basewrapper.cpp  e96b9f13b602  owning dict lookup; the conversion gate and the check before caching "no override" are both under Py_GIL_DISABLED, because Errors::occurred() un-parks a stashed error
+sources/shiboken6/libshiboken/bindingmanager.cpp  1b7f30e09f3b  mro holders and owning dict lookups; the nested conditional is only reindented
+sources/shiboken6/libshiboken/helper.cpp  a83b85d8650c  the debug dump walks the snapshot, and __file__ is looked up owning
+sources/shiboken6/libshiboken/pep384impl.cpp  693088026b98  the holders and the owning lookups are defined here; without Py_GIL_DISABLED each is the plain call plus a reference, and the holder keeps find_name_in_mro()'s tuple assertion
+sources/shiboken6/libshiboken/pep384impl.h  5bd983a19385  declarations
+sources/shiboken6/libshiboken/sbkbindingutils.cpp  98f857910f82  PyDict_Contains() where a lookup only asked whether a key is there; both keys are interned strings, so no comparison can fail
+sources/shiboken6/libshiboken/sbkconverter.cpp  a023e263f25c  the overload checks walk the snapshot, and pythonToCppPointer() is the expression the pointer converter had inline
+sources/shiboken6/libshiboken/sbkenum.cpp  eceff7b812e7  mro holder and owning lookups in the member maps
+sources/shiboken6/libshiboken/sbkerrors.cpp  c06cc4cdc887  conversionFailed() is new; without Py_GIL_DISABLED nothing calls it
+sources/shiboken6/libshiboken/sbkerrors.h  04d894ac80ff  a declaration
+sources/shiboken6/libshiboken/sbkfailpoint.cpp  ac051cbfea80  the throwing points are a second, empty inventory: armFailpointThrow() finds nothing and failpointThrow() never fires
+sources/shiboken6/libshiboken/sbkfailpoint.h  f3f52356874d  declarations, and SBK_FAILPOINT_THROW() next to SBK_FAILPOINT()
+sources/shiboken6/libshiboken/sbkheldlocks.cpp  4fe72b1f212b  two more locks in the rank table and the name list; nothing takes them in this build
+sources/shiboken6/libshiboken/sbkheldlocks.h  98f974a50d6b  two more enumerators and the leaf ranks they share
+sources/shiboken6/libshiboken/sbkmodule.cpp  0af0713cd2c1  owning lookups in sys.modules
+sources/shiboken6/libshiboken/signature/signature_extend.cpp  2bcbdea12684  owning lookup in the value dict, and the recursion counter is read through an accessor; the per-thread counter is the free-threaded build's alone
+sources/shiboken6/libshiboken/voidptr.cpp  d15699f85054  an include
+sources/shiboken6/shibokenmodule/shibokenmodule.cpp  6a8732cc5039  two more glue snippets of the failpoint family the module already exposes unconditionally; the added pair answers false and does nothing where the build has no failpoints
+sources/shiboken6_generator/ApiExtractor/predefined_templates.cpp  6aa16aa10928  the dict converters emit their old loop without Py_GIL_DISABLED; proven by --check --wrappers
+sources/shiboken6_generator/generator/shiboken/cppgenerator.cpp  71d381391d99  the generator's own code changes, its output does not: every free-threading emission is written under Py_GIL_DISABLED, proven by --check --wrappers
+sources/shiboken6_generator/generator/shiboken/cppgenerator.h  9ff4c3cefbc3  declarations for the above
+sources/shiboken6_generator/generator/shiboken/cppgenerator_container.cpp  2e692d4a3134  one gate more, written under Py_GIL_DISABLED; proven by --check --wrappers
+sources/shiboken6_generator/generator/shiboken/cppgenerator_smartpointer.cpp  ddb8861fba17  one gate more, written under Py_GIL_DISABLED; proven by --check --wrappers
+
+# The generated files. --check --wrappers compares the wrappers two GIL
+# builds of the same configuration emitted; a permutation is reported as
+# "reordered" and does not fail, see reordered() in gil_view.py.
+generated:shiboken6/shibokenmodule/Shiboken/shiboken_module_wrapper.cpp  d5d72bd697e0  the two entry points of the throwing failpoints; failpoints hang on SBK_NO_FAILPOINTS, not on Py_GIL_DISABLED, and the shipped build has neither them nor these functions

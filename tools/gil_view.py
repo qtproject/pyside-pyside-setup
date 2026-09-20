@@ -15,6 +15,17 @@ result still readable; cpp -E would expand headers and macros and destroy it.
                                 no conditionals left, for reviewing the design
     gil_view.py --generated     the same over the generated wrappers in the
                                 build tree, which is where the bulk sits
+    gil_view.py --check         the GIL view as a test: fails when the series
+                                changes code a build with a GIL compiles
+    gil_view.py --selftest      the check against cases with a known answer
+    gil_view.py --check --wrappers BASE_TREE HEAD_TREE
+                                the same over the wrappers two GIL builds
+                                generated - the generator's own source says
+                                nothing, it only prints the conditionals
+
+--check compares code, not text: comments and blank lines are taken out
+first. A changed file passes only if tools/gil_view_allow.txt lists it with
+the digest of exactly this change; see that file for the format.
 
 Writes plain diff/text files and prints their paths. Nothing to install.
 """
@@ -22,15 +33,21 @@ Writes plain diff/text files and prints their paths. Nothing to install.
 from __future__ import annotations
 
 import argparse
+import collections
 import difflib
+import hashlib
 import os
 import pathlib
 import shutil
 import subprocess
 import sys
 
-REPO = pathlib.Path(__file__).resolve().parent.parent
+# GIL_VIEW_REPO: a copy of this tool can judge another tree, for a script
+# that checks out old commits whose own copy has no --check yet.
+REPO = pathlib.Path(os.environ.get("GIL_VIEW_REPO")
+                    or pathlib.Path(__file__).resolve().parent.parent)
 DEFAULT_BASE = "@{upstream}"
+ALLOW = pathlib.Path(__file__).resolve().parent / "gil_view_allow.txt"
 
 
 def git(*args: str) -> str:
@@ -41,6 +58,10 @@ def git(*args: str) -> str:
 FAILED: list[str] = []
 
 DIRECTIVES = ("#if ", "#ifdef ", "#ifndef ", "#elif ")
+
+# What check_wrappers() puts in front of a generated file, so that one
+# allow list can hold both kinds without them colliding.
+GENERATED = "generated:"
 
 
 def uncomment_conditionals(source: str) -> str:
@@ -82,6 +103,222 @@ def view(source: str, mode: str, what: str = "?") -> str:
         reason = err[0] if err else str(p.returncode)
     FAILED.append(f"{what}: {reason}")
     return source
+
+
+def code_only(source: str) -> list[str]:
+    """The lines a compiler sees: no comments, no blank lines, no indent.
+
+    A small scanner rather than a regex, because a // inside a string is not
+    a comment. Glue snippets are not valid C++; a quote that does not close
+    on its line is taken as text, which can only make this stricter.
+    """
+    out, i, n = [], 0, len(source)
+    buf: list[str] = []
+    while i < n:
+        c = source[i]
+        two = source[i:i + 2]
+        if two == "//":
+            while i < n and source[i] != "\n":
+                i += 1
+        elif two == "/*":
+            end = source.find("*/", i + 2)
+            i = n if end < 0 else end + 2
+            buf.append(" ")
+        elif c in "\"'":
+            j = i + 1
+            while j < n and source[j] not in (c, "\n"):
+                j += 2 if source[j] == "\\" else 1
+            j = min(j + 1, n) if j < n and source[j] == c else j
+            buf.append(source[i:j])
+            i = j
+        elif c == "\n":
+            line = " ".join("".join(buf).split())
+            if line:
+                out.append(line)
+            buf = []
+            i += 1
+        else:
+            buf.append(c)
+            i += 1
+    line = " ".join("".join(buf).split())
+    if line:
+        out.append(line)
+    return out
+
+
+def code_diff(a: str, b: str, mode: str, what: str) -> list[str]:
+    """Changed code lines between two sources in one build's view.
+
+    The two file headers are dropped by position, not by their text: a code
+    line reading "++depth;" becomes "+++depth;" in the diff and a filter on
+    the first three characters throws it away - which blinded this check to
+    exactly the lines that count references and nesting depth.
+    """
+    d = list(difflib.unified_diff(code_only(view(a, mode, what)),
+                                  code_only(view(b, mode, what)),
+                                  lineterm="", n=0))
+    return [line for line in d[2:] if line[:1] in "+-"]
+
+
+def digest(lines: list[str]) -> str:
+    return hashlib.sha1("\n".join(lines).encode()).hexdigest()[:12]
+
+
+def allowed() -> dict[str, tuple[str, str]]:
+    """path -> (digest, reason) from tools/gil_view_allow.txt."""
+    result = {}
+    if ALLOW.is_file():
+        for raw in ALLOW.read_text().splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            path, dig, reason = line.split(None, 2)
+            result[path] = (dig, reason)
+    return result
+
+
+def reordered(lines: list[str]) -> bool:
+    """Whether the change is a permutation - every added line is a removed one.
+
+    The generator does not emit includes and type registrations in a stable
+    order: two builds of the same commit differ in a handful of the generated
+    files. That is the generator's own defect, not something a series did, so
+    a permutation is reported and does not fail. Generated files only - in a
+    source file, moved code is a change someone wrote.
+    """
+    added = collections.Counter(line[1:] for line in lines if line[:1] == "+")
+    removed = collections.Counter(line[1:] for line in lines if line[:1] == "-")
+    return bool(added) and added == removed
+
+
+def verdict(changes: dict[str, list[str]], out: pathlib.Path, label: str,
+            wrappers: bool = False) -> int:
+    """Report and judge {name: changed code lines}; 0 is a pass.
+
+    `wrappers` says this is the run over the generated files: they are the
+    only ones granted the permutation rule, and they have their own entries
+    in the allow list.
+    """
+    # One list, two runs: each sees only the entries that speak about it, or
+    # every entry of the other kind would count as unused.
+    allow = {name: value for name, value in allowed().items()
+             if name.startswith(GENERATED) == wrappers}
+    bad = accepted = moved = 0
+    with out.open("w") as fp:
+        for name, lines in sorted(changes.items(), key=lambda kv: -len(kv[1])):
+            dig = digest(lines)
+            if allow.get(name, ("", ""))[0] == dig:
+                state = "allowed"
+                accepted += 1
+            elif wrappers and reordered(lines):
+                state = "reordered"
+                moved += 1
+            else:
+                state = "STALE ALLOW" if name in allow else "CHANGED"
+                bad += 1
+            print(f"{len(lines):6d}  {state:11s} {dig}  {name}")
+            fp.write(f"=== {name}  {dig}  {state}\n" + "\n".join(lines) + "\n\n")
+    unused = sorted(set(allow) - set(changes))
+    for name in unused:
+        print(f"        UNUSED ALLOW        {name}")
+    report_failures()
+    print(f"\n{label}: {len(changes)} changed, {accepted} allowed, "
+          f"{moved} reordered, {bad} not, {len(unused)} unused allow entries, "
+          f"{len(FAILED)} unresolved\n{out}")
+    return 1 if bad or unused or FAILED else 0
+
+
+def check_series(base: str, head: str, mode: str, out: pathlib.Path) -> int:
+    files = sources(base, head)
+    changes = {}
+    for f in files:
+        lines = code_diff(content(base, f), content(head, f), mode, f)
+        if lines:
+            changes[f] = lines
+    return verdict(changes, out, f"{mode} view of {len(files)} sources, {base}..{head}")
+
+
+def check_wrappers(base_tree: str, head_tree: str, mode: str, out: pathlib.Path) -> int:
+    """Two build trees of the same configuration, wrapper by wrapper."""
+    def wrappers(tree: str) -> dict[str, pathlib.Path]:
+        root = pathlib.Path(tree)
+        found = {}
+        for pattern in ("*_wrapper.cpp", "*_wrapper.h", "*_module_wrapper.cpp",
+                        "*_python.h"):
+            for p in root.rglob(pattern):
+                found[os.fspath(p.relative_to(root))] = p
+        return found
+
+    a, b = wrappers(base_tree), wrappers(head_tree)
+    if not a or not b:
+        sys.exit(f"no generated wrappers under {base_tree if not a else head_tree}")
+    changes = {}
+    for name in sorted(set(a) | set(b)):
+        ta = a[name].read_text() if name in a else ""
+        tb = b[name].read_text() if name in b else ""
+        lines = code_diff(ta, tb, mode, name)
+        if lines:
+            changes[GENERATED + name] = lines
+    return verdict(changes, out, f"{mode} view of {len(set(a) | set(b))} generated files",
+                   wrappers=True)
+
+
+def selftest() -> int:
+    """The check has to see what it claims to see - and nothing else."""
+    ft = "#ifdef Py_GIL_DISABLED\nint f;\n#else\nint g;\n#endif\nint z;\n"
+    cases = [
+        ("comment change only", "int a; // one\n/* x\n y */ int b;\n",
+         "int a; // two\n/* other\n\n text */ int b;\n", 0),
+        ("// inside a string is code", 'const char *u = "http://x"; // c\n',
+         'const char *u = "http://y"; // c\n', 2),
+        ("indent and blank lines", "if (a) {\n    b();\n}\n",
+         "if (a) {\n\n        b();\n}\n", 0),
+        ("apostrophe in glue prose", "// don't\nint a = 1;\n%CONVERT['x']\n",
+         "// don't\nint a = 2;\n%CONVERT['x']\n", 2),
+        ("change under #ifdef Py_GIL_DISABLED", ft, ft.replace("int f;", "int f2; int f3;"), 0),
+        ("change under #if defined(Py_GIL_DISABLED)",
+         ft.replace("#ifdef Py_GIL_DISABLED", "#if defined(Py_GIL_DISABLED)"),
+         ft.replace("#ifdef Py_GIL_DISABLED", "#if defined(Py_GIL_DISABLED)")
+           .replace("int f;", "int f9;"), 0),
+        ("directive with a trailing comment",
+         ft.replace("#ifdef Py_GIL_DISABLED", "#ifdef Py_GIL_DISABLED  // twin"),
+         ft.replace("#ifdef Py_GIL_DISABLED", "#ifdef Py_GIL_DISABLED  // twin")
+           .replace("int f;", "int f7;"), 0),
+        ("change in the #else branch", ft, ft.replace("int g;", "int h;"), 2),
+        ("change outside any conditional", ft, ft.replace("int z;", "int zz;"), 2),
+        ("new code under #ifndef Py_GIL_DISABLED", ft,
+         ft + "#ifndef Py_GIL_DISABLED\nint n;\n#endif\n", 1),
+        ("code moved under the FT conditional", "int g;\n",
+         "#ifdef Py_GIL_DISABLED\nint g;\n#endif\n", 1),
+        # These two read as the diff's own file headers if the headers are
+        # filtered by text instead of by position.
+        ("an added pre-increment", "int d = 0;\nreturn d;\n",
+         "int d = 0;\n++d;\nreturn d;\n", 1),
+        ("a removed pre-decrement", "int d = 0;\n--d;\nreturn d;\n",
+         "int d = 0;\nreturn d;\n", 1),
+    ]
+    bad = 0
+    for name, a, b, want in cases:
+        got = len(code_diff(a, b, "gil", name))
+        bad += got != want
+        print(f"{'ok  ' if got == want else 'FAIL'} {name}: {got}, expected {want}")
+
+    # The permutation rule, which only the generated files are granted. It
+    # has to hold a moved line and let go of an added one.
+    moves = [
+        ("two lines swapped", ["+int b;", "-int a;", "-int b;", "+int a;"], True),
+        ("a line moved and one added", ["+int b;", "-int b;", "+int c;"], False),
+        ("a line moved and one removed", ["+int b;", "-int b;", "-int c;"], False),
+        ("a line changed", ["-int a;", "+int aa;"], False),
+        ("one more copy of a moved line", ["+int b;", "+int b;", "-int b;"], False),
+    ]
+    for name, lines, want in moves:
+        got = reordered(lines)
+        bad += got != want
+        print(f"{'ok  ' if got == want else 'FAIL'} {name}: {got}, expected {want}")
+
+    print(f"{len(cases) + len(moves)} cases, {bad} failed")
+    return 1 if bad or FAILED else 0
 
 
 def sources(base: str, head: str) -> list[str]:
@@ -198,6 +435,14 @@ def main() -> int:
                     help="which build tree to scan, by its build_history "
                          "configuration line, e.g. py3.15 or py3.12-qt6.12.0; "
                          "default is the newest build, whatever that is")
+    ap.add_argument("--check", action="store_true",
+                    help="as a test: exit 1 if the view shows changed code "
+                         "that tools/gil_view_allow.txt does not list")
+    ap.add_argument("--wrappers", nargs=2, metavar=("BASE_TREE", "HEAD_TREE"),
+                    help="with --check: compare the wrappers two builds of "
+                         "the same configuration generated")
+    ap.add_argument("--selftest", action="store_true",
+                    help="run the check against cases with a known answer")
     ap.add_argument("--dump", action="store_true",
                     help="write the resolved sources instead of a diff")
     args = ap.parse_args()
@@ -206,12 +451,18 @@ def main() -> int:
         sys.exit("unifdef(1) not found")
 
     mode = "ft" if args.ft else "gil"
+    if args.selftest:
+        return selftest()
     if args.generated:
         scan_generated(mode, args.build)
         return 0
 
     out = REPO / "gil-view-out"
     out.mkdir(exist_ok=True)
+    if args.check and args.wrappers:
+        return check_wrappers(*args.wrappers, mode, out / f"{mode}-check-wrappers.txt")
+    if args.check:
+        return check_series(args.base, args.head, mode, out / f"{mode}-check.txt")
     if args.dump:
         dump_head(args.base, args.head, mode, out / f"{mode}-view")
     else:
