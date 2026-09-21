@@ -17,6 +17,18 @@ run between the lease and the pointer read the way it can here. This
 document describes both, the locks that are deliberately separate from them,
 and what it all means for application code.
 
+## The notes in four files
+
+This file has the state lock, the call guard, the leases, the lock
+inventory, and how to switch the measures off and test them. The sections
+per measure are in three further files:
+[Wrapper Lifecycle](freethreading-lifecycle.md) for the wrapper map,
+destruction and the deallocator,
+[Types and Shared State](freethreading-types.md) for type walks, lookups and
+process-wide state, and
+[Generated Code, Signals and QML](freethreading-bindings.md) for what
+reaches the bindings' entry points.
+
 ## Where the `Bn-m` and `FTn` names come from
 
 A few passages here, and a few comments in the sources, name a finding as
@@ -82,42 +94,41 @@ unlock. A holder can therefore neither block nor need a stop-the-world pause,
 which is what makes a plain mutex the right primitive: it always reaches its
 own unlock.
 
-An earlier design took one coarse lock at the entry of every generated wrapper
-and held it until the wrapper returned. That put arbitrary Python, Qt and
-third-party code underneath it and made the lock part of the lock order of the
-whole process. It is gone: no lock over the *bookkeeping* is held across code
-the binding does not control.
+No lock over the *bookkeeping* is held across code the binding does not
+control. One lock still spans a call, and deliberately so - the per-object
+call guard below. It is a `PyCriticalSection`, so a thread that has to wait
+underneath it detaches and the guard is suspended, which keeps it out of the
+process-wide lock order.
 
-One lock still spans a call, and deliberately so - the per-object call guard
-below. It is a `PyCriticalSection`, so a thread that has to wait underneath it
-detaches and the guard is suspended; that is what keeps it out of the lock
-order the coarse lock joined.
+Bit `StateLock`; cleared, the bookkeeping runs unlocked, which the A/B in
+`run.py`'s scenario table measures.
 
 ### Prepare, then commit
 
-A transaction can still fail while it holds the state lock: a container
-insert or the growth of the `DeferredActions` list may throw `std::bad_alloc`,
-and whatever it has written by then stays written (B6-4). A transaction
-therefore makes every allocation it needs - room for its deferred actions, a
-set insert - before its first semantic write. What follows are pointer and
-flag writes and transfers into room that already exists, and
-`DeferredActions::commit()` marks the end.
+A transaction can fail while it holds the state lock: a container insert or
+the growth of the `DeferredActions` list may throw `std::bad_alloc`, and
+whatever it has written by then stays written (B6-4). It therefore makes
+every allocation it needs - room for its deferred actions, a set insert -
+before its first semantic write; what follows are pointer and flag writes
+into room that exists, and `DeferredActions::commit()` marks the end.
 
 The commit also decides what the list does when it is destroyed. A committed
 list owns its references and runs them, even where `run()` was not reached.
 An uncommitted list is dropped: the transaction unwound before the transfer,
 the protected state still owns those references, and releasing them would
-release them twice. A leak is the side an unwind has to fall on.
+release them twice - a leak is the side an unwind has to fall on.
 `keepReferenceLocked()` commits early, once the map has given its references
-up, because the insert after that can still throw.
+up, since the insert after that can still throw.
 
 `setParentLocked()` takes `removeParentLocked()`'s slot before it inserts the
-child into the new parent's set. In the other order a failed reserve would
-leave the child in both sets, and `_detachChildren()` on the new parent would
+child into the new parent's set; in the other order a failed reserve would
+leave the child in both sets and `_detachChildren()` on the new parent would
 never finish. `setParent()` turns `std::bad_alloc` into `MemoryError` after
-the unlock, because the generated caller has no handler for a C++ exception.
+the unlock, since the generated caller has no handler for a C++ exception.
 
-Bit `TransactionPrepare`; cleared, the room is taken after the edge is gone.
+Bit `TransactionPrepare`; cleared, the room is taken after the edge is
+gone, and `proof-transaction-prepare` sees ownership moved although the
+call raised.
 
 ## The call guard
 
@@ -133,7 +144,8 @@ lock two objects, because the inner one suspends the outer, and an argument's
 guard would silently drop the receiver's. Where a call genuinely touches two
 objects at once, Qt's own rules apply as they always did.
 
-The guard is bit `0x4` of `PYSIDE6_OPTION_FT`.
+`CallGuard` is the bit; cleared, a call runs with no guard on its receiver,
+which the A/B in `run.py` measures. It is `0x4` of `PYSIDE6_OPTION_FT`.
 
 ## Call leases
 
@@ -174,7 +186,8 @@ consult `activeCalls`. There the lease guarantees the pointer, not the
 object - no holder reads the array while another thread detaches it, but
 the object behind the copy may already be gone.
 
-The bit is `LeaseSnapshot`; cleared, holders read the array again.
+Bit `LeaseSnapshot`; cleared, holders read the array again, which
+`proof-lease-snapshot` and `proof-leased-receiver` walk into.
 
 ### Which objects a lease accepts
 
@@ -184,7 +197,8 @@ own metaclass as long as it derives from ours - an abstract base class over
 `QObject` does, `class Meta(type(QObject), ABCMeta)` - and an identity test
 does not recognize such objects, so their calls would take no lease.
 
-The bit is `MetatypeSubclassLease`; cleared, the identity test is back.
+Bit `MetatypeSubclassLease`; cleared, the identity test is back and
+`proof-metatype-subclass` finds such a call unleased.
 
 ### Leases taken inside a conversion
 
@@ -204,8 +218,8 @@ own, while every other lease it takes joins the outer one and waits for it.
 Not covered: a pointer converted in an injected snippet, and a container of
 pointers a Python override returns, which the native side keeps.
 
-The bit is `ConversionLeasesKept`; cleared, each lease ends with its
-converter, and `container-element-lease` sees its element freed mid-call.
+Bit `ConversionLeasesKept`; cleared, each lease ends with its converter,
+and `proof-conversion-leases` sees the element freed mid-call.
 
 ## Locks that are deliberately separate
 
@@ -228,13 +242,11 @@ forbids. Four places have a lock of their own:
   not: the parse runs application code, so the candidate is built with no
   lock held and published with `PyDict_SetDefaultRef()` - one atomic step
   that is the whole transaction, which is why no lock is taken around it.
-  `PyObject_SetAttr()` could not stay there: it reaches `SelectFeatureSet()`,
-  which compiles a class statement and clears a live type dictionary, and a
-  finalizer running under a raw lock that defines a QObject subtype arrives
-  back in `parsePythonType()` and trips the contract assertion.
-  `__METAOBJECT__` is an internal key no feature set has anything to say
-  about, so the attribute machinery was a detour - the lookup beside it read
-  the dictionary directly all along.
+  `PyObject_SetAttr()` may not be used there: it reaches `SelectFeatureSet()`,
+  which compiles a class statement and clears a live type dictionary, so a
+  finalizer defining a QObject subtype under a raw lock arrives back in
+  `parsePythonType()` and trips the contract assertion. `__METAOBJECT__` is
+  an internal key no feature set has anything to say about.
 
 `dynamicslot.cpp`, the connection hash
 : A plain mutex over a global container. Entries are taken out under it and
@@ -248,6 +260,9 @@ forbids. Four places have a lock of their own:
 
 Qt's own connect, disconnect and emit are thread-safe and are left to Qt.
 
+Bit `LazyTypeLock`; cleared, lazy type creation runs unlocked, which the A/B
+in `run.py` measures.
+
 ### The complete inventory
 
 Every raw lock the binding owns, what it may do while held, and whether a
@@ -257,7 +272,7 @@ locks are not in here: they are not ours, and no order over them is claimed.
 | Lock | Rank | Type | Taken in | May be held across | Guard active? |
 |---|---|---|---|---|---|
 | State | 8 | `std::mutex`, non-recursive | `sbkstatelock.cpp` | binding state only: validity, ownership, the parent and referred graph, `activeCalls` | yes, a lease takes the guard after the transaction |
-| Wrapper map | 6 | `std::recursive_mutex` | `bindingmanager.cpp`, 18 sites in the file, 11 of them also in a build with a GIL | map operations; visitors and destructors run outside. Still inside: `PyType_IsSubtype()` in the type-narrowing lookup, an identity question that waits on the immutable hierarchy snapshots. `mi_init()` also runs there and is not an exception: it computes offsets from the C++ pointer and calls nothing | yes |
+| Wrapper map | 6 | `std::recursive_mutex` | `bindingmanager.cpp`, map operations throughout, a good half of them also in a build with a GIL | map operations; visitors and destructors run outside. Still inside: `PyType_IsSubtype()` in the type-narrowing lookup, an identity question that waits on the immutable hierarchy snapshots. `mi_init()` also runs there and is not an exception: it computes offsets from the C++ pointer and calls nothing | yes |
 | Main-thread deletion | 7 | `std::mutex` | `bindingmanager.cpp`, 2 sites | one vector push or swap | no |
 | Lazy type | 1 | `std::recursive_mutex`, waiter detaches | `sbkmodule.cpp` | type creation, which calls Python - the exception, owned by the lazy protocol | no |
 | Class hierarchy | 2 | `std::mutex` | `bindingmanager.cpp`, 2 sites | taking or publishing the edge snapshot. A traversal walks its snapshot with the lock released, because it creates types and calls discovery functions | no |
@@ -359,1003 +374,6 @@ pointer or a virtual - `cpp_dtor`, `mi_init` and the type-discovery hooks are
 exactly that - and anything outside the files it is given. `ctest -R
 state_lock_scope` runs it.
 
-### The preflight in front of a virtual call
-
-A virtual reaching Python starts with one question: is this C++ address
-wrapped at all? It has to be answerable from a thread that has no Python
-thread state, because that is what a Qt worker thread entering a virtual
-looks like, and it has to stay cheap for the common case of a C++ object
-Python never saw.
-
-It used to narrow by type at the same time, and narrowing by type reads
-`Py_TYPE` and walks `tp_mro` - Python-owned state, read with no thread state
-to read it under (B4-2). The untyped overload is an address comparison and
-needs none, so that is what runs first; narrowing happens after the attach,
-in `acquireWrapper()`. Both typed lookups now assert that the thread is
-attached, so the next caller that gets this wrong aborts in a debug build
-instead of being found by the next review.
-
-`NativePreflight` is the bit, and `proof-native-preflight` discriminates
-through that assertion - which means it says nothing in a release build,
-where the unsafe read would simply happen. The measure is real either way;
-what is debug-only is the ability to show it.
-
-### A retired identity leaves a tombstone
-
-The wrapper map answers "which Python object stands for this C++ address".
-Removing an entry when a wrapper dies is not enough to keep that answer
-right: the destructor has not run yet, and a lookup in between sees an empty
-map, decides the address is free, and publishes a second wrapper for an
-object that is about to be destroyed (B4-1). That wrapper is marked valid
-and its pointer goes stale a moment later.
-
-An entry therefore does not leave the map when the wrapper dies. It is
-marked dying and stays until the destruction that retires it can no longer
-reach the address - past the C++ destructor for an owning wrapper, past the
-deallocation for a non-owning one. Until then the entry carries a reference
-to the type it was registered for, so a lookup can tell whether a dying
-identity is the one it is asking about without touching a wrapper that may
-already be freed. The reference is taken under the map lock, which an
-increment may span, and dropped when the tombstone falls, which a decref
-may not span.
-
-The wrapper the entry points at is *not* readable any more, and that is the
-whole point of the type reference. `acquire()` is the only place that may
-turn the map's borrowed pointer into a reference, and it asks
-`PyUnstable_TryIncRef()` - which reads the object. On a tombstone that is
-freed memory, and where the allocator had already recycled the block the
-increment succeeded and handed out a stranger. The guard belongs in
-`acquire()` and nowhere else: two of the five readers carried their own and
-three did not.
-
-A conversion that meets a tombstone gets a wrapper with no C++ pointer and
-no validity, so every use of it raises rather than reading freed memory -
-unless the dying type invalidates such wrappers itself.
-
-That exception is `destroyed(QObject *)`, and it is not a convenience. Qt
-emits the signal from `~QObject`, the argument is meant to be used there, and
-PySide invalidates whatever wrapper the conversion produced right after the
-signal. A tombstone that refused the conversion would hand the handler an
-argument it cannot touch, which `signals/signal2signal_connect_test`
-measures. A plain C++ class has no such mechanism - `QRecursiveMutex`, the
-type this whole finding was made on, would keep the stray wrapper valid
-forever - so it keeps the tombstone.
-
-libshiboken does not know what a QObject is. PySide installs a predicate
-(`setDyingConversionPredicate`) when QtCore is initialized, and the map asks
-it about the *dying* type, not about the one being looked up: what decides is
-whether the destruction that is running will invalidate what the conversion
-hands out. `PYSIDE6_OPTION_FT` with `Tombstones` cleared removes the entry
-the way it was removed before, which is what `failpoints.py
-proof-tombstones` requires in order to see the window return.
-
-The exception is a measure like any other and carries its own bit,
-`DyingConversionException`. Cleared, the tombstone refuses every dying
-identity, and `dying-qobject-argument` fails in its first half: the handler
-is handed an argument it cannot use. That is `proof-dying-qobject`.
-
-The question is asked per type, not per moment, so for a QObject the whole
-destruction is open, not just the stretch around the `destroyed()` emit. What
-closes that is not a narrower question - the moment PySide's invalidation runs
-is not something the binding is told - but the other end of the same
-transaction: **a wrapper the exception lets through belongs to the tombstone
-that let it through.** It is not entered in the map, so no later lookup can
-find it and no invalidation path outside libshiboken can be expected to reach
-it; the tombstone holds a reference to it, and invalidates it when it falls.
-Usable exactly as long as the destruction it was made for is running.
-
-That the map does not carry it is the load-bearing half. An entry would
-outlive the tombstone and become the canonical wrapper for whatever the
-allocator puts at that address next - the third and worst of the three
-damages, after "says valid over freed memory" and "says valid over a
-stranger". Two conversions inside one window still get the same wrapper: the
-tombstone is asked first, and hands its stray back the way the map would
-have.
-
-Which means the tombstone has to fall while anything can still observe it.
-It does: the deallocator retires it after the C++ destructor, and a deferred
-destruction retires it from the same queue. Both go through
-`retireWrapper()`, which takes the strays out under the map lock and
-invalidates them outside it - invalidation walks the object graph and takes
-the state lock, which the map lock may not span.
-
-What is left when `~BindingManager` runs is abandoned, tombstones included.
-Static destruction runs on whichever thread unloads the image, possibly
-after finalization has begun, so it must not run Python. Nothing is lost:
-`Object::destroy()` only detaches a wrapper from its C++ object and never
-runs the destructor.
-
-The bit is `DyingStrays`; cleared, such a wrapper is registered like any
-other, and `stray-outlives-tombstone` sees it still valid after the
-destruction is past. That is `proof-dying-strays`.
-
-Which paths lay one down is part of the claim, and it is not all of them.
-The deallocator does, and so does `Shiboken.delete()`, because both run the
-C++ destructor themselves and know when it is past; a destruction handed to
-the main thread carries its tombstone in the same queue, so it falls after
-the destructor rather than after the hand-off. That ordering is not
-cosmetic: the retirement used to be posted behind `deallocData()`, which
-runs Python, and the main thread could drain the queue in that window - the
-tombstone then stayed for good, and the address with it.
-
-`Object::destroy()` is the hard one and it does too, differently. It is
-called *from* the C++ destructor of a wrapper the C++ side owns, so the
-binding hears a destruction begin and is never called again to say it is
-over - there is no moment to take the tombstone away at. Removing the entry
-there, which is what used to happen, leaves true absence for every base
-destructor still to come.
-
-So the tombstone is laid anyway, and what retirement needs is kept with it:
-the pointer array, which the object no longer carries, and a reference on the
-type. It then waits for one of the two moments that do come back:
-
-  * **the generated wrapper's `operator delete`.** That is the point the
-    language guarantees after the last destructor - the memory is going back
-    - and because the wrapper's destructor is virtual it is found through the
-    vtable even when foreign code deletes through a base pointer. This is the
-    ordinary ending.
-  * **a construction publishing at the same address.** `registerWrapper()`,
-    the constructor path, and only that one: the allocator cannot hand an
-    address out again before the previous destruction is over, so a *newly
-    built* object there is proof. It exists for the case the first ending
-    misses - a placement-constructed object, destroyed by an explicit
-    destructor call with no `operator delete` to follow.
-
-A conversion is deliberately not such a proof and does not come through
-`registerWrapper()`: meeting a tombstone is what a conversion has to be
-refused for. The bit is `ExternalTombstones`; cleared, the entry is removed
-the way it always was, and `external-destruction` sees a valid wrapper
-published over an object C++ is taking apart.
-
-What a destruction takes with it is covered too. `invalidate()` releases the
-owned children plainly and the parent's destructor - one line later - is what
-deletes them, so each child had the same window its parent no longer has. The
-owned set is collected before the children are released, every child in it
-gets its own tombstone, and they are retired with the parent's, after the
-destructor. Children that carry a C++ wrapper are not in that set on purpose:
-nothing releases their entry here - their own C++ destructor calls
-`Object::destroy()`, and that keeps the window `Object::destroy()` has and
-cannot close, which the paragraph above declares.
-`delete-before-owned-dtor` is the failpoint in that window and
-`replacement-of-owned-child` the test that walks into it.
-
-Both destruction paths do it, and that took a second pass to get right: the
-deallocator carries its own copy of this sequence, and the first version of
-the child tombstones was only in `finishDestruction()`, so dropping the last
-reference to a parent still handed the children back blank. The deallocator
-also decides differently now: it works out whether it is going to destroy
-anything *before* it touches the map, because a tombstone stands for a
-destruction that is going to happen. A wrapper that owns nothing destroys
-nothing, and its entry is removed the way it always was.
-`replacement-of-child-in-dealloc` is that half.
-
-Two failpoints stand either side of the deallocator's window, because one is
-not enough: `dealloc-before-destroy` is before the wrapper is taken apart,
-`dealloc-before-cpp-dtor` after it and before the destructor. Only the second
-one sees the window this section is about - the first is inside a stretch
-where removing the entry early already held.
-
-### Claiming a native slot is one transaction
-
-A generated constructor writes the C++ pointer into the slot of the wrapper
-it belongs to. Reading the slot and writing it used to be two steps, and a
-Python subclass can put `self` where another thread finds it before it calls
-the base initializer - both threads then saw an empty slot, both constructed
-a C++ object, and both reported success (B5-3). One of the two objects was
-left with nobody to delete it, and validity, ownership and registry identity
-described whichever write landed last.
-
-The claim happens in one state-lock transaction now, so exactly one thread
-takes the slot and the other is told that the object is already initialized -
-the error that already existed for a second `__init__` from one thread. The
-loser destroys the candidate it built and nothing else. Raising happens
-after the transaction, because it is a Python call-out.
-
-One transaction is still only the second half. The slot was claimed *after*
-the C++ constructor, so the thread that loses has built its object anyway -
-and, for a QObject, hung it in Qt's tree - before it hears that it lost. The
-generated constructor now reserves the slot before it builds anything:
-`Shiboken::Object::ConstructionGuard` takes it, `claimed()` says whether this
-thread has it, and the destructor gives it back, which is what makes it
-usable in code that bails out of a dozen places.
-
-The slot in `cptr` stays null while it is reserved. A sentinel value there
-would have to mean something to the forty-odd places that read `cptr` - one
-of them compares two objects through `cptr[0]`, where two objects under
-construction would be the same object. The reservation is a bit beside it,
-in `SbkObjectPrivate::constructingSlots`, and only the construction path asks
-about it.
-
-What the constructor then publishes used to be four calls - claim the slot,
-mark valid, mark wrapper, register - and every other thread could meet the
-object between two of them. `Shiboken::Object::commitConstruction()` does
-the three that matter in the one order the lock contract allows: the state
-lock is the leaf, so the map may not be taken while it is held, which puts
-the registration first. What is visible in between is an object that is
-registered and not yet valid, on which a call refuses - the safe half, and
-the one the "`__init__` not called" error already covers. The reverse order
-would leave a valid object that is not in the map, and a conversion of the
-same pointer would publish a second wrapper for it. The generator emits that
-one call, so `setCppPointer()` and `registerWrapper()` no longer appear in
-generated code.
-
-`ConstructorClaim` is the bit. Cleared, the slot is claimed after the
-constructor as it was, and `constructor-claim` sees two C++ objects built for
-one wrapper: it parks the first thread where it is about to publish and
-counts the parent's children while it is there. That is
-`proof-constructor-claim`.
-
-### A constructor holds a lease past the commit
-
-Publishing is where the reservation stops protecting anything:
-`Shiboken.delete()` does not ask about it, so from the commit on another
-thread can destroy the object - while the constructor still uses it. The
-QObject setup reads `cptr->metaObject()` and fills properties, and injected
-code at the end works on `cptr`.
-
-A generated constructor with a QObject setup, or with injected code at the
-end, therefore takes a lease on `self` right after the commit and holds it
-to the end of the body. A delete in between is deferred to that lease's
-release; one that got in before the lease makes it refuse, and `__init__`
-raises instead of running on a destroyed object.
-
-Bit `ConstructorTailLease`; cleared, the setup runs with no lease, and
-`constructor-tail-lease` sees the object destroyed while its constructor is
-parked at `ctor-after-publish`.
-
-### Destruction claims follow the parent graph
-
-`Shiboken.delete()` claims the object it names and everything its C++
-destructor takes along, and a claimed object gets no new lease. The claim is
-recorded on the named object only. Every other member derives it from the
-parent chain it hangs in when asked:
-
-    claimed(x) = x->d->directDestruction || claimed(parent(x))
-
-That lets a waiting claim follow the graph. A child that moves out of a
-claimed parent is free again once the edge is gone (B6-1), one that moves in
-is claimed once the edge is published (B6-2), and both happen in the
-transaction that changes the edge. When the destruction is extracted, the
-claim is stamped onto every member of the set as it stands then, because
-invalidation hands the children back and their edges no longer say it.
-
-A process-wide count of waiting claims is read without the lock. While it is
-zero, an object's own flag is the whole answer and no chain is walked. That
-is only correct because every stamp is transitive: except for the claim on
-a waiting root, whatever sets `directDestruction` on a node sets it on the
-whole owned set below it, since the count drops to zero exactly when those
-C++ instances are about to go.
-
-Generated code cannot add a member behind the stamp: `setParent()` is
-emitted while the receiver and argument leases are held, and the claim
-refuses them. Hand-written glue that sets a parent without a lease, such as
-the layout ownership in `qtwidgets.cpp`, can still publish an edge there.
-
-Bit `ClaimByAncestry`; cleared, the request marks the whole owned set once:
-a child that moved out stays refused, one that moved in is admitted. B6-2
-has no failpoint test yet; the test README says what the harness lacks.
-
-### A teardown keeps the claim
-
-A child detached *because* its parent is torn down is not reparented: the
-parent's C++ destructor is about to take it along. If the claim went with the
-edge, a child that keeps `validCppObject`, as a wrapper subclass does, would
-be callable over memory that destructor frees. `invalidate()` is where it
-shows, because the lease release then finds the root invalid, skips the
-extraction, and the stamp never runs.
-
-The two sites that detach for a teardown, `_detachChildren()` and
-`collectInvalidateLocked()`, therefore stamp the claim the child derives onto
-its owned set while the edge still exists. `removeParentLocked()` does not:
-`giveOwnershipBack` is false in the first site but true in the second and in
-a reparent, so it cannot tell them apart. That also keeps B6-1 safe, since a
-reparent has no way to keep the claim.
-
-Bit `ClaimThroughTeardown`; cleared, the claim goes with the edge.
-
-### A teardown detaches the edge it read
-
-`removeParentLocked()` removes the *current* parent, and `_detachChildren()`
-picked a child in one transaction and removed its parent in another. A
-thread holding a lease on an unclaimed child could reparent it in between;
-the teardown then erased the new edge, and a later `Shiboken.delete()` of
-the new parent no longer saw the child's leases.
-
-`_detachChildren()` now invalidates and detaches in the transaction that
-picks the child. The invalidation plan cannot, because releasing wrappers
-takes the map lock, so it remembers the parent and detaches only from that
-one.
-
-Bit `DetachCheckedParent`; cleared, the removal takes the current parent
-again, and `teardown-detach-edge` sees the reparented child's new edge
-erased.
-
-### The deallocator claims the owned set
-
-Dropping the last reference to a Python-owned parent runs its C++ destructor
-from the deallocator, children and all. The binding performs that destruction
-but never asked about leases, so a call in flight on a child lost its object.
-
-In one transaction before `deallocData()` the deallocator now stamps the
-claim on the whole owned set and looks for a lease open in it; a derived
-claim would not do, since the teardown removes the edges it derives from.
-With none open the stamp alone refuses the lease a wrapper-subclass child
-could still take between the teardown and the destructor. With one, the
-destructor goes to the last of them, and since the stamp refuses new ones
-those are the only leases that can hold it back. The wrapper is at refcount
-zero and freed a moment later, so it cannot be pinned the way a waiting root
-is: the record carries what the deallocator would have used, the destructors,
-the tombstones and a reference per leased member. The release runs it after
-the waiting roots, on the main thread's queue where the type asks for that.
-
-Bit `DeallocClaim`; cleared, the deallocator destroys the owned set without
-looking, and `dealloc-waits-for-lease` sees `destroyed` fire under a lease.
-
-### The deallocator's stamp is taken back
-
-Unlike the stamp of `Shiboken.delete()`, this one is taken back where it was
-wrong. The binding graph says what the destructor should take, not what it
-does: `QQmlComponent.create()` makes the component the parent of the object
-through the return value heuristic, and the component's destructor leaves
-that object alone. A member with a C++ wrapper can outlive the destructor
-with a valid wrapper, so the claim pins the ones it stamps.
-
-Once the destructor is past - inline, after the last lease, or behind it in
-the main thread's queue - a member that still has its pointer gets its leases
-back; one the destructor deleted went through `Object::destroy()` and has
-none. Until then a survivor is refused like a dying member, and a lease open
-on it holds the destructor back.
-
-There is no bit for the take-back; `dealloc-claim-survivor` guards it.
-
-### Teardown claims what Python owns
-
-Deleting the application walks every wrapper and destroys the QObjects
-Python owns. That walk took a call lease on each and then tested ownership
-and validity without the lock - but a lease does not refuse a call in
-flight, it joins it. Another thread inside a call on the same object then
-had the destructor run under it.
-
-Under free threading the walk asks for the same claim `Shiboken.delete()`
-takes, with the ownership test inside the transaction:
-`callCppDestructorsIfOwned()`. An object nobody is calling is destroyed at
-once; one with a call in flight is claimed, refuses new leases, and its
-destructor runs when the last lease comes back - on that thread, as a
-deferred `Shiboken.delete()` does. An object C++ owns is left alone, as
-before.
-
-There is no bit: the lease was not a measure, it was the defect.
-`teardown-vs-call` guards it.
-
-### A deferred destruction keeps the main thread
-
-A destruction that waits for a lease runs when the last lease comes back, on
-the thread that returns it. `QWidget`, `QWindow` and `QQuickItem` are
-destroyed in the main thread (`delete-in-main-thread`), and the deallocator
-already sends them there; the lease release did not. A `Shiboken.delete()`
-of a widget from the main thread then destroyed it on a worker.
-
-Under free threading a ready root of such a type goes into the same queue the
-deallocator uses, pinned and still claimed, and takes the roots and
-deallocations released after it along, so their order holds. The main
-thread finishes it from a pending call. `deferredDeleteQObject()` used to
-drain the whole queue on its own thread, detached; it now deletes only its
-own object, and an entry that still meets another thread puts itself back.
-A child with an open lease can join the set while the root waits, so the
-set is tested again before the extraction. Finalization drains pending calls
-before the exit handlers run. Any other QObject is still destroyed where the
-lease comes back, as the deallocator destroys it where the last reference
-goes.
-
-There is no bit: the queue is not a trade-off. `deferred-widget-dtor` guards
-it.
-
-### The instance dictionary is published once
-
-A wrapper's `ob_dict` sits at `tp_dictoffset`, so CPython's generic
-attribute code creates and reads it as well. Shiboken's helper created it
-with a plain test and store, and a first access racing a `setattr` could
-overwrite the dict CPython had just published, attribute and all. The
-collector runs `tp_clear` with the world running again, and our map can hand
-the object out in between: `tp_clear` released the dict under whoever read
-it, CPython's own lock-free read included.
-
-Under free threading the helper creates the dict the way CPython does, under
-the object's critical section and published with a release store, and
-nothing replaces it afterwards: `tp_clear` empties it, which breaks the
-cycle, and the dict goes with the wrapper. A borrowed dict therefore lives as
-long as the wrapper its caller holds. An object taken out of the map during
-that window survives with its children, references and dict cleared.
-
-Bit `DictPublishOnce`; cleared, the plain store and release come back.
-`proof-dict-first-access` then loses an attribute set meanwhile, and
-`proof-dict-survives-clear` sees `tp_clear` replace the dict a reader holds.
-
-### The weakref list head is CPython's
-
-The deallocator tested `sbkObj->weakreflist` before calling
-`PyObject_ClearWeakRefs()`. That head is the one piece of a dying object's
-state another thread may still touch: a weakref operation reaches the
-referent's list under CPython's own hashed weakref lock, and the plain load
-races it. What the load sees can also be stale enough to skip the call, and
-with it the synchronized clearing and the callbacks.
-
-The test is gone under free threading. `PyObject_ClearWeakRefs()` makes the
-empty check itself, atomically and under that lock, so the precheck bought
-nothing but the race. The call stays behind `Py_IsInitialized()`, which is
-about static destruction and not about weakrefs.
-
-There is no bit: the precheck was an optimization, not a measure, and taking
-it back is the race itself. `weakrefs` is the guard that parks a thread
-between the last reference and the clearing.
-
-### Who may read parentInfo
-
-`setParentLocked()` publishes a freshly allocated `ParentInfo` with a plain
-store under the state lock, and several readers used the field without it.
-`SbkObject_tp_clear()`, `_destroyParentInfo()` and `deallocData()` tested it
-before calling a helper; `destroy()` read it under the lock and acted on the
-answer after. A clear runs with the world restarted, so a native callback can
-install a first parent under it - the load races the store, and a null read
-skips a child that is attached by the time the detaching would have happened.
-
-Under free threading the prechecks are gone and the helper is called
-unconditionally. Every helper below reads the field inside a transaction and
-does nothing when it is null: `_detachChildren()` and `detachFirstChild()`
-break on it, `removeParentLocked()` returns. The diagnostics, `Object::info()`
-behind `shiboken6.dump()` and `_debugFormat()` behind `debugSbkObject`, walk
-the children and the referred objects under the lock, so neither may be
-called while holding it. `shiboken6.dumpTree()` raises `NotImplementedError`
-instead: it formats each child with the lock released, which is not safe
-against the child set changing under it.
-
-`tp_traverse()` keeps its plain reads, because the collector stops the world
-around them.
-
-There is no bit: the readers were saving a lock acquisition, not trading a
-guarantee. No failpoint test carries this - the defect is a data race with no
-divergent outcome to observe, so TSan is what shows it.
-
-### The class hierarchy publishes snapshots
-
-`addClassInheritance()` mutated the graph under no lock while
-`findDerivedType()` and `dumpTypeGraph()` were walking it (B4-4). A lock
-around both ends is not available here: the traversal creates types through
-`Module::get()` and calls generated discovery functions in the middle of
-itself, so it runs arbitrary Python and cannot hold one.
-
-The edges are immutable instead. A writer copies the map and publishes the
-copy; a reader takes the current snapshot under a short lock and walks it
-with none held. What a traversal sees is therefore one graph from beginning
-to end, even when a module publishes hundreds of edges underneath it. The
-lock is `ClassHierarchy`, rank 2, and the inventory above says what may be
-held across it.
-
-A module hands its edges over as one table for the same reason the snapshot
-exists: publishing copies the map, so one call per edge copied it once per
-edge, and a full build has 436 of them. The generated `initInheritance()`
-calls `addClassInheritance()` once.
-
-There is no counterproof. `failpoints.py hierarchy-snapshot` parks a
-traversal with one iterator alive and imports fourteen modules under it,
-which makes the race deterministic - but with the snapshot taken away it
-still passes four runs out of five, because libc++ keeps `unordered_map`
-nodes alive across a rehash. A one-in-five crash is not a proof, and the
-test says so rather than claiming to be one.
-
-### MI offsets are computed once, and not cached
-
-A type with more than one C++ base is registered under one address per base,
-and the generated `mi_init()` computes those offsets. It used to fill a
-static array behind a sentinel check: two threads reaching it together both
-saw the sentinel, and both sorted, uniqued and `memmove`d the same array
-(B4-3). The
-initializer of a function-local static does that exactly once, whoever
-arrives, and that is what the generator emits now.
-
-The offsets were also cached in the type, filled by whichever registration
-came first and copied into every Python subclass on every constructor call -
-three writers to type state that readers walk without a lock. There is
-nothing to cache: `mi_init()` computes on its first call and hands out the
-same array afterwards, so the aliases are asked of it where they are used.
-`SbkObjectTypePrivate::mi_offsets` is gone.
-
-The offsets are a property of the layout, not of an instance. Virtual
-inheritance is not modelled by them and is not supported.
-
-The class graph is published the same way and for the same reason. It is
-immutable, so a writer copies it, and a module used to add its edges one call
-at a time - one copy of the whole map per edge, 436 of them in a full build.
-A module's generated `initInheritance()` now hands over a table and the map
-is copied once.
-
-There is no deterministic test for this one, and there cannot be: the race is
-inside generated code, where a failpoint cannot be placed, and the threads
-that lose it all write the same offsets, so nothing crashes either way. What
-carries it instead is a sanitizer, and for that both sides have to exist. The
-generator emits the sentinel version as well, behind `MiOffsetsOnce`, and
-`stress.py mi_first_instance` builds the first instance of every
-multiple-inheritance type in the sample binding from eight threads at once.
-With the bit cleared TSan has a race to report there; with it set it has
-none. That is the whole evidence for this measure, and it is a weaker kind
-than a counterproof - it is what the shape of the defect allows.
-
-Measured, on the sanitizer tree: nothing with every measure on, and two to
-six reports with `MiOffsetsOnce` cleared, in `Sbk_MDerived1_mi_init` and its
-siblings - the sentinel read against the write of the offsets, reached
-through `miOffsets()` from `registerWrapper()`.
-
-### Function-local statics whose initializer calls Python
-
-A C++ function-local static has a compiler-generated guard, and a second
-thread blocks in it while the first initializes. Where that initialization
-calls Python, the guard is a raw lock across Python by another name. The
-audit found these classes:
-
-- **Interned strings**, the large majority. Counted rather than estimated,
-  with the commands that produce the number, because the previous figure in
-  this file was neither: `grep -rn "static .*createStaticString" sources/
-  --include=*.cpp --include=*.h` gives 46 lines, one of them commented out,
-  so 45 function-local statics; `grep -rn "STATIC_STRING_IMPL("` gives 74
-  uses on top of that, in `sbkstaticstrings.cpp` and
-  `pysidestaticstrings.cpp`. One more interns without the helper
-  (`pysideproperty.cpp`, `getDataFromKwArgs()`), so "all of them go through
-  `createStaticString()`" is not true. Each interns one string once.
-  Bounded, no user code, no callback; kept.
-- **Type objects**, `createVoidPtrType()`, `createSignalType()`,
-  `createMetaSignalType()`, `createSignalInstanceType()`. These build types
-  through Python while holding the guard. Each is reached from its module's
-  own init function - `VoidPtr::init()` and `Signal::init()` call the
-  accessors themselves - so the guard is taken and released during module
-  initialization, before another thread can call in.
-- **Converter and type lookups**, `getConverter()`,
-  `getPythonTypeObject("QQmlEngine*")` in `pysideqmlregistertype.cpp`. Table
-  lookups, no Python execution.
-- **`PyTuple_New(0)`** in `pysidesignal.cpp`, one allocation.
-
-None of them is reached with another binding lock held, which is what makes
-them acceptable rather than the absence of a callback today. A new
-Python-calling static needs the same check.
-
-### Post routines run from a batch
-
-`qAddPostRoutine()` queues callbacks from any thread, and they run at Qt's
-teardown or in `QCoreApplication::shutdown()` (B16-2). A runner that walks
-the live queue lets a callback append under the iterator, and a raising
-callback leaves its exception pending for the next call.
-
-The runner takes the pending callbacks out as a batch under a short
-lock and calls them with no lock held: a Python call under a raw lock
-deadlocks against stop-the-world. Registrations made meanwhile go into the
-next batch, and the loop ends on an empty one. A raised exception is
-reported through `PyErr_WriteUnraisable()` and the batch goes on. A
-registration owns its callback before it publishes it: a runner may take
-the batch and release that reference as soon as the lock is gone.
-
-The loop stops after 1024 batches per run. A routine that re-registers
-itself would otherwise hang shutdown, and a build with a GIL has no other
-path.
-What is left after the limit is reported and released, not run.
-
-Bit `PostRoutineBatch`; cleared, the runner walks the live queue, and a
-debug build asserts on a registration during the walk.
-
-### QObject-pointer metatypes
-
-`createQObjectPtrMetaType()` asks `QMetaType::fromName()` whether the
-pointer name is taken and registers an interface if not (B16-3). Two
-threads registering the same name can both get "not taken". Qt does not reject
-the second registration: `registerCustomType()` in `qmetatype.cpp` finds the
-name among its aliases, stores the existing id into the new interface and
-returns it. The caller gets a valid `QMetaType` whose meta-object is the
-other class's, with no error. This applies to any code registering custom
-metatypes by name from more than one thread.
-
-The question and the registration run under one lock. It is a leaf and
-held across `QMetaType::id()`: a lock of ours reached from Qt's
-registration aborts a debug build instead of deadlocking. Qt's own locks
-are outside the ranks; for those the claim is that Qt's registration never
-calls back into `createQObjectPtrMetaType()`.
-
-The meta-object sits in a record next to the interface, and the record is
-never freed. `metaObjectFunc()` reads it through the interface pointer Qt
-hands back, so a Qt callback reads nothing another thread inserts.
-
-There is no bit and no test for the lock: a failpoint in the window would
-park under the lock, which `failpoint()` refuses. Claiming the name under
-a short lock (FT9), running `fromName()` and `id()` unlocked and publishing
-the result would take `QMetaType::id()` out of the lock and make the window
-testable.
-
-### Documentation recursion
-
-`handle_doc()` suppresses the generated help text while it builds one,
-because `make_helptext()` asks the object for its own `__doc__` (B16-5).
-With one process-wide counter, a thread asking for an unrelated `__doc__`
-while another builds help text gets the raw descriptor, and two threads
-losing an increment can leave it nonzero for good. The depth is per thread
-in the free-threaded build. A build with a GIL keeps its one counter,
-although `make_helptext()` runs Python and can switch threads there too.
-The globals the signature bootstrap publishes (B16-1) are not covered.
-
-Bit `DocRecursionPerThread`; cleared, the shared counter is back.
-
-### The two caches on a virtual call
-
-A generated virtual override caches two things: the name of the Python method
-to look for, in a function-local `nameCache[2]`, and the override it found, in
-`m_PyMethodCache[i]` on the wrapper instance. Both were plain pointers written
-by whichever thread reached the virtual first, and read by all the others.
-
-The value is never wrong. Every thread computes the same name and finds the
-same override, so a lost race costs a reference and not correctness: only the
-pointer that ends up in the slot is ever owned by anybody, and the names come
-from `PyUnicode_InternFromString()`, which hands out a new reference on every
-call. What it also costs is a data race that a sanitizer reports on every
-single run - seven of them out of the `signal_race` scenario alone on
-03.09., which is the kind of noise a real finding hides in.
-
-`Shiboken::CacheSlot` is the replacement: one pointer, `get()`, `publish()`
-and `reset()`. Under free threading it is a `std::atomic<PyObject *>` with a
-compare-exchange, and `publish()` returns what the slot holds afterwards and
-drops the reference that lost. With a GIL it is the plain pointer it always
-was. It is the size and alignment of the pointer it replaces, and a
-`static_assert` says so.
-
-There is no bit and no counterproof for this one, and there should not be: it
-takes nothing away and adds no window. What it fixes is a reference leak that
-no test can see and sanitizer noise that only a sanitizer can - so a
-sanitizer is what says whether it worked.
-
-Measured, same machine and same scenarios: `signal_race` reported **seven**
-races on 04.09. and **six** as late as 09.09., in `overrideMethodName()`,
-`Sbk_GetPyOverride()` and the two generated cache slots they are handed. It
-now reports **none**. Across all fourteen scenarios twelve reports remain,
-every one of them in the feature system - `sbkfeature_base`,
-`initSelectableFeature()` around the subtype walk, `class_property` - which
-is the finding this work package does not own. Not one report names either
-cache any more.
-
-### Walking a type's mro and bases
-
-An assignment to `__bases__` replaces `tp_mro` and `tp_bases`, and owning a
-type does not own the tuples. A walk that borrows one and calls back into
-Python before it is done - `PepType_GetDict()`, a dict lookup,
-`PyObject_GetAttr()` - can read a tuple another thread has released.
-`PepMroRef` and `PepBasesRef` hold an owned snapshot for the walk (FT3).
-
-The snapshot comes from `PyObject_GetAttr()`, not from the field.
-`set_tp_bases()` stores under the type lock without stopping the world, and
-`set_tp_mro()` stops the world only from 3.14 on, so loading the field and
-then incrementing races the writer's decrement. `_PyType_GetBases()` takes
-the type lock around those two steps; the attribute is how an extension
-gets the same. The price is that a metaclass answers: it can raise or
-return something that is not a tuple, so a null snapshot carries an
-exception, and a caller with no error channel stores it. The same holds
-for a tuple whose items are not types, or a `__bases__` that names the
-type itself: every walk takes the items for types, and the one over bases
-recurses.
-
-No raw binding lock may be held around a holder. The lookup can run
-Python, and releasing a bases tuple can free the types in it. An mro tuple
-is freed only by the tracing collector from 3.14 on, because `set_tp_mro()`
-turns on deferred refcounting; on 3.13t it falls like any other tuple. The
-holder asserts on both ends.
-
-A failed lookup makes `getOverride()` answer nullptr, as "no override"
-does, and `Sbk_GetPyOverride()` caches that answer for the object's
-lifetime. It caches only when no error is set.
-
-Bit `MroSnapshot`; cleared, a walk borrows the type's own tuple again. A
-tuple a metaclass builds per access stays owned, since nothing else holds
-it. Cleared, `find_name_in_mro()` borrows as well, which no release did.
-
-Walks that are not converted:
-
-| Where | Why |
-|---|---|
-| `walkThroughBases()`, `isDirectAncestor()` | shiboken's own graph walks; converting them needs its own measurement. `walkThroughBases()` asserts that the state lock is not held |
-| `dynamicqmetaobject.cpp` | the dynamic meta object, FT10 |
-| `feature_select.cpp`, `sbkfeature_base.cpp` | the feature system, FT2. Still compiled into free-threaded builds, and `lookupUnqualifiedOrOldEnum()` walks `tp_mro` on every failed attribute lookup on a Qt class |
-| `helper.cpp` | diagnostics, FT12 |
-| `pep384impl.cpp` | the startup probe, before a second thread exists |
-| `sbktypefactory.cpp` | writes the fields while the type is created |
-| `resolveMetaType()` | reads `tp_base`, the third field `__bases__` replaces, bare. Reached only for a type without bases, which an initialized type never is |
-
-### Dictionary lookups own their result
-
-`PyDict_GetItem()` and `PyDict_GetItemString()` return a borrowed value.
-With the GIL nothing runs between the lookup and the caller's incref;
-without it another thread can remove the entry and release the value in
-that gap. The same holds for `PyDict_Next()`: its key and value are borrowed
-from a dict another thread can change, and a loop body that calls Python
-releases a critical section on the dict, so a section alone does not help.
-
-`PepDict_GetItemOwned()` and `PepDict_GetItemStringOwned()` return a new
-reference, through `PyDict_GetItemRef()` on a free-threaded build; they
-suppress errors and keep a pending exception, as the borrowed calls do.
-`PepDict_IterationSnapshot()` hands a loop a private copy on a free-threaded
-build and the dict itself otherwise. Type and instance dictionaries,
-`sys.modules`, module globals and dicts handed in by the caller take these
-paths, the generated `getattro` and the dict converter templates included.
-A dict private to the call, such as its keyword arguments, keeps the plain
-API. A signal call owns the homonymous method it found until it is bound.
-That list is what was converted, not a claim about every
-borrowed lookup: `find_name_in_mro()` still returns one out of a type dict,
-and the `__feature__` code is left as it is (FT2).
-
-There is no option bit: the owned form only closes a gap, it trades nothing.
-
-### A failed type function stops there
-
-A generated type function that fails answers nullptr with an error set.
-Every step after it took the answer as a type: `incarnateHelper()` and
-`incarnateType()` incremented it, `getEnclosingObject()` asserted on it and a
-release build walked on with nullptr, and the attribute walk in
-`Module::get()` looked the next name up on it. All of that sits on the
-import path, so the failure ends startup either way - what must not happen is
-that a crash replaces the report.
-
-Under free threading each of these stops on nullptr and leaves the error set.
-`incarnateType()` restores the feature switch it turned off for the call, as
-its normal exit does, and when a subtype failed it reports that error rather
-than hand out the main type with an exception pending.
-
-That is the entry side of B13-2. Whether a failed initializer may leave a
-readiness flag, a half-built type or a dropped subtype entry behind, and what
-a retry then sees, belongs to the lazy machinery and is not settled here.
-
-There is no bit: not dereferencing a null answer trades against nothing, and
-a counter-proof would have to make a generated type function fail.
-
-### A virtual dispatch owns the override it found
-
-`getOverride()` looked the method up, took what `PyMethod_Function()` or the
-compiled-method attribute gave it - both borrowed - and let the bound method
-go at the return. After that the callable hung on the class dictionary alone,
-and the one caller treats it as owned: it releases it when an error is
-pending, which drops a reference nobody took.
-
-The walk between the lookup and the return runs Python, so the reference has
-to be taken where the callable is found, not where it is handed out. Under
-free threading the two branches own what they found, an `AutoDecRef` carries
-it across the mro walk, and each return hands the caller a reference of its
-own. The caller is then right as it stands: it releases on the error path,
-and the reference it takes for `publish()` is the one that keeps the override
-alive across the call.
-
-There is no bit: owning what you return is not a trade against anything.
-There is no guard test either, although the window can be reached: the
-walk parks at `mro-after-snapshot`, which `proof-mro-snapshot` uses, and
-another thread could replace the method in the class there.
-
-### A signal instance remembers its type weakly
-
-A signal instance keeps the type of its source to find the homonymous method
-later, stored as a raw pointer. Every read sits behind a check that the
-source is alive, and with a GIL a live source keeps its type. Under free
-threading the check and the read race: another thread can finish the last
-wrapper and release the type in between, and the walk over it now takes a
-`PepMroRef`, which asks the type for its `__mro__`.
-
-A strong reference is not the answer: a signal instance is not tracked by the
-collector, and a class that keeps one of its own bound signals would close a
-cycle through that edge and never be freed. Under free threading the record
-holds a weak reference instead, and each reader resolves it to a strong one
-for as long as it uses the type. A type that is gone has no homonymous
-method, and a wrapper built for the sender then gets its type from the QObject
-heuristics. Every type takes weak references; should one refuse, the record
-reads as if the type were gone.
-
-There is no bit: a reference is not a measure that can be switched off.
-`signal-type-collectable` guards the cycle; the race has no failpoint.
-
-### A capsule method owns its instance
-
-QtRemoteObjects gives a dynamic class its slots and properties through a
-descriptor that binds a builtin function to a capsule. The capsule records
-the instance and the descriptor's own capsule as raw pointers, and the handler
-reads the instance as `self`. A bound method that outlives its object reads
-a freed wrapper, and every access leaks: the method's capsule takes one
-reference too many, and a property access never releases its function.
-
-Under free threading the function's `__self__` is a tuple of the instance
-and the capsule: nobody can write it, and the collector traverses both. The
-capsule's context holds the descriptor, which owns the method definition and
-the capsule the handler reads. Neither a capsule nor `__module__` can hold
-the instance: a capsule shows the collector no edges, and `__module__` can
-be assigned. A bound `PyMethod` is no way out either: `connect()` expects a
-Python function behind every method. The method stays a builtin whose
-`__self__` is that tuple instead of the capsule.
-
-There is no bit: a reference is not a measure that can be switched off.
-`capsule-method-owns-instance` and `capsule-access-no-leak` guard it. The
-build with a GIL keeps the borrowed pointer and the leak.
-
-### A source's property is read as a copy
-
-A QtRemoteObjects source keeps its property values in a `QVariantList` of
-its own, in a capsule in the instance dictionary, and one handler reads and
-sets them. The getter held a reference into the list while it converted the
-value, and the setter replaced the element in place. With a GIL the two never
-overlap; under free threading a setter in another thread rewrites the variant
-under the reader, and two setters write the same variant at once.
-
-Under free threading every access to the list holds the capsule's critical
-section. A read takes a copy and converts it after the section, and a set
-swaps the new value in and releases the old one after the section, where its
-destructor may run Python. The setter compares against its own read, so a
-set that races another is ordered at that read. A source whose list is gone
-raises a `RuntimeError` instead of locking a null capsule.
-
-Bit `SourcePropertyCopy`; cleared, the getter holds the reference again and
-`proof-source-property-copy` returns the value a setter wrote after the read.
-
-### The guard's reach in generated code
-
-Checked against the generated wrappers rather than the templates, because
-that is where a missing lease would sit. Over all 1872 of them:
-
-| Entry kind | with `cppSelf` | without a lease |
-|---|---|---|
-| methods | 36673 | 0 |
-| rich comparison | 287 | 0 |
-| number, sequence and mapping slots | 539 | 0 |
-| property getters and setters | 574 | 0 |
-| entries with an `allow-thread` detach | 249 | 0 |
-
-The table counts generated entry points, and that is also its limit. It is
-not a statement about every way a C++ pointer is dereferenced: hand-written
-snippets are outside it, and so is the buffer protocol -
-`qbytearray-bufferprotocol` in `qtcore.cpp` reads `cppSelf` with no lease and
-hands out a pointer into the object's memory. That is older than any of this
-and belongs to the lease work; it is named here so the table is not read as a
-completeness argument it does not make.
-
-Not every reader takes its pointer from the lease yet (see "What a lease
-hands out"):
-
-- `tp_getattro` and `tp_setattro` take a lease and then read the pointer
-  again. They do not dereference it on the spot.
-- `Object::cppPointers()`, `PySide::convertToQObject()` and the property
-  setter of QtRemoteObjects' dynamic classes take no lease at all.
-
-`CallLease{self, <type>}` takes the guard, arguments are constructed with
-`Guard::Omit`. That is deliberate: a contended inner guard would run the
-native call with the receiver's own guard suspended, so two nested guards are
-never a two-object transaction. Where the generator emits
-`Py_BEGIN_ALLOW_THREADS` or `ThreadStateSaver`, the lease is always
-constructed before the detach region and outlives it - the guard is suspended
-there, the lease is not.
-
-### How far the guard actually reaches
-
-The guard is a CPython critical section, and a critical section ends at every
-detach. That is not a caveat to work around, it is what makes the guard
-usable at all, and it is measurable from Python:
-
-| While one thread is here | A second call on the same receiver |
-|---|---|
-| in a Python override called back from C++, busy-waiting | waits |
-| in a native call that blocks with the thread attached | waits, for as long as the call takes |
-| waiting for a `threading.Lock` | goes through |
-| waiting in `QRecursiveMutex::lock()`, which is `allow-thread` | goes through |
-| waiting in any wait that detaches | goes through |
-
-So the lock inversion "guard first, then a lock" against "lock first, then the
-guard" resolves by itself whenever the wait detaches - the receiver's section
-is suspended for the duration and the other thread gets in. It does not
-resolve when the wait keeps the thread attached, and that is the boundary
-below. `sources/pyside6/tests/manually/freethreading/failpoints.py` measures
-both halves rather than asserting them: `guard-vs-python-lock` and
-`guard-vs-annotated-lock` for the resolving case, `guard-spans-native-wait`
-for the other.
-
-Two consequences worth stating. A blocking Qt method needs its `allow-thread`
-annotation more under free-threading than it did with the GIL: without it the
-call blocks every other thread that reaches the same receiver, and it blocks
-stop-the-world for everyone. And nothing may be built on the guard being
-continuously held across a Python C API call, because it is not.
-
-### A failed conversion stops the entry
-
-Under free threading a Python to C++ conversion can fail at any time: a
-concurrent `Shiboken.delete()` makes the converter's own lease refuse, and
-the converter leaves null or its untouched output behind, with an exception
-set. Generated calls check for that before the native call. Without a check
-a direct entry runs on that output (B10-3): rich comparison and the default
-`__setitem__` use it, and a field setter writes it into the live field,
-hands it to `keepReference()` and returns success with the exception
-pending.
-
-These entries, and the value converter of opaque containers, call
-`Shiboken::Errors::conversionFailed()` before their first native statement.
-A pointer field is converted into a local and written only after that check;
-so is a container field, whose converter clears the target and inserts every
-element, the failed ones as null or default-constructed items, so the live
-field would be lost before the check could refuse. A value field stays the
-conversion target, since a failed copy conversion writes nothing.
-`returnFromRichCompare()` keeps the conversion's exception instead of
-reporting that no operator matched.
-
-Bit `ConversionGate`; cleared, the entries run on the conversion's output,
-and so does the check in the QProperty setter.
-
-### Method slots own their receiver for the call
-
-A slot for a bound method keeps a reference on the function and a weak
-reference on the receiver, so that the connection does not keep the
-receiver alive. Delivering through a raw receiver pointer beside it binds a
-receiver the slot does not own (B12-4, B14-4). The weakref callback that
-disconnects is cleanup after the fact: a delivery already running keeps
-going while another thread drops the receiver's last reference.
-
-The weak reference is now the slot's only authority over the receiver.
-Each delivery upgrades it with `WeakRef::deref()` and owns the receiver
-until the Python call returns. A receiver being destroyed has its weak
-references cleared before any callback runs, so the upgrade answers a live
-object or nothing, and nothing means no call.
-
-A receiver whose type has no weak reference support - `__slots__` without
-`__weakref__` - gets a strong reference on the whole bound method instead.
-That keeps the receiver alive as long as the connection. The cost: a
-receiver that owns its sender forms a cycle through `PySideQSlotObject`,
-which the collector cannot walk, and is never freed. Making it collectable
-would mean giving the reference to the sender's wrapper, whose
-`referredObjects` the traversal already visits; what stands in the way is
-the disconnect, because `PySideQSlotObject` does not know its sender and Qt
-destroys slot objects while the sender is dying.
-`slot_weakrefless_receiver_test.py` measures the cycle and has to be turned
-around when that changes. Any other failure to create the weak reference,
-for example a `MemoryError`, takes the same fallback but is reported as
-unraisable.
-
-Not repaired: connecting the same bound method twice still leaves one
-registry row for two Qt connections (B14-5), so the weakref callback
-disconnects only one of them. Representing equal connections needs the
-record model of the FT5 handoff. The surviving connection does not deliver
-to the dead receiver.
-
-`WeakRef::deref()` exists in the free-threaded build only, where
-`PyWeakref_GetRef()` is always available; a build with a GIL has no caller.
-
-The bit is `MethodReceiverUpgrade`; cleared, a delivery binds the raw
-receiver pointer without touching its refcount, and a receiver without weak
-reference support is held as a raw pointer.
-
-### What the lock contract does not promise
-
-No general freedom from deadlock. The contract covers the locks listed above:
-none of them is held across Python, Qt, a decref, a destructor or an
-unbounded wait, except where this document names the exception. It says
-nothing about locks the application or a third-party library holds while
-calling in, and nothing about Qt's own locks. A native lock taken in the
-opposite order to a binding lock can still deadlock - that was true with the
-GIL and stays true.
-
-Nor is the type hierarchy promised to hold still. CPython accepts
-`__bases__` assignment on wrapper types, and even across layouts - a QObject
-subclass can be given a QTimer subclass as its base while instances of it
-exist. What keeps destruction correct is the shape of the transaction rather
-than any refusal by CPython: the destructor list is taken once, before the
-state lock, and the locked part only zips it with `cptr`. An immutable
-per-type list published when the type is readied would make this an
-invariant instead of a property of the code as written; that belongs with
-the identity and hierarchy snapshots.
-
-Nor is QML construction promised to survive every nesting. QML allocates
-the memory for a registered type and the generated constructor places the
-object into it; a second QObject built inside `__init__` before that happens
-would take the address instead, so only the type QML asked for may consume
-it. A second object of the *same* type built there still passes that test
-and still takes the address. Telling those apart needs the address to travel
-with the object being constructed rather than with the thread, which belongs
-to the wrapper-identity work.
-
-`abi3t` is not supported, and behaviour after `fork()` is undefined for a
-process that has used the bindings; use `spawn`, or `fork` followed by
-`exec`.
-
 ## What this does not give you
 
 Qt itself does not become thread-safe. The call guard serializes two threads
@@ -1392,7 +410,8 @@ the claim.
 ## Switching the locks off
 
 `PYSIDE6_OPTION_FT` is a bit per measure, and clearing one puts back what was
-there before it:
+there before it. Each bit is documented where its measure is; this section
+claims no bit of its own and is only the manual for the switch.
 
 ```
 PYSIDE6_OPTION_FT             unset, and that is the only supported setting:
@@ -1403,7 +422,7 @@ PYSIDE6_OPTION_FT=0b011       the two locks only
 PYSIDE6_OPTION_FT=off         without any of them
 ```
 
-A leading `~` means "all of them except these", so a counterproof names
+A leading `~` means "all of them except these", so a counter-proof names
 only the measure it takes away. The quotes are for zsh, which rejects a bare
 `~0x1000` as a user name.
 
@@ -1427,8 +446,9 @@ claim:
     A/B in `run.py`'s scenario table instead, one lock switched off per
     column, five rounds each. Their subjects are stress scenarios, not
     deterministic ones.
-  - `MiOffsetsOnce` has a sanitizer A/B and can have nothing else; the
-    section above says why.
+  - `MiOffsetsOnce` has a sanitizer A/B and can have nothing else;
+    [its section](freethreading-types.md#mi-offsets-have-one-owner)
+    says why.
   - `MetaObjectParseOutsideLock` has both: a `proof-*` for the race the
     split opens, and a `run.py` scenario for the contract assertion the
     cleared bit trips. That scenario needs a build with the assertions in
@@ -1471,10 +491,7 @@ half needs the locks switched off, which produces crashing processes and
 therefore cannot be part of the automatic suite. It lives in
 `sources/pyside6/tests/manually/freethreading/run.py`, which runs each
 scenario twice, with and without the lock it depends on, and only calls a
-scenario a proof when it crashes without it. Ten of the sixteen are proofs
-at the moment; `signal_race` became one when the coarse lock went, because the
-signal machinery reaches the wrapper lookups, the parent/child graph and
-destruction, and the coarse lock had been covering that.
+scenario a proof when it fails without it.
 
 Run it with the free-threaded interpreter; `REPEATS`, `STRESS_THREADS` and
 `STRESS_ITERS` size the run, and naming scenarios restricts it. Never run a
@@ -1484,50 +501,44 @@ set, and a scenario on its own can stay clean hundreds of times.
 ### Deterministic races: failpoints
 
 Repetition is a poor way to reach a window of a few instructions. A failpoint
-is a named place where a test stops one thread, so the second one arrives in
-the order the test wants, every time - a test that fails on an unfixed
-revision rather than in one run out of fourteen. They sit either side of the
-windows that matter, for example:
-before weakrefs are cleared, before the C++ destructor runs, once the wrapper
-is gone and only that destructor is left, once the destructor is past and the
-tombstone is still standing, before a parent's destructor deletes the children
-it has just handed back, after a lease is taken and before it is handed back,
-before `destroy()` detaches `cptr` and again where `destroy()` is past but
-the memory is not, between the check and the write in `setCppPointer()`,
-inside a traversal of the class-inheritance graph with one iterator alive,
-between the lookup that misses an instance meta object and the commit that
-publishes one, and before `setParent()` publishes a new edge.
-`Shiboken.failpointNames()` lists what a build has; a release build has none
-and the tests skip.
+is a named place where a test stops one thread, so the second arrives in the
+order the test wants, every time - a test that fails on an unfixed revision
+rather than in one run out of fourteen. They sit either side of the windows
+that matter: before the C++ destructor runs, once it is past and the
+tombstone still stands, between the check and the write in `setCppPointer()`,
+before `setParent()` publishes an edge. `Shiboken.failpointNames()` lists
+what a build has; a release build has none and the tests skip.
+
+Two properties make them usable rather than merely present. A parked thread
+waits **detached**, so it blocks neither stop-the-world nor, on a build
+running with the GIL, everyone else. And an armed point stops exactly one
+thread: the arming goes with the first one through, so a test can park a call
+and then drive the same code path from another thread to reach the object the
+parked one holds.
 
 The registry and the call sites are held together by
 `libshiboken/check_failpoint_names.py`, which ctest runs. A name a test arms
 but no `SBK_FAILPOINT()` carries lets that test run into its timeout; a name
 in the code but not in `KnownFailpoints` cannot be armed at all, and the test
-that wants it reports a skip - which is green. Both directions have cost a
-day, which is why this is a check and not a convention.
+that wants it reports a skip - which is green.
 
-Two properties are what make them usable rather than merely present. A parked
-thread waits **detached**, so it blocks neither stop-the-world nor, on a
-build running with the GIL, everyone else. And an armed point stops exactly
-one thread: the arming goes with the first one through, so a test can park a
-call and then drive the same code path from another thread to reach the
-object the parked one holds.
+### A failpoint that throws
 
-A second kind throws instead of parking. `SBK_FAILPOINT_THROW()` stands
-where a transaction allocates under the state lock - for example
-`deferred-slot-alloc` - and, once armed, throws `std::bad_alloc` a single
-time, so a test can see what a failed transaction leaves behind. It cannot park,
-because the thread holds the lock. The kinds are armed separately and have
-separate inventories, `KnownFailpoints` and `KnownThrowFailpoints`, which
-the name check keeps apart.
+`SBK_FAILPOINT_THROW()` stands where a transaction allocates under the state
+lock - `deferred-slot-alloc`, for one - and, once armed, throws
+`std::bad_alloc` a single time, so a test can see what a failed transaction
+leaves behind. It cannot park, because the thread holds the lock. The two
+kinds are armed separately and have separate inventories, `KnownFailpoints`
+and `KnownThrowFailpoints`, which the name check keeps apart.
 
-`sources/pyside6/tests/manually/freethreading/failpoints.py` holds the tests.
-They are not run directly for evidence, because a test that only ever ran
-free-threaded shows that the code works there, not that the synchronization
-is what makes it work. `failpoint_matrix.py` next to it runs each one in its
-own subprocess, with a hard timeout and its own process group, on every
-interpreter the argument needs:
+### The failpoint matrix
+
+`failpoints.py` holds the tests. They are not run directly for evidence,
+because a test that only ever ran free-threaded shows that the code works
+there, not that the synchronization is what makes it work.
+`failpoint_matrix.py` next to it runs each one in its own subprocess, with a
+hard timeout and its own process group, on every interpreter the argument
+needs:
 
 | Row | Interpreter |
 |---|---|
@@ -1536,19 +547,17 @@ interpreter the argument needs:
 | `ft-gil-off` | the same binary, `PYTHON_GIL=0` |
 
 Each child verifies the GIL state it was asked for **after** importing
-PySide, because that import is what can turn the GIL back on; a row that
-silently ran in the wrong mode would be a second measurement of the first.
-A build directory carries the Python version but not whether that Python was
-free-threaded - `qfpdp-py3.15-...` is the same name for 3.15.0b3 and
-3.15.0b3t - so each row names its interpreter and its build and the two are
-checked against each other through the extension suffix. A row without a
+PySide, because that import is what can turn the GIL back on. A build
+directory names the Python version but not whether that Python was
+free-threaded, so each row names its interpreter and its build and the two
+are checked against each other through the extension suffix. A row without a
 build is reported as missing and the run ends as partial, never as green.
-
-    FT_PYTHON, FT_BUILD_DIR      the free-threaded row, defaults to the
-                                 interpreter running the script
-    GIL_PYTHON, GIL_BUILD_DIR    the traditional row, no default
+`FT_PYTHON` and `FT_BUILD_DIR` name the free-threaded row and default to the
+interpreter running the script; `GIL_PYTHON` and `GIL_BUILD_DIR` name the
+traditional one and have no default.
 
 A test may declare that its expected outcome is not "ok":
 `lazy-lock-spans-destruction` is listed as failing while B13-5 is open, and
-the runner can treat a deliberate deadlock's timeout as the pass. Both mean
-the same thing - the day the cell changes, the entry comes out.
+the runner can treat a deliberate deadlock's timeout as the pass. The day the
+cell changes, the entry comes out.
+

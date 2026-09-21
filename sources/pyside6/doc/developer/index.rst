@@ -35,6 +35,9 @@ many features and implementation details that the project has:
 
    enumfeatures_doc.rst
    freethreading.md
+   freethreading-lifecycle.md
+   freethreading-types.md
+   freethreading-bindings.md
    limited_api.rst
    signature_doc.rst
    mypy-correctness.rst

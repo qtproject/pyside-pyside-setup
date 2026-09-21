@@ -31,22 +31,23 @@ wrong, 77 nothing to test because this build has no failpoints.
 ## What a test here has to earn
 
 A test that passes with and without the code it is named after proves
-nothing, and two of the tests in this directory were exactly that until a
-review found them. So each measure FT8 added can be switched off at runtime
-through `PYSIDE6_OPTION_FT` (`sbkftoptions.h`), and the tests named
-`proof-*` run their subject in a child process with one bit cleared and
-require it to fail there. If it still passes, the test is not testing what
-its name says and the `proof-*` cell is what says so.
+nothing. Each measure can be switched off at runtime through
+`PYSIDE6_OPTION_FT` (`sbkftoptions.h`), and the tests named `proof-*` run
+their subject in a child process with one bit cleared and require it to fail
+there. If it still passes, the test is not testing what its name says, and
+the `proof-*` cell is what says so.
 
 `check_bit_coverage.py` holds that rule against the tree: every bit in
-`sbkftoptions.h` has a `proof-*` that clears it, or an exemption with the
-reason it is demonstrated elsewhere; every `proof-*` clears a bit the enum
-has and proves a registered test; and the entries add up to the `test_*`
-functions.
+`sbkftoptions.h` has a `proof-*` that clears it or an exemption with its
+reason, every `proof-*` clears a bit the enum has and proves a registered
+test, and the entries add up to the `test_*` functions. `check_doc_form.py`
+beside it holds the shape of this file and of the free-threading notes: one
+section per bit, a budget in text lines, and every `See` reference naming a
+heading that is really there.
 
-One test is expected to FAIL. It holds a finding that belongs to another
-work package, and the line comes out of the registry the day that package is
-done. A run that does not reach the defect reports *skipped*, not ok.
+One test is expected to FAIL. It holds a finding that belongs to another work
+package, and the line comes out of the registry the day that package is done.
+A run that does not reach the defect reports *skipped*, not ok.
 
 ## The tests
 
@@ -54,6 +55,220 @@ Two sections below have no test, and say why. That is deliberate: a finding
 whose code path nothing can reach, or a race that is inside generated code
 where no failpoint can be placed, is worth writing down and worth repairing,
 but inventing a test for it would only look like evidence.
+
+## Locks, the call guard and leases
+
+The measures are in
+[the overview](../../../doc/developer/freethreading.md).
+
+### metaobject-lifetime
+
+Every QObject answers `metaObject()` with the same `&QObject::staticMetaObject`,
+so the wrapper map holds one wrapper for it and hands that one to everybody.
+Destroying any single QObject invalidated it and hit every other holder,
+although the C++ object behind it is static and never dies.
+
+Five lines, with a GIL, no threads. The third one is the whole test - leave it
+out and the shared wrapper is not among `b`'s referred objects, nothing
+touches it, and the remaining four pass on a broken build:
+
+    a, b = QObject(), QObject()
+    ma = a.metaObject()
+    mb = b.metaObject()         # the SAME wrapper, fetched through b
+    Shiboken.delete(b)          # a stranger
+    ma.className()              # RuntimeError: already deleted
+
+The defect is in the walk: `invalidate()` marked referred objects invalid,
+and a referred object is the one case where the holder is *not* the owner -
+the `reference-count` tag exists because a parent link would be wrong there.
+Moving the bookkeeping in `callCppDestructors()` ahead of the C++ destructors
+is what exposed it; before that `clearReferences()` had taken the referred
+objects out by the time `invalidate()` ran. The walk is gone from both twins,
+and `ownership_invalidate_referred_test.py` in the sample binding is the
+regression test, under ctest with the GIL as without it.
+
+### lease-vs-destroy
+
+The lease window: destruction arriving while a call holds a lease. A thread
+takes a lease and parks; another destroys the same object. The destruction
+has to be deferred until the lease comes back, and the call must not see a
+detached pointer.
+
+Writing it as `obj.objectName()` measures something else. That expression is
+two leases: `tp_getattro` takes one to hand out the bound method, the call
+takes another, and Python bytecode runs in between, where no call is in
+flight and a destruction that lands there refuses the second lease - which is
+correct. A GIL build divides the expression in the same place.
+
+The method is therefore bound before the failpoint is armed, and the test
+parks inside the call, with the lease held. The destruction is deferred, the
+call returns its value.
+
+### mi-pointer - an equivalence, and no proof row
+
+A lease asked for a base type computes that base's pointer itself: the
+multiple-inheritance slot, then the special cast. Single inheritance never
+reaches either. `sample.MDerived1` has two C++ bases and a cast function,
+and the test converts and calls it as each base.
+
+There is no `proof-*` row. Clearing `LeaseSnapshot` puts back
+`Conversions::cppPointer()`, the function this arithmetic has to
+reproduce, so both must answer the same. The row guards the arithmetic
+against drift; it is not a measure.
+
+### lease-snapshot, proof-lease-snapshot
+
+B5-1: C++ deletes an object while a lease on it is out, and
+`Object::destroy()` detaches the pointer array without consulting
+`activeCalls`. The lease cannot defer that, but its holder must not read
+the array a second time.
+
+`Shiboken.VoidPtr(obj)` takes a lease, parks at `lease-after-acquire` and
+copies the pointer out; the parent's `killChild()` runs in between. The
+test expects the address the lease validated.
+
+`proof-lease-snapshot` clears `LeaseSnapshot` and expects zero: the holder
+reads the detached array again. The re-read tests for null, so the window
+shows as a value rather than a crash.
+
+### leased-receiver, proof-leased-receiver
+
+The same window for the receiver of a generated call. `hash()` on
+`sample.ObjectType` returns the receiver pointer without dereferencing it,
+so the test can report the pointer of an object that is already gone
+without touching freed memory. It expects the address the lease validated;
+`proof-leased-receiver` clears `LeaseSnapshot` and expects the null that
+`Conversions::cppPointer()` reads.
+
+### metatype-subclass, proof-metatype-subclass
+
+A class with a metaclass derived from the binding's, as in
+`class Meta(type(QObject), ABCMeta)`. The test needs two answers: reaching
+`lease-after-acquire` shows that a lease was taken at all, and the address
+from `Shiboken.VoidPtr()` shows it is the right one.
+`proof-metatype-subclass` clears `MetatypeSubclassLease`; the object then
+takes no lease and never reaches the failpoint.
+
+The object is kept alive until the process ends. Destroying a wrapper type
+with its own metaclass crashes the interpreter, with a GIL and with every
+bit cleared - a separate defect that would otherwise end the run before it
+reports.
+
+### parent-removal-alloc, proof-transaction-prepare
+
+B6-4: a state transaction that fails halfway. `setParent(None)` reaches
+`removeParentLocked()`, which erases the edge, hands ownership back and then
+defers the decref of the edge reference - the last allocation, after every
+write. The throwing failpoint `deferred-slot-alloc` fails that allocation. It
+throws instead of parking, because a thread inside a transaction holds the
+state lock.
+
+The test expects the call to raise with ownership unchanged, and a retry to
+succeed. It checks ownership and not `parent()`, because Qt has reparented
+the object before the binding transaction runs.
+
+`proof-transaction-prepare` clears `TransactionPrepare`: the room is taken
+after the erase, and ownership has moved although the call raised.
+
+### no-lock-in-python
+
+FT8 invariant 2: no binding raw lock spans Python. A Python `__del__` is the
+shortest way to ask. It runs from the middle of a wrapper's destruction,
+which is exactly where the state lock and the wrapper-map lock are taken. If
+either were held across the callback the `__del__` would see it, and a real
+Python call under a lock deadlocks against stop-the-world.
+
+### no-lock-in-conversion
+
+The same invariant where an argument conversion calls back into Python. An
+earlier version of this test ran its probe from a plain dict lookup and
+proved nothing: that is ordinary Python, outside any call. The probe has to
+run *inside* a generated entry point, and `__index__` on an integer argument
+is the shortest way in - shiboken asks for it while converting, with the
+receiver guard taken and the lease held.
+
+That is what the second half of the measurement is for: `activeCalls()` on
+the receiver says the probe really is inside the call, so a "no lock held" is
+about the conversion path and not about some quiet moment elsewhere.
+
+### state-lock-leaf
+
+FT8 invariant 7: a state-lock holder needs nothing before it can let go. One
+thread parks in the middle of a call, holding its lease and its receiver
+guard. With it standing there, everything the state lock protects has to keep
+working in other threads: wrapper creation, the parent graph, destruction. If
+a transaction needed the parked thread's guard, or if a guard holder still
+held the state lock, this would not come back - which is why it runs in a
+subprocess with a timeout rather than trusting a join.
+
+### no-leaked-lease
+
+Invariants 9 and 10: every generated exit gives the lease back. The lease is
+what holds the C++ destructor off, so one that survives its call would pin
+the object for good and say nothing while doing it. Every shape of exit is
+asked afterwards: the ordinary return, an argument that fails to convert, an
+exception out of an override, a comparison, an attribute, and a method that
+detaches around the native call - the detach suspends the guard, and the
+lease has to outlive that.
+
+### lock-order
+
+FT8 invariant 1: every raw lock has a rank, and the rank is kept.
+`checkLockRank()` asserts it before every acquisition - a lock may only be
+taken while holding locks that rank below it - so taking one the other way
+round aborts a debug build here rather than deadlocking somewhere else later.
+
+A rank violation therefore shows as a crash, not as a failure. What this test
+compares is the other half: which pairs are held at once at all. The
+inventory in `doc/developer/freethreading.md` names them, and a pair that is
+not in it is a finding - a lock order nobody has argued for - not a detail to
+print and move on from.
+
+### lazy-lock-spans-destruction - expected FAIL
+
+Open, and owned by the lazy protocol: B13-5 from the other end.
+`Module::get()` holds the lazy-type mutex across `PyObject_GetAttr()`, so
+arbitrary Python runs under it - and with it a refcount reaching zero, a
+wrapper being destroyed, a deferred C++ destructor running. That last one is
+what the state lock's own rule forbids for every other lock: a destructor
+reaches Qt and user code, so a raw lock held across it deadlocks against
+stop-the-world and against a re-entrant call.
+
+The assertion in `DeferredActions::run()` is what sees it, and only when two
+of the tests here run in the same process - it needs the wrappers the first
+leaves for the collector and the type incarnation the second causes - which
+is why this one runs them rather than rebuilding that state. It no longer
+fires on either interpreter, and `Module::get()` still takes the mutex around
+the walk, so the drivers changed, not the protocol: *skipped*, never ok.
+Making it deterministic again needs a failpoint inside `Module::get()`.
+
+Counted rather than asserted, because aborting on it would mean nobody can
+run a debug build until the lazy protocol is replaced. Only the lazy line of
+`contractExceptions()` is read: the wrapper-map exception is a different,
+documented one, taken on every type-narrowed lookup, so counting it in here
+would mean this test could never pass again.
+
+### container-element-lease, proof-conversion-leases
+
+An element of a container argument is deleted while the call runs: the call
+leases an argument that is a wrapper, not the wrappers a list carries, and
+each element's lease is taken inside its converter. `processEvent([parker,
+victim], event)` on a `sample.ObjectType` calls `event()` on each element in
+order; the parker's override waits while another thread calls
+`Shiboken.delete(victim)`.
+
+Expected: the delete is deferred while the parker waits, the victim's
+`event()` runs on a live object, and the delete has run after the call.
+`Shiboken.dump()` separates destroyed from claimed, `isValid()` does not.
+
+`proof-conversion-leases` clears `ConversionLeasesKept`: the delete runs at
+once and the parker is left on a daemon thread - released, the native loop
+would call `event()` on freed memory.
+
+## Wrapper lifecycle
+
+The measures are in
+[Wrapper Lifecycle](../../../doc/developer/freethreading-lifecycle.md).
 
 ### weakrefs
 
@@ -78,25 +293,20 @@ where the map entry used to be removed and before the destructor runs. The
 test then converts the same address, which is what `destroyed(QObject *)`
 delivery and a parent conversion do in an application.
 
-Removing the entry early - which the lock-scope work did - closes only half
-of the window. In the other half a lookup sees true absence and publishes a
-second wrapper, and that one is marked valid while the destructor is about
-to run underneath it. The entry now stays as a tombstone until the
-destruction can no longer reach the address, and a conversion that meets one
-gets a wrapper that is not marked valid instead of one that points at freed
-memory.
+Removing the entry early closes only half the window: in the other half a
+lookup sees true absence and publishes a second wrapper, marked valid while
+the destructor is about to run underneath it.
 
 `QRecursiveMutex` and not `QObject`: a QObject's `destroyed()` signal
-invalidates a stray wrapper afterwards, which hides the window. That is why
-this went unnoticed - it only bites the object types that have no such
-signal.
+invalidates a stray wrapper afterwards, which hides the window, so this bites
+only the object types that have no such signal.
 
 `proof-tombstones` clears `Tombstones` in a child and requires the failure
 to come back.
 
 ### replacement-before-cpp-dtor, proof-tombstones-late
 
-The half the test above cannot see. It parks at `dealloc-before-destroy`,
+The half the test above cannot see. It parks at `dealloc-before-cpp-dtor`,
 which is before `deallocData()` - and `deallocData()` goes through the
 wrapper map on its way out, so until this test existed it took the tombstone
 with it. Between that point and the C++ destructor a lookup saw true absence
@@ -140,12 +350,8 @@ failure back.
 
 ### dying-qobject-argument, proof-dying-qobject
 
-The exception the tombstone makes for QObject, from both sides. A tombstone
-refuses to hand out a wrapper for an address being destroyed;
-`destroyed(QObject *)` is emitted from inside that destruction and its
-argument is meant to be used. PySide invalidates that wrapper right after the
-signal, so the refusal does not apply to a type that does this - libshiboken
-asks a predicate PySide installs with QtCore.
+The exception the tombstone makes for QObject, from both sides - the notes
+have it under "A dying QObject still hands out its argument".
 
 Both halves are the claim: usable in the handler, dead afterwards. The second
 half is the load-bearing one. If it stopped holding, the exception would hand
@@ -155,22 +361,16 @@ only measures the first half.
 
 `proof-dying-qobject` clears `DyingConversionException`: the tombstone then
 refuses every dying identity, and the handler is handed an argument it cannot
-use. The exception is a measure, so it has a switch like the rest of them.
-
-The predicate is asked about the type, not about the moment, so for a QObject
-the whole destruction is open and not just the stretch around the signal. What
-follows from that is the next test.
+use. What the per-type question leaves open is the next test.
 
 ### stray-outlives-tombstone, proof-dying-strays
 
 The other end of the exception. Since it is asked per type, a conversion may
-also land *after* the signal - past the C++ destructor, before the tombstone
-falls. Such a wrapper used to be registered like any other: it said "valid",
-it pointed at freed memory, and when the tombstone fell it stayed behind as
-the wrapper for whatever the allocator put at that address next. Nothing
-invalidated it, because the path that invalidates the handler's argument -
-PySide's `_PySideInvalidatePtr` property - runs earlier, with the property
-data.
+land *after* the signal - past the C++ destructor, before the tombstone
+falls. Such a wrapper used to be registered like any other and said "valid"
+over freed memory; nothing invalidated it, because the path that invalidates
+the handler's argument, PySide's `_PySideInvalidatePtr` property, runs
+earlier, with the property data.
 
 The failpoint `dealloc-before-retire` parks the deallocating thread in exactly
 that stretch, and the test converts the address from another thread. What it
@@ -187,11 +387,9 @@ other and is still valid when the test looks again.
 
 ### external-destruction, proof-external-tombstones
 
-The destruction the binding does not drive. The deallocator and
-`Shiboken.delete()` run the C++ destructor themselves and know when it is
-past; here foreign C++ deletes an object Python knows, the generated wrapper
-destructor reports it through `Object::destroy()`, and nothing calls the
-binding again.
+The destruction the binding does not drive: foreign C++ deletes an object
+Python knows, the generated wrapper destructor reports it through
+`Object::destroy()`, and nothing calls the binding again.
 
 `sample.ObjectType` built **from Python**, so it is an `ObjectTypeWrapper`
 whose destructor reports at all - `ObjectType.create()` hands out a plain C++
@@ -223,58 +421,6 @@ built, and both outcomes look alike again.
 
 `proof-constructor-claim` clears `ConstructorClaim` and requires the second
 object back.
-
-### metaobject-lifetime
-
-Every QObject answers `metaObject()` with the same `&QObject::staticMetaObject`,
-so the wrapper map holds one wrapper for it and hands that one to everybody.
-Destroying any single QObject invalidated it and hit every other holder,
-although the C++ object behind it is static and never dies.
-
-Five lines, with a GIL, no threads. The third one is the whole test - leave it
-out and the shared wrapper is not among `b`'s referred objects, nothing
-touches it, and the remaining four pass on a broken build:
-
-    a, b = QObject(), QObject()
-    ma = a.metaObject()
-    mb = b.metaObject()         # the SAME wrapper, fetched through b
-    Shiboken.delete(b)          # a stranger
-    ma.className()              # RuntimeError: already deleted
-
-Bisected to `4c1d56fb6` (29.07.2026, "Add a coarse lock for free-threaded
-builds"), which moved the bookkeeping in `callCppDestructors()` ahead of the
-C++ destructors. Before that, `~Wrapper() -> Object::destroy() ->
-clearReferences()` had already taken the referred objects out by the time
-`invalidate()` ran, so it found nothing to mark dead.
-
-That commit only exposed it. The defect is in the walk: `invalidate()` had
-marked referred objects invalid since 2011, and a referred object is the one
-case where the holder is *not* the owner - the `reference-count` tag exists
-because a parent link would be wrong there. The walk is gone from both twins;
-`ownership_invalidate_referred_test.py` in the sample binding is the
-regression test, and it runs under ctest with the GIL as without it.
-
-### lease-vs-destroy
-
-The lease window: destruction arriving while a call holds a lease. A thread
-takes a lease and parks; another destroys the same object. The destruction
-has to be deferred until the lease comes back, and the call must not see a
-detached pointer. It passes, and the reason it did not is worth keeping.
-
-It was written as `obj.objectName()` and stood as an expected FAIL for days,
-with the explanation that the generated code re-reads `cppSelf` after the
-lease was granted. That explanation was wrong, and a stack at the raise says
-so: the failing lease is the *first* one that call ever takes.
-
-`obj.objectName()` is two leases. `tp_getattro` takes one to hand out the
-bound method, the call takes another, and Python bytecode runs in between.
-The thread parked in the first, the destruction landed in the gap, and the
-second lease was refused - which is correct, because in that gap no call is
-in flight. A GIL build divides the expression in exactly the same place.
-
-The method is therefore bound before the failpoint is armed, and then the
-test parks where it always meant to: inside the call, with the lease held.
-The destruction is deferred, the call returns its value.
 
 ### teardown-vs-call - a guard, no proof row
 
@@ -318,108 +464,6 @@ QObject wrapper and for a Python subclass, whose `tp_clear` is CPython's
 `subtype_clear()` handing on to ours.
 See "The instance dictionary is published once" in the free-threading notes.
 
-### mi-pointer - an equivalence, and no proof row
-
-A lease asked for a base type computes that base's pointer itself: the
-multiple-inheritance slot, then the special cast. Single inheritance never
-reaches either. `sample.MDerived1` has two C++ bases and a cast function,
-and the test converts and calls it as each base.
-
-There is no `proof-*` row. Clearing `LeaseSnapshot` puts back
-`Conversions::cppPointer()`, the function this arithmetic has to
-reproduce, so both must answer the same. The row guards the arithmetic
-against drift; it is not a measure.
-
-### signal-type-collectable - a guard, no proof row
-
-A signal instance remembers the type of its source, and a signal instance is
-not tracked by the collector. A class that keeps one of its own bound
-signals, `Holder.saved = Holder().fired`, is then a cycle whose last edge,
-signal to class, only the record knows about: held strongly, the class is
-never freed. The test drops the class, collects, and expects its weak
-reference dead. A strong reference fails it; so does nothing on a build with
-a GIL, where the pointer is raw. There is no `proof-*` row: a reference is
-not a bit that can be cleared.
-
-The use-after-free the weak reference also closes has no test here. Every
-read of the type sits behind a check that the source is alive, so one thread
-cannot reach a dead type; the race is between that check and the read, and
-there is no failpoint in that gap.
-See "A signal instance remembers its type weakly" in the free-threading notes.
-
-### capsule-method-owns-instance, capsule-access-no-leak - guards, no proof row
-
-G80: a QtRemoteObjects source keeps a bound slot, `method = source.reset`,
-and drops the object. The first test expects the object alive under the
-method and gone with it, then keeps the method in the instance dictionary
-and expects the cycle collected, then assigns `method.__module__` and
-expects the object still alive. The second checks a slot, two properties and
-a POD field once, then reads and sets them 10000 times each and expects less
-than 50 kB left in `tracemalloc`.
-
-Without the fix the first test finds the object freed and the second 80
-bytes per slot access. A capsule that holds the instance fails the cycle, a
-function that holds it as `__module__` the assignment. Both skip on a build
-with a GIL, which keeps the old code, and on a build without QtRemoteObjects.
-See "A capsule method owns its instance" in the free-threading notes.
-
-### source-property-copy, proof-source-property-copy
-
-G84: a QtRemoteObjects source's getter parks at `source-property-after-read`,
-the value read but not yet converted, and the main thread sets the property.
-The getter must return the value it read. The test sets the property once
-first, so the instance's list no longer shares its data with the type's and
-the setter writes into the element the getter reads. `proof-source-property-copy`
-clears `SourcePropertyCopy` and expects the getter to return the later value.
-Skips on a build with a GIL and on one without QtRemoteObjects.
-See "A source's property is read as a copy" in the free-threading notes.
-
-### source-property-missing - a guard, no proof row
-
-G85: a source whose `__PROPERTIES__` was deleted, or replaced by an integer,
-is read and set. Both must raise `RuntimeError`; before the fix they locked
-or dereferenced a null list. It runs in a child process, since a regression
-crashes. Skips like the one above.
-See "A source's property is read as a copy" in the free-threading notes.
-
-### lease-snapshot, proof-lease-snapshot
-
-B5-1: C++ deletes an object while a lease on it is out, and
-`Object::destroy()` detaches the pointer array without consulting
-`activeCalls`. The lease cannot defer that, but its holder must not read
-the array a second time.
-
-`Shiboken.VoidPtr(obj)` takes a lease, parks at `lease-after-acquire` and
-copies the pointer out; the parent's `killChild()` runs in between. The
-test expects the address the lease validated.
-
-`proof-lease-snapshot` clears `LeaseSnapshot` and expects zero: the holder
-reads the detached array again. The re-read tests for null, so the window
-shows as a value rather than a crash.
-
-### leased-receiver, proof-leased-receiver
-
-The same window for the receiver of a generated call. `hash()` on
-`sample.ObjectType` returns the receiver pointer without dereferencing it,
-so the test can report the pointer of an object that is already gone
-without touching freed memory. It expects the address the lease validated;
-`proof-leased-receiver` clears `LeaseSnapshot` and expects the null that
-`Conversions::cppPointer()` reads.
-
-### metatype-subclass, proof-metatype-subclass
-
-A class with a metaclass derived from the binding's, as in
-`class Meta(type(QObject), ABCMeta)`. The test needs two answers: reaching
-`lease-after-acquire` shows that a lease was taken at all, and the address
-from `Shiboken.VoidPtr()` shows it is the right one.
-`proof-metatype-subclass` clears `MetatypeSubclassLease`; the object then
-takes no lease and never reaches the failpoint.
-
-The object is kept alive until the process ends. Destroying a wrapper type
-with its own metaclass crashes the interpreter, with a GIL and with every
-bit cleared - a separate defect that would otherwise end the run before it
-reports.
-
 ### claim-moves-out, proof-claim-ancestry
 
 B6-1: a child that leaves a claimed parent leaves the claim behind.
@@ -437,9 +481,8 @@ call on it raises.
 ### claim-survives-teardown, proof-claim-teardown
 
 B6-1 from the other side: a child detached *because* its parent is torn down
-has to keep the claim, since the parent's C++ destructor takes it along.
-
-The root is `sample.ObjectType.create()`, built by C++: `Shiboken.invalidate()`
+keeps the claim, since the parent's destructor takes it along. The root is
+`sample.ObjectType.create()`, built by C++: `Shiboken.invalidate()`
 detaches children only from a root without `containsCppWrapper`, and every
 object built from Python has one. Child and grandchild are `ObjectType`
 subclasses, which keep `validCppObject`. A leased call on the child makes
@@ -473,22 +516,6 @@ The harness needs per-point arming, parking and release first. A short
 timeout on the first point is no substitute: it enforces the order but hands
 the result to a deadline.
 
-### setter-conversion-fails, proof-conversion-gate
-
-B10-3: a generated direct entry running on the output of a failed
-conversion. A thread assigning to `Derived.objectTypeField` parks in the
-pointer converter before the converter's own lease (`convert-before-lease`).
-The test deletes the argument, so that lease refuses, writes null and sets a
-RuntimeError. The test expects the field to keep its value and the setter to
-raise.
-
-The setter and not rich comparison, because the setter leaves the damage
-readable. A comparison on a null operand crashes, which shows that the gate
-matters but not what was left behind.
-
-`proof-conversion-gate` clears `ConversionGate`: the null reaches the field,
-which then reads `None`.
-
 ### owned-child-claimed - a guard, no proof row
 
 A child built from Python has a C++ wrapper, and keeps `validCppObject` and
@@ -501,22 +528,6 @@ There is no `proof-*` row. Clearing `ClaimByAncestry` hides the defect rather
 than restoring it: the request then marks the whole set, and the stamp has
 nothing to add.
 
-### parent-removal-alloc, proof-transaction-prepare
-
-B6-4: a state transaction that fails halfway. `setParent(None)` reaches
-`removeParentLocked()`, which erases the edge, hands ownership back and then
-defers the decref of the edge reference - the last allocation, after every
-write. The throwing failpoint `deferred-slot-alloc` fails that allocation. It
-throws instead of parking, because a thread inside a transaction holds the
-state lock.
-
-The test expects the call to raise with ownership unchanged, and a retry to
-succeed. It checks ownership and not `parent()`, because Qt has reparented
-the object before the binding transaction runs.
-
-`proof-transaction-prepare` clears `TransactionPrepare`: the room is taken
-after the erase, and ownership has moved although the call raised.
-
 ### two-thread-ctor, proof-ctor-commit
 
 B5-3: two threads run the same base `__init__` on one object. One parks
@@ -528,134 +539,15 @@ both are told they won, and each of them has constructed a C++ object.
 winners to come back - and it clears `ConstructorClaim` in *both* runs. The
 reservation refuses the second thread before it ever reaches the transaction,
 so with everything on there is nothing left here to see. Measures nest, and a
-counterproof for the inner one has to switch the outer one off to ask its
+counter-proof for the inner one has to switch the outer one off to ask its
 question at all.
-
-### no-lock-in-python
-
-FT8 invariant 2: no binding raw lock spans Python. A Python `__del__` is the
-shortest way to ask. It runs from the middle of a wrapper's destruction,
-which is exactly where the state lock and the wrapper-map lock are taken. If
-either were held across the callback the `__del__` would see it, and a real
-Python call under a lock deadlocks against stop-the-world.
-
-### no-lock-in-conversion
-
-The same invariant where an argument conversion calls back into Python. An
-earlier version of this test ran its probe from a plain dict lookup and
-proved nothing: that is ordinary Python, outside any call. The probe has to
-run *inside* a generated entry point, and `__index__` on an integer argument
-is the shortest way in - shiboken asks for it while converting, with the
-receiver guard taken and the lease held.
-
-That is what the second half of the measurement is for: `activeCalls()` on
-the receiver says the probe really is inside the call, so a "no lock held" is
-about the conversion path and not about some quiet moment elsewhere.
-
-### state-lock-leaf
-
-FT8 invariant 7: a state-lock holder needs nothing before it can let go. One
-thread parks in the middle of a call, holding its lease and its receiver
-guard. With it standing there, everything the state lock protects has to keep
-working in other threads: wrapper creation, the parent graph, destruction. If
-a transaction needed the parked thread's guard, or if a guard holder still
-held the state lock, this would not come back - which is why it runs in a
-subprocess with a timeout rather than trusting a join.
-
-### no-leaked-lease
-
-Invariants 9 and 10: every generated exit gives the lease back. The lease is
-what holds the C++ destructor off, so one that survives its call would pin
-the object for good and say nothing while doing it. Every shape of exit is
-asked afterwards: the ordinary return, an argument that fails to convert, an
-exception out of an override, a comparison, an attribute, and a method that
-detaches around the native call - the detach suspends the guard, and the
-lease has to outlive that.
-
-### guard-vs-python-lock, guard-vs-annotated-lock
-
-Two threads in opposite order: one holds a lock and then wants the receiver
-guard, the other holds the guard and then wants the lock. Whether both come
-back is the whole question. A wait that detaches suspends the receiver's
-critical section and lets the other thread through; a wait that does not is
-the deadlock a GIL build has for a method without `allow-thread`.
-
-Invariant 8 seen from the outside: nothing may assume the receiver guard is
-continuously held, and here it visibly is not. `QRecursiveMutex::lock()` is
-annotated in `typesystem_core_common.xml`, so the generated code detaches
-around it and the inversion resolves exactly as with a Python lock.
-
-### guard-spans-native-wait
-
-The documented boundary, measured instead of deadlocked. The two tests above
-pass because their waits detach. A native call that blocks with the thread
-attached does not, and neither does it reach a safe point where the runtime
-could suspend it - so the guard is held for the whole wait and every other
-thread reaching that receiver waits with it.
-
-That is the deadlock a GIL build has for a method without `allow-thread`,
-kept rather than removed, and this is where it shows. Written as a
-measurement and not as a deliberate deadlock: the boundary is just as visible
-in two seconds of waiting, and the test still ends. `ctypes.PyDLL` stands in
-for the unannotated blocking method - it is the one way to call something
-native from Python without letting go of the thread state.
-
-With the GIL the measurement cannot tell the guard apart from the GIL, so
-that row skips. The boundary holds there by construction; it is where it
-comes from.
-
-### qml-placement
-
-FT8 finding 4 (B15-4): the placement context has to nest. QML constructs a
-registered type into memory it allocated itself. The old code stored that
-address in one thread-local slot behind a process-wide `QMutex` held across
-`PyObject_CallObject()`: the mutex protected nothing another thread could
-read, deadlocked a same-thread nested creation outright, and one slot cannot
-hold two addresses.
-
-The registered type creates another QObject before its own construction
-finishes, which is what needs the addresses to nest. That inner object is of
-a different type, and the type test on the address is what turns it away.
-
-What the type test cannot turn away is a second object of the **same** type
-built there before the awaited one; that one still takes the address. Telling
-the two apart needs the address to travel with the object being constructed
-rather than with the thread, which belongs to the wrapper-identity work.
-
-Counterproof: `proof-qml-type` clears `QmlPlacementType` and the test
-segfaults, because QML then holds the inner object.
-
-### qml-placement-parallel
-
-Two threads inside QML construction at the same time. It fails on the
-revision before the fix by construction rather than by timing: the registered
-type does not finish its `__init__` until the other thread has reached the
-same point. With the `QMutex` still spanning `PyObject_CallObject()` the
-second thread cannot enter `createInto()` while the first is in Python, the
-first waits for the second, and the barrier times out.
-
-Counterproof: `proof-qml-scope` clears `QmlPlacementFree`, which puts that
-mutex back, and the test hangs until the runner kills it.
-
-### qml-placement-unwinds
-
-A guard, not a proof, and labelled as one: the placement context is popped by
-a destructor, so it was popped on the old revision too and this test passes
-there as well. What it holds is that the error path keeps working - the next
-construction on the same thread gets its own address and its own object
-rather than the one the failed construction left behind.
-
-The registered type raises *after* `super().__init__()`, deliberately.
-Raising before it leaves QML's memory unconstructed and QML then uses it;
-that segfault is the caller's mistake and says nothing about the placement
-context.
 
 ### makeValid() and referred objects - no test
 
-The regress a review found in `makeValid()`. FT8 moved the walk under the
-state lock and replaced `Object::checkType()` with a metatype identity test,
-because the state lock has to stay a leaf and `PyType_IsSubtype()` reads
-Python-owned type state. The two are not the same question: a type whose
+A regression in `makeValid()`. FT8 moved the walk under the state lock and
+replaced `Object::checkType()` with a metatype identity test, because the
+state lock has to stay a leaf and `PyType_IsSubtype()` reads Python-owned
+type state. The two are not the same question: a type whose
 metaclass merely derives from `SbkObjectType` - the ordinary result of
 `class Meta(type(QObject), ABCMeta)` - passes the old test and fails the new
 one. The walk is pruned there and everything below it stays invalidated.
@@ -689,11 +581,83 @@ happens after the attach, in `acquireWrapper()`.
 
 `proof-native-preflight` clears `NativePreflight` and the subject aborts.
 What it aborts on is `SBK_ASSERT_ATTACHED()` inside the typed `hasWrapper()`,
-so this counterproof discriminates through an assertion, and assertions are
+so this counter-proof discriminates through an assertion, and assertions are
 compiled out under `NDEBUG`. On a free-threaded release build the A/B side
 would do the unsafe read silently and the row would read "still passes". The
 measure is real either way; what is debug-only is the ability to show it
 here.
+
+### dealloc-waits-for-lease, proof-dealloc-claim
+
+Dropping the last reference to a Python-owned parent runs its C++ destructor
+from the deallocator, and that destructor deletes the children. A thread
+holds a lease on a child through `Shiboken.VoidPtr(child)`, parked at
+`lease-after-acquire`, and the main thread drops the parent. `VoidPtr` copies
+the pointer and reads nothing behind it, so the run without the bit reports
+rather than crashes.
+
+Expected: `destroyed` of the child, connected directly, has not fired while
+the lease is open, and fires once afterwards on the thread that released it.
+
+`proof-dealloc-claim` clears `DeallocClaim`: the deallocator destroys the
+owned set without looking, and `destroyed` fires under the open lease.
+
+### dealloc-claim-survivor - a guard, no proof row
+
+The deallocator's claim stamps the owned set as the binding graph has it, and
+the graph can be wrong: `QQmlComponent.create()` parents the object on the
+component, whose destructor leaves it alone. A `Placed` object has a C++
+wrapper and survives with a valid one, so the stamp has to be taken back once
+the destructor is past.
+
+Both paths are asked: a component dropped with no lease open, where the
+destructor runs in the deallocator, and one dropped while a `VoidPtr` lease on
+the survivor is parked, where it runs from the release and has to be refused
+while it waits, which shows it took that path. Expected: both survivors valid
+and answering their name.
+
+No `proof-*` row: the take-back has no bit, and clearing `DeallocClaim` drops
+the waiting path with the stamp, so the test would fail because nothing was
+refused - `dealloc-waits-for-lease`'s question, not this one.
+
+### teardown-detach-edge, proof-detach-checked-parent
+
+A child reparented in the middle of its parent's teardown. `killChild()`
+deletes a Python-built `sample.ObjectType`, whose destructor detaches its
+children in `_detachChildren()`. That thread parks at `detach-mid-round`,
+a child picked; the main thread then moves the child to a new parent, in
+C++ as well, so the destructor still to run leaves it alone.
+
+Expected: the child's binding parent is the new one, read from
+`Shiboken.dump()`. A `VoidPtr` lease on the child is then parked while
+`Shiboken.delete()` destroys the new parent, and the delete has to wait.
+Not covered: `runInvalidationPlan()`, the other site; it needs its own point.
+
+`proof-detach-checked-parent` clears `DetachCheckedParent`: pick and removal
+are two transactions with the point between them, and the removal takes the
+new parent's edge. With the bit set the point sits after the single
+transaction, where a reparent is harmless.
+
+### constructor-tail-lease, proof-constructor-tail-lease
+
+A generated constructor publishes the object and then still works on it, so
+`Shiboken.delete()` can reach it from the commit on. A `QObject` subclass
+puts `self` into a list and calls `super().__init__(tag=...)`, which
+`fillQtProperties()` hands to its Python `setTag()`; the thread parks at
+`ctor-after-publish` in `updateSourceObject()` and the main thread deletes
+it. Not `objectName`, whose setter takes a lease the waiting delete refuses.
+
+Expected: the delete is deferred while the constructor waits, the object is
+alive inside `setTag()`, `__init__` completes, and it is destroyed after.
+
+`proof-constructor-tail-lease` clears `ConstructorTailLease`: the delete runs
+at once and the constructor stays parked on a daemon thread - released, the
+setup would read `metaObject()` from freed memory.
+
+## Types and shared state
+
+The measures are in
+[Types and Shared State](../../../doc/developer/freethreading-types.md).
 
 ### MI offsets - no test, and why
 
@@ -707,42 +671,30 @@ What carries `MiOffsetsOnce` instead is a sanitizer A/B: `stress.py
 mi_first_instance` builds the first instance of every multiple-inheritance
 type in the sample binding from eight threads at once, and TSan reports two
 to six races in `Sbk_MDerived*_mi_init` with the bit cleared and none with it
-set. That is weaker than a counterproof, and it is what the shape of the
+set. That is weaker than a counter-proof, and it is what the shape of the
 defect allows. The developer documentation has the numbers.
 
 ### hierarchy-snapshot - a guard, and why it is only that
 
-`addClassInheritance()` mutated the class graph with no lock while
-`findDerivedType()` and `dumpTypeGraph()` were walking it. The repair: edges
-are published as an immutable snapshot, a reader takes the snapshot under a
-short lock and walks it with none held, because the traversal creates types
-through `Module::get()` and calls generated discovery functions in the middle
-of itself.
+The class graph is walked while modules add edges to it; the snapshot is what
+the notes describe under "The class hierarchy publishes snapshots".
 
 The test parks a traversal with one iterator alive - the failpoint
-`hierarchy-mid-traversal` - and imports fourteen modules under it, each of
-which publishes hundreds of edges. That makes the race deterministic rather
-than a matter of scheduling.
+`hierarchy-mid-traversal` - and imports fourteen modules under it, each
+publishing hundreds of edges, which makes the race deterministic rather than
+a matter of scheduling. Edges come from module init and nothing else, so a
+run that imports none watches an idle map and passes either way; the
+shiboken test bindings are on the list because a Core subset with
+`--build-tests`, which is what the sanitizer trees are, has nothing else to
+import.
 
-It still cannot fail. Measured both ways: with the snapshot taken away the
-same test passes four runs out of five and segfaults on the fifth, and with
-the iterator parked it passes every time - libc++ keeps `unordered_map` nodes
-alive across a rehash and relinks them, so the iteration survives an
-invalidation that is undefined behaviour all the same. A one-in-five crash is
-not a counterproof, and this file does not pretend otherwise: there is no
-`proof-hierarchy`.
-
-**TSan reports nothing here.** On the sanitizer tree, this test - the traversal
-parked with a live iterator while four modules enter their edges - reports
-nothing. That is what stands in for the counterproof this test cannot be.
-
-Two things had to be fixed before the run said anything at all. Edges are
-added by module init and by nothing else, so a run that imports no module
-watches an idle map and passes either way; the list therefore includes the
-shiboken test bindings, which a Core subset - what the sanitizer trees are -
-does have. And the result line used to count the length of the wish list
-rather than the imports that went through, which read as fourteen module
-inits where there had been four.
+It still cannot fail. With the snapshot taken away the same test passes four
+runs out of five and segfaults on the fifth, because libc++ keeps
+`unordered_map` nodes alive across a rehash and relinks them, so the
+iteration survives an invalidation that is undefined behaviour all the same.
+A one-in-five crash is not a counter-proof, and there is no `proof-hierarchy`.
+What stands in for it is TSan: on the sanitizer tree, where four of the
+fourteen modules import, this test reports nothing.
 
 ### type-mutation
 
@@ -760,65 +712,17 @@ property of the code as written; that belongs with the identity and hierarchy
 snapshots. Until then this is the guard rail that says the window stayed
 harmless.
 
-### lock-order
-
-FT8 invariant 1: every raw lock has a rank, and the rank is kept.
-`checkLockRank()` asserts it before every acquisition - a lock may only be
-taken while holding locks that rank below it - so taking one the other way
-round aborts a debug build here rather than deadlocking somewhere else later.
-
-A rank violation therefore shows as a crash, not as a failure. What this test
-compares is the other half: which pairs are held at once at all. The
-inventory in `doc/developer/freethreading.md` names them, and a pair that is
-not in it is a finding - a lock order nobody has argued for - not a detail to
-print and move on from.
-
-### lazy-lock-spans-destruction - expected FAIL
-
-Open, and owned by the lazy protocol: B13-5 from the other end.
-`Module::get()` holds the lazy-type mutex across `PyObject_GetAttr()`, so
-arbitrary Python runs under it - and with it a refcount reaching zero, a
-wrapper being destroyed, a deferred C++ destructor running. That last one is
-what the state lock's own rule forbids for every other lock: a destructor
-reaches Qt and user code, so a raw lock held across it deadlocks against
-stop-the-world and against a re-entrant call.
-
-Found by the assertion in `DeferredActions::run()` when two of the tests here
-ran in the same process, which is why this one runs them rather than trying
-to rebuild the state they leave behind. Neither of them reaches it alone: it
-needs the wrappers the first one leaves for the collector and the type
-incarnation the second one causes.
-
-It no longer fires on either interpreter: a run that drops two hundred
-wrappers into the collector and then walks six uncreated types records no
-exception either. `Module::get()` still takes the mutex around the walk, so
-the drivers changed, not the protocol - hence *skipped*, never ok. Making it
-deterministic again needs a failpoint inside `Module::get()`, which belongs
-with the replacement of that protocol.
-
-Counted rather than asserted, because aborting on it would mean nobody can
-run a debug build until the lazy protocol is replaced. Only the lazy line of
-`contractExceptions()` is read: the wrapper-map exception is a different,
-documented one, taken on every type-narrowed lookup, so counting it in here
-would mean this test could never pass again.
-
 ### metaobject-commit-race, proof-metaobject-parse
 
-B15-2. `addMetaMethod()` held the meta-object lock across the construction of
-the instance `MetaObjectBuilder`, and constructing one parses the Python
-type: attribute lookup on every class member, warnings, delayed enum
-resolution. A raw lock held across that is the inversion the review
-describes - a member with a custom `__getattribute__` runs application code
-under it.
-
-The parse moved out of the lock, which splits the operation into a lookup
-that misses, a candidate built with no lock held, and a commit that publishes
-one winner. That split is the new window this test is about: the parked
-thread has built its candidate and is about to commit when the second one
-runs the same path, builds its own and publishes first. The loser gives its
-candidate back - the capsule owns it, so dropping the last reference frees it
-below the lock - and continues with the winner's builder. Both signals have
-to end up in one meta object, at different indexes.
+B15-2, from the test end: the notes have the measure under "Parsing a Python
+type happens outside the lock". Taking the parse out of the lock splits the
+operation into a lookup that misses, a candidate built unlocked, and a commit
+that publishes one winner, and that split is the window this test is about.
+The parked thread has built its candidate and is about to commit when the
+second runs the same path, builds its own and publishes first. The loser
+gives its candidate back - the capsule owns it, so dropping the last
+reference frees it below the lock - and continues with the winner's builder.
+Both signals have to end up in one meta object, at different indexes.
 
 `proof-metaobject-parse` clears `MetaObjectParseOutsideLock`. The parse then
 goes back under the lock and `SBK_ASSERT_NO_RAW_LOCK()` at the top of
@@ -855,13 +759,13 @@ snapshot and walking it. `mro-snapshot-owns` checks the mechanism: the
 parked walk holds a reference to `__mro__` that the finished walk gives
 back.
 
-`mro-snapshot` checks the window. It assigns `__bases__`, collects, and
+`mro-snapshot` checks the window: it assigns `__bases__`, collects, and
 allocates 2000 tuples of the same width whose entries carry the override
-under its own name. A walk that reads the freed tuple takes the override
-for an inherited default and does not call it; a walk into other memory
-crashes. The test expects the override to run. The `gc.collect()` is
-required: `set_tp_mro()` turns on deferred refcounting, and only the
-tracing collector frees such a tuple.
+under its own name. A walk that reads the freed tuple takes the override for
+an inherited default and does not call it, a walk into other memory crashes,
+and the test expects the override to run. The `gc.collect()` is required -
+`set_tp_mro()` turns on deferred refcounting, so only the tracing collector
+frees such a tuple.
 
 `proof-mro-snapshot` clears `MroSnapshot` and expects `mro-snapshot` to
 fail.
@@ -993,6 +897,153 @@ registration lock, and `failpoint()` refuses to park while a lock is held.
 A bit that no scenario can clear is not kept.
 See "QObject-pointer metatypes" in the free-threading notes.
 
+## Generated code, signals and QML
+
+The measures are in
+[Generated Code, Signals and QML](../../../doc/developer/freethreading-bindings.md).
+
+### signal-type-collectable - a guard, no proof row
+
+A signal instance remembers the type of its source, and a signal instance is
+not tracked by the collector. A class that keeps one of its own bound
+signals, `Holder.saved = Holder().fired`, is then a cycle whose last edge,
+signal to class, only the record knows about: held strongly, the class is
+never freed. The test drops the class, collects, and expects its weak
+reference dead. A strong reference fails it; so does nothing on a build with
+a GIL, where the pointer is raw. There is no `proof-*` row: a reference is
+not a bit that can be cleared.
+
+The use-after-free the weak reference also closes has no test here. Every
+read of the type sits behind a check that the source is alive, so one thread
+cannot reach a dead type; the race is between that check and the read, and
+there is no failpoint in that gap.
+See "A signal instance remembers its type weakly" in the free-threading notes.
+
+### capsule-method-owns-instance, capsule-access-no-leak - guards, no proof row
+
+G80: a QtRemoteObjects source keeps a bound slot, `method = source.reset`,
+and drops the object. The first test expects the object alive under the
+method and gone with it, then keeps the method in the instance dictionary
+and expects the cycle collected, then assigns `method.__module__` and
+expects the object still alive. The second checks a slot, two properties and
+a POD field once, then reads and sets them 10000 times each and expects less
+than 50 kB left in `tracemalloc`.
+
+Without the fix the first test finds the object freed and the second 80
+bytes per slot access. A capsule that holds the instance fails the cycle, a
+function that holds it as `__module__` the assignment. Both skip on a build
+with a GIL, which keeps the old code, and on a build without QtRemoteObjects.
+See "A capsule method owns its instance" in the free-threading notes.
+
+### source-property-copy, proof-source-property-copy
+
+G84: a QtRemoteObjects source's getter parks at `source-property-after-read`,
+the value read but not yet converted, and the main thread sets the property.
+The getter must return the value it read. The test sets the property once
+first, so the instance's list no longer shares its data with the type's and
+the setter writes into the element the getter reads. `proof-source-property-copy`
+clears `SourcePropertyCopy` and expects the getter to return the later value.
+Skips on a build with a GIL and on one without QtRemoteObjects.
+See "A source's property is read as a copy" in the free-threading notes.
+
+### source-property-missing - a guard, no proof row
+
+G85: a source whose `__PROPERTIES__` was deleted, or replaced by an integer,
+is read and set. Both must raise `RuntimeError`; before the fix they locked
+or dereferenced a null list. It runs in a child process, since a regression
+crashes. Skips like the one above.
+See "A source's property is read as a copy" in the free-threading notes.
+
+### setter-conversion-fails, proof-conversion-gate
+
+B10-3: a generated direct entry running on the output of a failed
+conversion. A thread assigning to `Derived.objectTypeField` parks in the
+pointer converter before the converter's own lease (`convert-before-lease`).
+The test deletes the argument, so that lease refuses, writes null and sets a
+RuntimeError. The test expects the field to keep its value and the setter to
+raise.
+
+The setter and not rich comparison, because the setter leaves the damage
+readable. A comparison on a null operand crashes, which shows that the gate
+matters but not what was left behind.
+
+`proof-conversion-gate` clears `ConversionGate`: the null reaches the field,
+which then reads `None`.
+
+### guard-vs-python-lock, guard-vs-annotated-lock
+
+Two threads in opposite order: one holds a lock and then wants the receiver
+guard, the other holds the guard and then wants the lock. Whether both come
+back is the whole question. A wait that detaches suspends the receiver's
+critical section and lets the other thread through; a wait that does not is
+the deadlock a GIL build has for a method without `allow-thread`.
+
+Invariant 8 seen from the outside: nothing may assume the receiver guard is
+continuously held, and here it visibly is not. `QRecursiveMutex::lock()` is
+annotated in `typesystem_core_common.xml`, so the generated code detaches
+around it and the inversion resolves exactly as with a Python lock.
+
+### guard-spans-native-wait
+
+The documented boundary, measured instead of deadlocked. The two tests above
+pass because their waits detach. A native call that blocks with the thread
+attached does not, and neither does it reach a safe point where the runtime
+could suspend it - so the guard is held for the whole wait and every other
+thread reaching that receiver waits with it.
+
+That is the deadlock a GIL build has for a method without `allow-thread`,
+kept rather than removed, and this is where it shows. Written as a
+measurement and not as a deliberate deadlock: the boundary is just as visible
+in two seconds of waiting, and the test still ends. `ctypes.PyDLL` stands in
+for the unannotated blocking method - it is the one way to call something
+native from Python without letting go of the thread state.
+
+With the GIL the measurement cannot tell the guard apart from the GIL, so
+that row skips. The boundary holds there by construction; it is where it
+comes from.
+
+### qml-placement
+
+FT8 finding 4 (B15-4): the placement context has to nest. One thread-local
+slot behind a process-wide `QMutex` held across `PyObject_CallObject()`
+protected nothing another thread could read, deadlocked a same-thread nested
+creation outright, and could not hold two addresses.
+
+The registered type creates another QObject before its own construction
+finishes, which is what needs the addresses to nest; that inner object is of
+a different type, and the type test on the address turns it away. What the
+test cannot turn away is a second object of the **same** type built there
+first - telling those apart needs the address to travel with the object
+rather than with the thread, which belongs to the wrapper-identity work.
+
+Counterproof: `proof-qml-type` clears `QmlPlacementType` and the test
+segfaults, because QML then holds the inner object.
+
+### qml-placement-parallel
+
+Two threads inside QML construction at the same time. It fails on the
+revision before the fix by construction rather than by timing: the registered
+type does not finish its `__init__` until the other thread has reached the
+same point. With the `QMutex` still spanning `PyObject_CallObject()` the
+second thread cannot enter `createInto()` while the first is in Python, the
+first waits for the second, and the barrier times out.
+
+Counterproof: `proof-qml-scope` clears `QmlPlacementFree`, which puts that
+mutex back, and the test hangs until the runner kills it.
+
+### qml-placement-unwinds
+
+A guard, not a proof, and labelled as one: the placement context is popped by
+a destructor, so it was popped on the old revision too and this test passes
+there as well. What it holds is that the error path keeps working - the next
+construction on the same thread gets its own address and its own object
+rather than the one the failed construction left behind.
+
+The registered type raises *after* `super().__init__()`, deliberately.
+Raising before it leaves QML's memory unconstructed and QML then uses it;
+that segfault is the caller's mistake and says nothing about the placement
+context.
+
 ### method_receiver_dead (run.py)
 
 B12-4, B14-4. `method_receiver_dead.py`, run by `run.py`, asks whether a
@@ -1027,88 +1078,3 @@ Each thread creates the object it is about. The receiver, because biased
 reference counting makes the creating thread the owner, and a `del`
 elsewhere would not deallocate. The sender, because a signal emitted from
 another thread is queued and, with no event loop, never delivered.
-
-### container-element-lease, proof-conversion-leases
-
-An element of a container argument is deleted while the call runs: the call
-leases an argument that is a wrapper, not the wrappers a list carries, and
-each element's lease is taken inside its converter. `processEvent([parker,
-victim], event)` on a `sample.ObjectType` calls `event()` on each element in
-order; the parker's override waits while another thread calls
-`Shiboken.delete(victim)`.
-
-Expected: the delete is deferred while the parker waits, the victim's
-`event()` runs on a live object, and the delete has run after the call.
-`Shiboken.dump()` separates destroyed from claimed, `isValid()` does not.
-
-`proof-conversion-leases` clears `ConversionLeasesKept`: the delete runs at
-once and the parker is left on a daemon thread - released, the native loop
-would call `event()` on freed memory.
-
-### dealloc-waits-for-lease, proof-dealloc-claim
-
-Dropping the last reference to a Python-owned parent runs its C++ destructor
-from the deallocator, and that destructor deletes the children. A thread
-holds a lease on a child through `Shiboken.VoidPtr(child)`, parked at
-`lease-after-acquire`, and the main thread drops the parent. `VoidPtr` copies
-the pointer and reads nothing behind it, so the run without the bit reports
-rather than crashes.
-
-Expected: `destroyed` of the child, connected directly, has not fired while
-the lease is open, and fires once afterwards on the thread that released it.
-
-`proof-dealloc-claim` clears `DeallocClaim`: the deallocator destroys the
-owned set without looking, and `destroyed` fires under the open lease.
-
-### dealloc-claim-survivor - a guard, no proof row
-
-The deallocator's claim stamps the owned set as the binding graph has it, and
-the graph can be wrong: `QQmlComponent.create()` parents the object on the
-component, whose destructor leaves it alone. A `Placed` object has a C++
-wrapper and survives with a valid one, so the stamp has to be taken back once
-the destructor is past.
-
-Both paths are asked: a component dropped with no lease open, where the
-destructor runs in the deallocator, and one dropped while a `VoidPtr` lease on
-the survivor is parked, where it runs from the release and has to be refused
-while it waits, which shows it took that path. Expected: both survivors valid
-and answering their name.
-
-No `proof-*` row: the take-back has no bit, and clearing `DeallocClaim` drops
-the waiting path with the stamp, so the test would fail because nothing was
-refused - `dealloc-waits-for-lease`'s question, not this one.
-
-### teardown-detach-edge, proof-detach-checked-parent
-
-A child reparented in the middle of its parent's teardown. `killChild()`
-deletes a Python-built `sample.ObjectType`, whose destructor detaches its
-children in `_detachChildren()`. That thread parks at `detach-mid-round`,
-a child picked; the main thread then moves the child to a new parent, in
-C++ as well, so the destructor still to run leaves it alone.
-
-Expected: the child's binding parent is the new one, read from
-`Shiboken.dump()`. A `VoidPtr` lease on the child is then parked while
-`Shiboken.delete()` destroys the new parent, and the delete has to wait.
-Not covered: `runInvalidationPlan()`, the other site; it needs its own point.
-
-`proof-detach-checked-parent` clears `DetachCheckedParent`: pick and removal
-are two transactions with the point between them, and the removal takes the
-new parent's edge. With the bit set the point sits after the single
-transaction, where a reparent is harmless.
-
-### constructor-tail-lease, proof-constructor-tail-lease
-
-A generated constructor publishes the object and then still works on it, so
-`Shiboken.delete()` can reach it from the commit on. A `QObject` subclass
-puts `self` into a list and calls `super().__init__(tag=...)`, which
-`fillQtProperties()` hands to its Python `setTag()`; the thread parks at
-`ctor-after-publish` in `updateSourceObject()` and the main thread deletes
-it. Not `objectName`, whose setter takes a lease the waiting delete refuses.
-
-Expected: the delete is deferred while the constructor waits, the object is
-alive inside `setTag()`, `__init__` completes, and it is destroyed after.
-
-`proof-constructor-tail-lease` clears `ConstructorTailLease`: the delete runs
-at once and the constructor stays parked on a daemon thread - released, the
-setup would read `metaObject()` from freed memory.
-

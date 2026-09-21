@@ -1,0 +1,42 @@
+# Sections that are over budget on purpose, one per line:
+#
+#     <file> : <heading> : <reason>
+#
+# The reason names what the section holds, not that it is long. A reader who
+# disagrees should be able to say which part does not belong there.
+#
+# check_doc_form.py reads this. A line that names a section which is no
+# longer over budget, or no longer there, fails the check as well: an
+# exception that outlives its reason is worse than none.
+
+freethreading.md : The complete inventory : every lock with its scope and rank, and the lock order itself, as one table
+freethreading.md : Where the `Bn-m` and `FTn` names come from : the name table, one row per finding
+freethreading.md : Switching the locks off : the manual for PYSIDE6_OPTION_FT, with every spelling it accepts
+freethreading.md : The failpoint matrix : the three rows as a table, and how each row's interpreter and build are checked against each other
+freethreading.md : Locks that are deliberately separate : an entry per lock that is deliberately not the state lock, each with what it protects and why it may be held across Python
+freethreading-types.md : MI offsets have one owner : the offsets, the cache that was removed with them, and why a sanitizer is the only evidence this measure can have
+freethreading-types.md : Walking a type's mro and bases : the snapshot, why it is taken through the attribute rather than the field, the lock rule around a holder, and the cached failed lookup
+freethreading-lifecycle.md : Destruction claims follow the parent graph : the derivation rule, the lock-free fast path and the condition that makes it correct, and what generated code cannot get past
+freethreading.md : Testing : the two tests in the ordinary suite, why a passing test is half an argument, and how run.py supplies the other half
+freethreading-bindings.md : The guard's reach in generated code : what the lease covers across generated entry points, and the readers that are outside it
+freethreading-bindings.md : How far the guard actually reaches : the table of what waits behind a guard and what walks through, and the two consequences for annotations
+freethreading-bindings.md : What the lock contract does not promise : the four promises it does not make, each with what would be needed to make it
+freethreading-types.md : The two caches on a virtual call : both caches, why a lost race costs a reference and not correctness, and what a sanitizer says in place of a counter-proof
+freethreading-types.md : Function-local statics whose initializer calls Python : one entry per class of static whose guard is a raw lock across Python, with what makes each acceptable
+freethreading.md : Prepare, then commit : the rule, what a committed and an uncommitted list do when destroyed, and the two call sites whose order depends on it
+freethreading-bindings.md : A failed conversion stops the entry : the entries that check, and what a pointer, a container and a value field each do with the conversion's output
+README.md : What a test here has to earn : what a proof row has to do, and the two checkers that hold that rule against the tree
+freethreading-lifecycle.md : A retired identity leaves a tombstone : the race, what a tombstone is, where each of the two destructions retires it, and the bit
+freethreading-lifecycle.md : A destruction C++ drives has no second moment : the two endings that do come back, each with the condition it needs, plus the recovery path and why a conversion is neither
+freethreading-types.md : The class hierarchy publishes snapshots : the race, the immutable snapshot, why no lock can span the traversal, and the table handed over at module init
+README.md : hierarchy-snapshot - a guard, and why it is only that : what the test parks, why it cannot fail, and what the sanitizer measures in its place
+README.md : Deterministic lifetime races : the file's own head, which says what an A/B harness can and cannot show
+README.md : metaobject-commit-race, proof-metaobject-parse : the window, the abort that measures it, why it is debug-only, and what it does not show
+README.md : makeValid() and referred objects - no test : why there can be no test here, and why the fix stays regardless
+README.md : metaobject-lifetime : the five-line reproducer and the walk it exposes
+README.md : lazy-lock-spans-destruction - expected FAIL : what the expected FAIL needs to fire, why it no longer does, and why it is counted rather than asserted
+README.md : mro-snapshot-owns, mro-snapshot, proof-mro-snapshot : three scenarios of one bit - the mechanism, the window, and the counter-proof
+README.md : stray-outlives-tombstone, proof-dying-strays : both ends of the exception, and why the two paths are checked separately
+README.md : claim-survives-teardown, proof-claim-teardown : the child and the grandchild, and why clearing the other bit would not show it
+README.md : external-destruction, proof-external-tombstones : both halves - the refusal while the tombstone stands, and the address being free once it falls
+freethreading-types.md : Who may read parentInfo : the readers that tested the field unlocked, the helpers that now read it in a transaction, and the three diagnostics with the lock rule each follows
