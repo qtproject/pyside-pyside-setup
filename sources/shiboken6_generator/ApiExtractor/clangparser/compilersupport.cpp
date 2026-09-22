@@ -295,34 +295,48 @@ static QString findClangLibDir()
     return queryLlvmConfigDir(u"--libdir"_s);
 }
 
+// Ask Clang itself where its built-in includes are. Needed for installations
+// where they are not below llvm-config --libdir: Fedora ships them in
+// /usr/lib/clang/<version> whereas --libdir may report /usr/lib64/llvm22/lib64.
+static QString queryClangResourceIncludesDir()
+{
+    const QString binDir = queryLlvmConfigDir(u"--bindir"_s);
+    QString clang;
+    if (!binDir.isEmpty())
+        clang = QStandardPaths::findExecutable(u"clang"_s, {binDir});
+    if (clang.isEmpty())
+        clang = QStandardPaths::findExecutable(u"clang"_s);
+    QByteArray stdOut;
+    if (clang.isEmpty() || !runProcess(clang, {u"-print-resource-dir"_s}, &stdOut))
+        return {};
+    // Clang reports the directory relative to its location ("/usr/bin/../lib/clang/22").
+    const QFileInfo includeDir(QFile::decodeName(stdOut.trimmed()) + "/include"_L1);
+    return QFileInfo::exists(includeDir.filePath() + "/stddef.h"_L1)
+        ? includeDir.canonicalFilePath() : QString{};
+}
+
 static QString findClangBuiltInIncludesDir()
 {
     // Find the include directory of the highest version.
     const QString clangPathLibDir = findClangLibDir();
     if (!clangPathLibDir.isEmpty()) {
-        QString candidate;
-        QString clangDirName = clangPathLibDir + u"/clang"_s;
-        // PYSIDE-2769: llvm-config --libdir may report /usr/lib64 on manylinux_2_28_x86_64
-        // whereas the includes are under /usr/lib/clang/../include.
-        if (!QFileInfo::exists(clangDirName) && clangPathLibDir.endsWith("64"_L1)) {
-            const QString fallback = clangPathLibDir.sliced(0, clangPathLibDir.size() - 2);
-            clangDirName = fallback + u"/clang"_s;
-            qCWarning(lcShiboken, "%s: Falling back from %s to %s.",
-                      __FUNCTION__, qPrintable(clangPathLibDir), qPrintable(fallback));
-        }
+        // PYSIDE-2769: llvm-config --libdir may report /usr/lib64 whereas the includes
+        // are under /usr/lib/clang/../include (manylinux_2_28_x86_64, and Fedora, which
+        // moved the resource directory to /usr/lib/clang as of LLVM 17). Check both.
+        QStringList clangDirNames{clangPathLibDir + "/clang"_L1};
+        if (clangPathLibDir.endsWith("64"_L1))
+            clangDirNames.append(clangPathLibDir.chopped(2) + "/clang"_L1);
 
+        QString candidate;
         QVersionNumber lastVersionNumber(1, 0, 0);
-        QDir clangDir(clangDirName);
-        const QFileInfoList versionDirs =
-            clangDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-        if (versionDirs.isEmpty())
-            qCWarning(lcShiboken, "%s: No subdirectories found in %s.",
-                      __FUNCTION__, qPrintable(clangDirName));
-        for (const QFileInfo &fi : versionDirs) {
-            const QString fileName = fi.fileName();
-            if (fileName.at(0).isDigit()) {
-                const QVersionNumber versionNumber = QVersionNumber::fromString(fileName);
-                if (!versionNumber.isNull() && versionNumber > lastVersionNumber) {
+        for (const QString &clangDirName : std::as_const(clangDirNames)) {
+            const QFileInfoList versionDirs =
+                QDir(clangDirName).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+            for (const QFileInfo &fi : versionDirs) {
+                const QVersionNumber versionNumber = QVersionNumber::fromString(fi.fileName());
+                // Verify the includes are present; stale version directories do occur.
+                if (!versionNumber.isNull() && versionNumber > lastVersionNumber
+                    && QFileInfo::exists(fi.absoluteFilePath() + "/include/stddef.h"_L1)) {
                     candidate = fi.absoluteFilePath();
                     lastVersionNumber = versionNumber;
                 }
@@ -330,8 +344,18 @@ static QString findClangBuiltInIncludesDir()
         }
         if (!candidate.isEmpty())
             return candidate + "/include"_L1;
+        qCWarning(lcShiboken, "%s: No Clang built-in includes found below %s.",
+                  __FUNCTION__, qPrintable(clangDirNames.constFirst()));
     }
-    return queryLlvmConfigDir(u"--includedir"_s);
+
+    const QString resourceIncludeDir = queryClangResourceIncludesDir();
+    if (!resourceIncludeDir.isEmpty())
+        return resourceIncludeDir;
+
+    // This is LLVM's include directory rather than the resource directory; use it
+    // only if it does provide the built-in includes.
+    const QString includeDir = queryLlvmConfigDir(u"--includedir"_s);
+    return QFileInfo::exists(includeDir + "/stddef.h"_L1) ? includeDir : QString{};
 }
 
 QString compilerFromCMake()
@@ -376,7 +400,8 @@ static void appendClangBuiltinIncludes(HeaderPaths *p)
     if (clangBuiltinIncludesDir.isEmpty()) {
         qCWarning(lcShiboken, "Unable to locate Clang's built-in include directory "
                   "(neither by checking the environment variables LLVM_INSTALL_DIR, CLANG_INSTALL_DIR "
-                  " nor running llvm-config). This may lead to parse errors.");
+                  " nor running llvm-config or clang -print-resource-dir). "
+                  "This may lead to parse errors.");
     } else {
         p->append(HeaderPath{QFile::encodeName(clangBuiltinIncludesDir),
                              HeaderType::System});
