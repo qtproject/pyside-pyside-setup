@@ -128,11 +128,6 @@ struct SbkObjectTypePrivate
 
 namespace Shiboken
 {
-/**
- * Utility function used to transform a PyObject that implements sequence protocol into a std::list.
- **/
-std::vector<SbkObject *> splitPyObject(PyObject *pyObj);
-
 int getNumberOfCppBaseClasses(PyTypeObject *baseType);
 
 std::vector<PyTypeObject *> getCppBaseClasses(PyTypeObject *baseType);

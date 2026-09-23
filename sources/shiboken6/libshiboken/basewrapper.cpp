@@ -1064,22 +1064,23 @@ PyObject *checkInvalidArgumentCount(Py_ssize_t numArgs, Py_ssize_t minArgs, Py_s
     return result;
 }
 
-std::vector<SbkObject *> splitPyObject(PyObject *pyObj)
+template <class Function>
+static void traverseSequence(PyObject *pyObj, Function func)
 {
-    std::vector<SbkObject *> result;
-    if (PySequence_Check(pyObj)) {
-        AutoDecRef lst(PySequence_Fast(pyObj, "Invalid keep reference object."));
-        if (!lst.isNull()) {
-            for (Py_ssize_t i = 0, i_max = PySequence_Size(lst.object()); i < i_max; ++i) {
-                Shiboken::AutoDecRef item(PySequence_GetItem(lst.object(), i));
-                if (Object::checkType(item))
-                    result.push_back(reinterpret_cast<SbkObject *>(item.object()));
-            }
+    if (pyObj == nullptr)
+        return;
+
+    // Check for list/tuple explicitly, suppressing classes implementing the sequence protocol
+    // like QPolygon (PYSIDE-3423).
+    if (PyTuple_Check(pyObj) != 0 || PyList_Check(pyObj) != 0) {
+        for (Py_ssize_t i = 0, size = PySequence_Size(pyObj); i < size; ++i) {
+            Shiboken::AutoDecRef item(PySequence_GetItem(pyObj, i));
+            if (Object::checkType(item))
+                func(reinterpret_cast<SbkObject *>(item.object()));
         }
-    } else {
-        result.push_back(reinterpret_cast<SbkObject *>(pyObj));
+    } else if (Object::checkType(pyObj)) {
+        func(reinterpret_cast<SbkObject *>(pyObj));
     }
-    return result;
 }
 
 template <class Iterator>
@@ -1311,28 +1312,9 @@ Py_hash_t hash(PyObject *pyObj)
 
 static void setSequenceOwnership(PyObject *pyObj, bool owner)
 {
-    if (!pyObj)
-        return;
+    using OwnershipFunc = void (*)(SbkObject *);
 
-    const Py_ssize_t length = PyList_Check(pyObj) != 0 || PyTuple_Check(pyObj)  != 0
-                                  ? PySequence_Size(pyObj) : -1;
-    if (length >= 0) {
-        if (length > 0) {
-            const auto objs = splitPyObject(pyObj);
-            if (owner) {
-                for (SbkObject *o : objs)
-                    getOwnership(o);
-            } else {
-                for (SbkObject *o : objs)
-                    releaseOwnership(o);
-            }
-        }
-    } else if (Object::checkType(pyObj)) {
-        if (owner)
-            getOwnership(reinterpret_cast<SbkObject *>(pyObj));
-        else
-            releaseOwnership(reinterpret_cast<SbkObject *>(pyObj));
-    }
+    traverseSequence(pyObj, owner ? OwnershipFunc(getOwnership) : OwnershipFunc(releaseOwnership));
 }
 
 void setValidCpp(SbkObject *pyObj, bool value)
@@ -1457,9 +1439,8 @@ void invalidate(SbkObject *self)
 
 static void recursive_invalidate(PyObject *pyobj, std::set<SbkObject *> &seen)
 {
-    const auto objs = splitPyObject(pyobj);
-    for (SbkObject *o : objs)
-        recursive_invalidate(o, seen);
+    auto func = [&seen](SbkObject *o) { recursive_invalidate(o, seen); };
+    traverseSequence(pyobj, func);
 }
 
 static void recursive_invalidate(SbkObject *self, std::set<SbkObject *> &seen)
