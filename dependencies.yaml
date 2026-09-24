@@ -1,61 +1,61 @@
 dependencies:
   ../../qt/qt3d:
-    ref: 80c5e3b70024ee0fd49233be0ea8325b55a7810b
+    ref: 5dee5924f8e9e144c9dbd2f45476ec86ad109983
     required: true
   ../../qt/qt5compat:
-    ref: 68a7899357a552580b35d9a014987fcf7b806d1d
+    ref: a659b749e75dc90b90c3f4ed733310cbb47ca560
     required: true
   ../../qt/qtcanvaspainter:
-    ref: 2ed764029d56921d8148cb141dcd6631a4601b38
+    ref: fb147042fd378245e39584c8d85ed2a254ced1d8
     required: true
   ../../qt/qtconnectivity:
-    ref: ea19ed2a3afdbedffbceaca07d14c1ecdedac669
+    ref: 13723dcf956fe525e1e8c604f64888f1516dcc08
     required: true
   ../../qt/qtdatavis3d:
-    ref: f1424f9df89bea89cfaa6660356f4e6dabe6f4ff
+    ref: 360a137fb81b8c33e6dfb2e6c2e9fb0bb8306d46
     required: true
   ../../qt/qtdoc:
-    ref: c1048b23900ae73c91726348da24467dc24a7c16
+    ref: bd4a92e661d5c763c4ddcc9670e4aa409abc49be
     required: true
   ../../qt/qtgrpc:
-    ref: 3c32c4a109f85925ef59f0cb7e74ac90d268e8ab
+    ref: 9c2e3b985fff4a1fa11771a75ebbb6c101a20192
     required: true
   ../../qt/qtlottie:
-    ref: d221de8566f2947eefbdcc34df004406d31f814e
+    ref: 8d6266bb3463d84fc30eb53763ae3a96ffcc8caf
     required: true
   ../../qt/qtnetworkauth:
-    ref: 66e920fc9a1671351b56154b5e70273fa1f30e6a
+    ref: 09aa981fe8d2e07a97e4efbbcdc3831bc4957936
     required: true
   ../../qt/qtopenapi:
-    ref: d1c7c6b809df2bd8255cb038b96bdc650bf22db5
+    ref: 9ad16195a0c7b3695962c9e59438b067e93b0e88
     required: true
   ../../qt/qtqa:
-    ref: ecfead0de5e0336f54f48534ac1c470c27e9c91f
+    ref: f8857986e698bf84d6cfbb9a48cb86bcadcd6dd6
     required: true
   ../../qt/qtquickeffectmaker:
-    ref: ff4c3febe786f19ad2ea7465cbe9a96d57a1192d
+    ref: c29781076b3f5e8ad8e9d26e5eacdd2a37f67dcb
     required: true
   ../../qt/qtremoteobjects:
-    ref: 06166c7edeb7a7d7d719d382d427c66636a63656
+    ref: c89f1c05ee6972c30cdb6558233a384da983c872
     required: true
   ../../qt/qtscxml:
-    ref: c3f6fe61fc88cde4d19966439f92688c5b571942
+    ref: 6c5731a07c57570469be7482ebb65681fbd090fa
     required: true
   ../../qt/qtserialbus:
-    ref: 11fc5e7415d238da341d46a789124d972abf6a45
+    ref: 3afecb3e616dfe0491014ddc518d972d6b17ead2
     required: true
   ../../qt/qtspeech:
-    ref: 83010984b4cf4ee98ea480502b81227f13248429
+    ref: 4069e4998ebb27d168e265344692638b263d64f2
     required: true
   ../../qt/qttranslations:
-    ref: b8185a782f36494af7282c148b6ddf2f61455bc9
+    ref: 176fbe5194fd5e9986bf2da87ae31eb298fc1ba0
     required: true
   ../../qt/qtvirtualkeyboard:
-    ref: 984ce003f8e77047e264887ac4e2e4f7247e081e
+    ref: ad1ddad4aa6e0ccf763bb19e25e680af11a3499b
     required: true
   ../../qt/qtwayland:
-    ref: 15ba9c72c542bcfc60f73047e0500a5f651ebb3e
+    ref: df25f4c4511c13dbf6578dba31f1a3836aaedd6b
     required: true
   ../../qt/qtwebview:
-    ref: 235b35e6d59bd62d596128b1ef1af71969860ed2
+    ref: 71e30db582d824bc873dac73576a396298d62d7a
     required: true
