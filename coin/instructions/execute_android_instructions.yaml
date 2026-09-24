@@ -19,7 +19,6 @@ instructions:
     command: "{{.Env.interpreter}} -m pip install --user -r tools/cross_compile_android/requirements.txt"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
-    ignoreExitCode: true
     enable_if:
         condition: or
         conditions:
@@ -35,7 +34,6 @@ instructions:
     command: "{{.Env.interpreter}} tools/cross_compile_android/main.py --qt-install-path /Users/qt/work/install --auto-accept-license --skip-update --verbose --ndk-path {{.Env.ANDROID_NDK_ROOT}} --sdk-path {{.Env.ANDROID_SDK_ROOT}} --plat-name aarch64 --coin"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
-    ignoreExitCode: true
     enable_if:
       condition: property
       property: host.os
@@ -46,7 +44,6 @@ instructions:
     command: "{{.Env.interpreter}} tools/cross_compile_android/main.py --qt-install-path /home/qt/work/install --auto-accept-license --skip-update --verbose --ndk-path {{.Env.ANDROID_NDK_ROOT}} --sdk-path {{.Env.ANDROID_SDK_ROOT}} --plat-name x86_64 --coin"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
-    ignoreExitCode: true
     enable_if:
         condition: and
         conditions:
