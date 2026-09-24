@@ -14,7 +14,7 @@ instructions:
     userMessageOnFailure: >
          Failed to install deps
   - type: ExecuteCommand
-    command: "{{.Env.interpreter}} tools/cross_compile_ios/main.py build --qt-install-path /Users/qt/work/install --arch arm64 --coin"
+    command: "{{.Env.interpreter}} tools/cross_compile_ios/main.py --qt-install-path /Users/qt/work/install --arch arm64 --coin"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     ignoreExitCode: true
@@ -30,7 +30,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute build instructions on arm64-device
   - type: ExecuteCommand
-    command: "{{.Env.interpreter}} tools/cross_compile_ios/main.py build --qt-install-path /Users/qt/work/install --arch arm64 --simulator --coin"
+    command: "{{.Env.interpreter}} tools/cross_compile_ios/main.py --qt-install-path /Users/qt/work/install --arch arm64 --simulator --coin"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     ignoreExitCode: true
@@ -46,7 +46,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute build instructions on arm64-simulator
   - type: ExecuteCommand
-    command: "{{.Env.interpreter}} tools/cross_compile_ios/main.py build --qt-install-path /Users/qt/work/install --arch x86_64 --simulator --coin"
+    command: "{{.Env.interpreter}} tools/cross_compile_ios/main.py --qt-install-path /Users/qt/work/install --arch x86_64 --simulator --coin"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     ignoreExitCode: true
