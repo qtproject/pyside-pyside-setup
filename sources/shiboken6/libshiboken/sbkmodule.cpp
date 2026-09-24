@@ -77,6 +77,13 @@ static ModuleData *moduleData()
     return &data;
 }
 
+/*!
+    \namespace Shiboken::Module
+
+    \brief Namespace for module-related functionality.
+
+    \inmodule libshiboken
+*/
 namespace Shiboken::Module
 {
 

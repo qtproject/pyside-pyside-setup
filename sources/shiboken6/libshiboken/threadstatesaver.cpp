@@ -7,6 +7,15 @@
 namespace Shiboken
 {
 
+/*!
+    \class Shiboken::ThreadStateSaver
+
+    \brief RAII wrapper around PyEval_SaveThread()/PyEval_RestoreThread().
+
+    Releases the global interpreter lock while in scope.
+
+    \inmodule libshiboken
+ */
 ThreadStateSaver::ThreadStateSaver() = default;
 
 ThreadStateSaver::~ThreadStateSaver()

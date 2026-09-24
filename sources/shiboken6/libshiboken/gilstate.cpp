@@ -7,6 +7,13 @@
 namespace Shiboken
 {
 
+/*!
+    \class Shiboken::GilState
+
+    \brief RAII wrapper around the global interpreter lock (GIL).
+
+    \inmodule libshiboken
+*/
 GilState::GilState(bool acquire)
 {
     if (acquire && Py_IsInitialized()) {

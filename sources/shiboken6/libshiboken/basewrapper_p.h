@@ -25,16 +25,27 @@ struct SbkConverter;
 
 namespace Shiboken
 {
-/**
-    * This mapping associates a method and argument of an wrapper object with the wrapper of
-    * said argument when it needs the binding to help manage its reference count.
-    */
+/*!
+    \internal
+
+    This mapping associates a method and argument of a wrapper object with the
+    wrapper of said argument when it needs the binding to help manage its
+    reference count.
+*/
 using RefCountMap = std::unordered_multimap<std::string, PyObject *> ;
 
-/// Linked list of SbkBaseWrapper pointers
+/*!
+    \internal
+
+    Linked list of SbkBaseWrapper pointers.
+*/
 using ChildrenList = std::set<SbkObject *>;
 
-/// Structure used to store information about object parent and children.
+/*!
+    \internal
+
+    Structure used to store information about object parent and children.
+*/
 struct ParentInfo
 {
     /// Pointer to parent object.
@@ -50,10 +61,11 @@ struct ParentInfo
 extern "C"
 {
 
-/**
- * \internal
- * Private data for SbkBaseWrapper
- */
+/*!
+    \internal
+
+    Private data for SbkBaseWrapper.
+*/
 struct SbkObjectPrivate
 {
     LIBSHIBOKEN_DISABLE_COPY_MOVE(SbkObjectPrivate)

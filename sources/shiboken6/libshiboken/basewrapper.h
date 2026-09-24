@@ -27,7 +27,13 @@ extern "C"
 struct SbkConverter;
 struct SbkObjectPrivate;
 
-/// Base Python object for all the wrapped C++ classes.
+/*!
+    \class SbkObject
+
+    \brief Base Python object for all the wrapped C++ classes.
+
+    \inmodule libshiboken
+*/
 struct LIBSHIBOKEN_API SbkObject
 {
     PyObject_HEAD

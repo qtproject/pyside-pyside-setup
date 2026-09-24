@@ -265,6 +265,13 @@ void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject *wrapper, co
     }
 }
 
+/*!
+    \class Shiboken::BindingManager
+
+    \brief Maintains a set of wrappers.
+
+    \inmodule libshiboken
+*/
 BindingManager::BindingManager() :
     m_d(new BindingManager::BindingManagerPrivate)
 {

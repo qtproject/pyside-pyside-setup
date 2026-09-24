@@ -10,7 +10,13 @@
 
 namespace Shiboken
 {
-// Some often-used strings
+/*!
+    \namespace Shiboken::PyName
+
+    \brief Namespace for often-used strings.
+
+    \inmodule libshiboken
+*/
 namespace PyName
 {
 LIBSHIBOKEN_API PyObject *co_name();
@@ -32,6 +38,13 @@ LIBSHIBOKEN_API PyObject *values();
 LIBSHIBOKEN_API PyObject *qtStaticMetaObject();
 } // namespace PyName
 
+/*!
+    \namespace Shiboken::PyMagicName
+
+    \brief Namespace for Python names.
+
+    \inmodule libshiboken
+*/
 namespace PyMagicName
 {
 LIBSHIBOKEN_API PyObject *class_();
@@ -53,6 +66,13 @@ LIBSHIBOKEN_API PyObject *rlshift();
 LIBSHIBOKEN_API PyObject *rrshift();
 } // namespace PyMagicName
 
+/*!
+    \namespace Shiboken::Messages
+
+    \brief Namespace for messages.
+
+    \inmodule libshiboken
+*/
 namespace Messages
 {
 LIBSHIBOKEN_API PyObject *unknownException();

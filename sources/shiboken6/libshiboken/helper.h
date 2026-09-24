@@ -52,9 +52,12 @@ LIBSHIBOKEN_API const char *typeNameOf(const char *typeIdName);
 /// Returns whether \a method is a compiled method (Nuitka).
 LIBSHIBOKEN_API bool isCompiledMethod(PyObject *method);
 
-/**
- *  Creates and automatically deallocates C++ arrays.
- */
+/*!
+    \class Shiboken::ArrayPointer
+    \inmodule libshiboken
+
+    \brief Creates and automatically deallocates C++ arrays.
+*/
 template<class T>
 class ArrayPointer
 {

@@ -40,6 +40,13 @@ void PythonContextMarker::setBlocking()
     _pythonContextStack = _pythonContextStack / 2 * 2;
 }
 
+/*!
+    \namespace Shiboken::Errors
+
+    \brief Namespace for error handling.
+
+    \inmodule libshiboken
+*/
 namespace Errors
 {
 
@@ -224,6 +231,13 @@ PyObject *occurred()
     return PyErr_Occurred();
 }
 
+/*!
+    \class Shiboken::Errors::Stash
+
+    \brief Temporarily stashes an error set in Python.
+
+    \inmodule libshiboken
+*/
 Stash::Stash() : m_store(std::make_unique<ErrorStore>())
 {
     fetchError(*m_store);
@@ -257,6 +271,13 @@ void Stash::release()
 
 } // namespace Errors
 
+/*!
+    \namespace Shiboken::Warnings
+
+    \brief Namespace for warnings handling.
+
+    \inmodule libshiboken
+*/
 namespace Warnings
 {
 void warnInvalidReturnValue(const char *className, const char *functionName,

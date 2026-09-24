@@ -14,9 +14,12 @@ struct SbkObject;
 namespace Shiboken
 {
 
-/**
- *  AutoDecRef holds a PyObject pointer and decrement its reference counter when destroyed.
- */
+/*!
+   \class Shiboken::AutoDecRef
+   \brief AutoDecRef holds a PyObject pointer and decrements its reference counter when destroyed.
+
+   \inmodule libshiboken
+*/
 struct AutoDecRef
 {
 public:
@@ -29,24 +32,35 @@ public:
         return *this;
     }
 
-    /// AutoDecRef constructor.
-    /// \param pyobj A borrowed reference to a Python object
+    /*!
+        Constructs an AutoDecRef taking ownership of the borrowed reference to the
+        Python object \a pyObj.
+    */
     explicit AutoDecRef(PyObject *pyObj) noexcept : m_pyObj(pyObj) {}
-    /// AutoDecRef constructor.
-    /// \param pyobj A borrowed reference to a wrapped Python object
+
+    /*!
+        Constructs an AutoDecRef taking ownership of the borrowed reference to the
+        wrapped Python object \a pyObj.
+    */
     explicit AutoDecRef(SbkObject *pyObj) noexcept : m_pyObj(reinterpret_cast<PyObject *>(pyObj)) {}
-    /// AutoDecref default constructor.
-    /// To be used later with reset():
+
+    /*!
+        Constructs an empty AutoDecRef, to be used later with reset().
+    */
     AutoDecRef() noexcept = default;
 
-    /// Decref the borrowed python reference
+    /*!
+        Decrements the reference count of the borrowed python reference.
+    */
     ~AutoDecRef()
     {
         Py_XDECREF(m_pyObj);
     }
 
     [[nodiscard]] bool isNull() const { return m_pyObj == nullptr; }
-    /// Returns the pointer of the Python object being held.
+    /*!
+        Returns the pointer of the Python object being held.
+    */
     [[nodiscard]] PyObject *object() const { return m_pyObj; }
     [[nodiscard]] operator PyObject *() const { return m_pyObj; }
     operator bool() const { return m_pyObj != nullptr; }
@@ -58,9 +72,9 @@ public:
         return reinterpret_cast<T>(m_pyObj);
     }
 
-    /**
-     * Decref the current borrowed python reference and borrow \p other.
-     */
+    /*!
+        Decref the current borrowed python reference and borrow \a other.
+    */
     void reset(PyObject *other)
     {
         // Safely decref m_pyObj. See Py_XSETREF in object.h .

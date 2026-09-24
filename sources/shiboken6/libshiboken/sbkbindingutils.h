@@ -11,7 +11,12 @@
 namespace Shiboken {
 struct AutoDecRef;
 
-/// Maps a keyword argument by name to its parameter index
+/*!
+    \struct Shiboken::ArgumentNameIndexMapping
+    \inmodule libshiboken
+
+    \brief Maps a keyword argument by name to its parameter index.
+*/
 struct ArgumentNameIndexMapping
 {
     const char *name;

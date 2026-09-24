@@ -13,12 +13,20 @@
 namespace Shiboken
 {
 
-/// PyObjectHolder holds a PyObject pointer, keeping a reference decrementing
-/// its reference counter when destroyed. It makes sure to hold the GIL when
-/// releasing. It implements copy/move semantics and is mainly intended as a
-/// base class for functors holding a callable which can be passed around and
-/// stored in containers or moved from freely.
-/// For one-shot functors, release() can be invoked after the call.
+/*!
+    \class Shiboken::PyObjectHolder
+
+    \brief Keeps a reference to a PyObject.
+
+    PyObjectHolder holds a PyObject pointer, keeping a reference decrementing
+    its reference counter when destroyed. It makes sure to hold the GIL when
+    releasing. It implements copy/move semantics and is mainly intended as a
+    base class for functors holding a callable which can be passed around and
+    stored in containers or moved from freely.
+    For one-shot functors, release() can be invoked after the call.
+
+    \inmodule libshiboken
+*/
 class PyObjectHolder
 {
 public:

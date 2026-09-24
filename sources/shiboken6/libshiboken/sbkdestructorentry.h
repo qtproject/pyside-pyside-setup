@@ -13,7 +13,12 @@ using ObjectDestructor = void (*)(void *);
 namespace Shiboken
 {
 
-/// Data required to invoke a C++ destructor
+/*!
+    \class Shiboken::DestructorEntry
+    \inmodule libshiboken
+
+    \brief Data required to invoke a C++ destructor.
+*/
 struct DestructorEntry
 {
     ObjectDestructor destructor;

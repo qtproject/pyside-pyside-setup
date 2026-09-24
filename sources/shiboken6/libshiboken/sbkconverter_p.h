@@ -21,57 +21,59 @@ extern "C"
 using ToCppConversion = std::pair<IsConvertibleToCppFunc, PythonToCppFunc>;
 using ToCppConversionVector = std::vector<ToCppConversion>;
 
-/**
- *  \internal
- *  Private structure of SbkConverter.
- */
+/*!
+    \internal
+    Private structure of SbkConverter.
+*/
 struct SbkConverter
 {
-    /**
-     *  Python type associated with this converter. If the type is a Shiboken
-     *  wrapper, then it must be a SbkObjectType; otherwise it will be the
-     *  Python type to which the C++ value will be converted (note that the
-     *  C++ type could be produced from various Python types).
-     */
+    /*!
+        Python type associated with this converter. If the type is a Shiboken
+        wrapper, then it must be a SbkObjectType; otherwise it will be the
+        Python type to which the C++ value will be converted (note that the
+        C++ type could be produced from various Python types).
+    */
     PyTypeObject *pythonType;
-    /**
-     *  This function converts a C++ object to a Python object of the type
-     *  indicated in pythonType. The identity of the C++ object is kept,
-     *  because it looks for an already existing Python wrapper associated
-     *  with the C++ instance.
-     *  It is used to convert C++ pointers and references to Python objects.
-     */
+    /*!
+        This function converts a C++ object to a Python object of the type
+        indicated in pythonType. The identity of the C++ object is kept,
+        because it looks for an already existing Python wrapper associated
+        with the C++ instance.
+        It is used to convert C++ pointers and references to Python objects.
+    */
     CppToPythonFunc pointerToPython;
-    /**
-     *  This function converts a C++ object to a Python object of the type
-     *  indicated in pythonType. The identity of the object is not kept,
-     *  because a new instance of the C++ object is created.
-     *  It is used to convert objects passed by value, or reference, if said
-     *  reference can't be traced to an object that already has a Python
-     *  wrapper assigned for it.
-     */
+    /*!
+        This function converts a C++ object to a Python object of the type
+        indicated in pythonType. The identity of the object is not kept,
+        because a new instance of the C++ object is created.
+        It is used to convert objects passed by value, or reference, if said
+        reference can't be traced to an object that already has a Python
+        wrapper assigned for it.
+    */
     CppToPythonFunc copyToPython;
-    /** Same as copyToPython, but additionally receives the 'PyTypeObject *'.
-      * Both functions are checked.
-      * FIXME PYSIDE 7: Add PyTypeObject parameter to CppToPythonFunc? */
+    /*!
+        Same as copyToPython, but additionally receives the \c{PyTypeObject *}.
+        Both functions are checked.
+    */
+    // FIXME PYSIDE 7: Add PyTypeObject parameter to CppToPythonFunc?
     CppToPythonWithTypeFunc copyToPythonWithType;
-    /**
-     *  This is a special case of a Python to C++ conversion. It returns
-     *  the underlying C++ pointer of a Python wrapper passed as parameter
-     *  or NULL if the Python object is a None value.
-     *  It comes separated from the other toCppConversions because if you
-     *  have a Python object representing a Value Type the type checking
-     *  for both ValueType and ValueType *would be the same, thus the first
-     *  check would be true and the second would never be reached.
-     */
+    /*!
+        This is a special case of a Python to C++ conversion. It returns
+        the underlying C++ pointer of a Python wrapper passed as parameter
+        or nullptr if the Python object is a None value.
+        It comes separated from the other toCppConversions because if you
+        have a Python object representing a Value Type the type checking
+        for both \c ValueType and \c{ValueType *} would be the same, thus
+        the first check would be true and the second would never be reached.
+    */
     ToCppConversion toCppPointerConversion;
-    /**
-     *  This is a list of type checking functions that return the
-     *  proper Python to C++ conversion function, for the given Python
-     *  object.
-     *  For Object Types, that never have implicit conversions, this
-     *  list is always empty.
-     */
+    /*!
+        This is a list of type checking functions that return the
+        proper Python to C++ conversion function, for the given Python
+        object.
+        For Object Types, that never have implicit conversions, this
+        list is always empty.
+    */
     ToCppConversionVector toCppConversions;
 };
 
