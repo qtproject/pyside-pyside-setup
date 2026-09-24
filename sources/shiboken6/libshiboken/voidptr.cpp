@@ -3,7 +3,9 @@
 // Qt-Security score:significant reason:default
 
 #include "voidptr.h"
+#ifdef Py_GIL_DISABLED
 #include "autodecref.h"
+#endif
 #include "pep384ext.h"
 #include "sbkconverter.h"
 #include "basewrapper.h"

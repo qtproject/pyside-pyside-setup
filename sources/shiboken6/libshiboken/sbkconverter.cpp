@@ -12,7 +12,9 @@
 #include "helper.h"
 #include "sbkstring.h"
 #include "sbkpep.h"
+#ifdef Py_GIL_DISABLED
 #include "sbkfailpoint.h"
+#endif
 #include "voidptr.h"
 
 #include <string>
@@ -534,11 +536,17 @@ void pythonToCppPointer(const SbkConverter *converter, PyObject *pyIn, void *cpp
     assert(converter);
     assert(pyIn);
     assert(cppOut);
+#ifdef Py_GIL_DISABLED
     if (pyIn == Py_None) {
         *reinterpret_cast<void **>(cppOut) = nullptr;
         return;
     }
     pythonToCppPointer(converter->pythonType, pyIn, cppOut);
+#else
+    *reinterpret_cast<void **>(cppOut) = pyIn == Py_None
+        ? nullptr
+        : cppPointer(converter->pythonType, reinterpret_cast<SbkObject *>(pyIn));
+#endif
 }
 
 static void _pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void *cppOut)
@@ -820,6 +828,7 @@ bool checkDictTypes(PyTypeObject *keyType, PyTypeObject *valueType, PyObject *py
 
     PyObject *key{};
     PyObject *value{};
+#ifdef Py_GIL_DISABLED
     Shiboken::AutoDecRef items(PepDict_IterationSnapshot(pyIn));
     if (items.isNull()) {
         PyErr_Clear();
@@ -832,6 +841,15 @@ bool checkDictTypes(PyTypeObject *keyType, PyTypeObject *valueType, PyObject *py
         if (!PyObject_TypeCheck(value, valueType))
             return false;
     }
+#else
+    Py_ssize_t pos = 0;
+    while (PyDict_Next(pyIn, &pos, &key, &value)) {
+        if (!PyObject_TypeCheck(key, keyType))
+            return false;
+        if (!PyObject_TypeCheck(value, valueType))
+            return false;
+    }
+#endif
     return true;
 }
 
@@ -846,6 +864,7 @@ bool checkMultiDictTypes(PyTypeObject *keyType, PyTypeObject *valueType,
 
     PyObject *key{};
     PyObject *values{};
+#ifdef Py_GIL_DISABLED
     Shiboken::AutoDecRef items(PepDict_IterationSnapshot(pyIn));
     if (items.isNull()) {
         PyErr_Clear();
@@ -864,6 +883,21 @@ bool checkMultiDictTypes(PyTypeObject *keyType, PyTypeObject *valueType,
                 return false;
         }
     }
+#else
+    Py_ssize_t pos = 0;
+    while (PyDict_Next(pyIn, &pos, &key, &values)) {
+        if (!PyObject_TypeCheck(key, keyType))
+            return false;
+        if (!PySequence_Check(values))
+            return false;
+        const Py_ssize_t size = PySequence_Size(values);
+        for (Py_ssize_t i = 0; i < size; ++i) {
+            AutoDecRef value(PySequence_GetItem(values, i));
+            if (!PyObject_TypeCheck(value, valueType))
+                return false;
+        }
+    }
+#endif
     return true;
 }
 
@@ -877,6 +911,7 @@ bool convertibleDictTypes(const SbkConverter *keyConverter, bool keyCheckExact, 
         return false;
     PyObject *key{};
     PyObject *value{};
+#ifdef Py_GIL_DISABLED
     Shiboken::AutoDecRef items(PepDict_IterationSnapshot(pyIn));
     if (items.isNull()) {
         PyErr_Clear();
@@ -897,6 +932,23 @@ bool convertibleDictTypes(const SbkConverter *keyConverter, bool keyCheckExact, 
             return false;
         }
     }
+#else
+    Py_ssize_t pos = 0;
+    while (PyDict_Next(pyIn, &pos, &key, &value)) {
+        if (keyCheckExact) {
+            if (!PyObject_TypeCheck(key, keyConverter->pythonType))
+                return false;
+        } else if (!isPythonToCppConvertible(keyConverter, key)) {
+            return false;
+        }
+        if (valueCheckExact) {
+            if (!PyObject_TypeCheck(value, valueConverter->pythonType))
+                return false;
+        } else if (!isPythonToCppConvertible(valueConverter, value)) {
+            return false;
+        }
+    }
+#endif
     return true;
 }
 
@@ -911,6 +963,7 @@ bool convertibleMultiDictTypes(const SbkConverter *keyConverter, bool keyCheckEx
         return false;
     PyObject *key{};
     PyObject *values{};
+#ifdef Py_GIL_DISABLED
     Shiboken::AutoDecRef items(PepDict_IterationSnapshot(pyIn));
     if (items.isNull()) {
         PyErr_Clear();
@@ -937,6 +990,29 @@ bool convertibleMultiDictTypes(const SbkConverter *keyConverter, bool keyCheckEx
             }
         }
     }
+#else
+    Py_ssize_t pos = 0;
+    while (PyDict_Next(pyIn, &pos, &key, &values)) {
+        if (keyCheckExact) {
+            if (!PyObject_TypeCheck(key, keyConverter->pythonType))
+                return false;
+        } else if (!isPythonToCppConvertible(keyConverter, key)) {
+            return false;
+        }
+        if (!PySequence_Check(values))
+            return false;
+        const Py_ssize_t size = PySequence_Size(values);
+        for (Py_ssize_t i = 0; i < size; ++i) {
+            AutoDecRef value(PySequence_GetItem(values, i));
+            if (valueCheckExact) {
+                if (!PyObject_TypeCheck(value.object(), valueConverter->pythonType))
+                    return false;
+            } else if (!isPythonToCppConvertible(valueConverter, value.object())) {
+                return false;
+            }
+        }
+    }
+#endif
     return true;
 }
 

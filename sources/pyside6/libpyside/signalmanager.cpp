@@ -232,7 +232,6 @@ PyObject *methodGetAttr(PyObject *self, PyObject *name)
     // A build with a GIL reads the slot and keeps the error pending, as the
     // loop below expects when it finds no candidate to try.
     PyErr_Clear();
-#endif
     PepMroRef mro(Py_TYPE(self));
     if (mro.isNull())
         return nullptr;
@@ -251,6 +250,24 @@ PyObject *methodGetAttr(PyObject *self, PyObject *name)
                 break;
         }
     }
+#else
+    auto *type = Py_TYPE(self);
+    for (Py_ssize_t i = 0, size = PyTuple_Size(type->tp_mro); i < size; ++i) {
+        auto *candidate = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_mro, i));
+        if (candidate != &PyBaseObject_Type) {
+            PyErr_Clear();
+            Shiboken::AutoDecRef mangledName(_Pep_TypePrivateMangle(candidate, name));
+            // _Pep_TypePrivateMangle can return nullptr on malloc or unicode failure.
+            if (mangledName.isNull()) {
+                PyErr_Clear();
+                break;
+            }
+            result = PyObject_GetAttr(self, mangledName.object());
+            if (result != nullptr)
+                break;
+        }
+    }
+#endif
     return result;
 }
 

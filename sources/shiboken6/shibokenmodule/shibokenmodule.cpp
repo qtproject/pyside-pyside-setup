@@ -133,21 +133,23 @@ return listAll;
 // @snippet getallvalidwrappers
 
 // @snippet armfailpoint
+#ifdef Py_GIL_DISABLED
+// The two kinds have disjoint names: a throwing point is armed as one,
+// every other name goes to the parking kind.
+const bool ok = Shiboken::armFailpointThrow(%1) || Shiboken::armFailpoint(%1, %2);
+#else
 const bool ok = Shiboken::armFailpoint(%1, %2);
+#endif
 %PYARG_0 = %CONVERTTOPYTHON[bool](ok);
 // @snippet armfailpoint
 
-// @snippet armfailpointthrow
-const bool ok = Shiboken::armFailpointThrow(%1);
-%PYARG_0 = %CONVERTTOPYTHON[bool](ok);
-// @snippet armfailpointthrow
-
-// @snippet disarmfailpointthrow
-Shiboken::disarmFailpointThrow();
-// @snippet disarmfailpointthrow
-
 // @snippet releasefailpoint
+#ifdef Py_GIL_DISABLED
+// A throwing point parks nobody: releasing it disarms it, if it is armed.
+const bool ok = Shiboken::releaseFailpoint(%1) || Shiboken::disarmFailpointThrow(%1);
+#else
 const bool ok = Shiboken::releaseFailpoint(%1);
+#endif
 %PYARG_0 = %CONVERTTOPYTHON[bool](ok);
 // @snippet releasefailpoint
 

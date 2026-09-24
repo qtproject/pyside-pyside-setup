@@ -152,8 +152,12 @@ struct SourceDefs
             auto *capsule = PyCapsule_GetPointer(methodData->payload, "PropertyCapsule");
             if (capsule) {
                 auto *ob_dict = SbkObject_GetDict_NoRef(self);
+#ifdef Py_GIL_DISABLED
                 Shiboken::AutoDecRef propCapsule(PepDict_GetItemOwned(ob_dict, propertiesAttr()));
                 auto *propPtr = PyCapsule_GetPointer(propCapsule,
+#else
+                auto *propPtr = PyCapsule_GetPointer(PyDict_GetItem(ob_dict, propertiesAttr()),
+#endif
                                                      nullptr);
                 auto *currentProperties = reinterpret_cast<QVariantList *>(propPtr);
                 auto *callData = reinterpret_cast<PropertyCapsule *>(capsule);

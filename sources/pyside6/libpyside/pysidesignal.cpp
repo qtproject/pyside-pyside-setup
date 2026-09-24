@@ -19,7 +19,9 @@
 #include <sbkconverter.h>
 #include <sbkenum.h>
 #include <sbkerrors.h>
+#ifdef Py_GIL_DISABLED
 #include <sbkfailpoint.h>
+#endif
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
@@ -844,9 +846,17 @@ static PyObject *signalDescrGet(PyObject *self, PyObject *obj, PyObject * /*type
     // PYSIDE-68-bis: It is important to respect the already cached instance.
     Shiboken::AutoDecRef name(Py_BuildValue("s", signal->data->signalName.data()));
     auto *dict = SbkObject_GetDict_NoRef(obj);
+#ifdef Py_GIL_DISABLED
     auto *inst = PepDict_GetItemOwned(dict, name);
     if (inst)
         return inst;
+#else
+    auto *inst = PyDict_GetItem(dict, name);
+    if (inst) {
+        Py_INCREF(inst);
+        return inst;
+    }
+#endif
     inst = reinterpret_cast<PyObject *>(PySide::Signal::initialize(signal, name, obj));
     PyObject_SetAttr(obj, name, inst);
     return inst;
@@ -911,18 +921,15 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
     // but walk through the whole mro to find a hidden method with the same name.
     auto signalName = inst->d->signalName;
     Shiboken::AutoDecRef name(Shiboken::String::fromCString(signalName));
+#ifdef Py_GIL_DISABLED
     // The loop looks up a dict key and calls _getRealCallable(), so the
     // tuple has to stand for the whole walk, not just for the size.
-#ifdef Py_GIL_DISABLED
     // Held for the whole walk. A type that is gone has no method.
     Shiboken::AutoDecRef sourceType(
         reinterpret_cast<PyObject *>(inst->d->shared->acquireSourceType()));
     if (sourceType.isNull())
         return nullptr;
     PepMroRef mro(reinterpret_cast<PyTypeObject *>(sourceType.object()));
-#else
-    PepMroRef mro(inst->d->shared->sourceType);
-#endif
     if (mro.isNull()) {
         // Null means "no homonymous method"; the error must not stay set.
         Shiboken::Errors::storeErrorOrPrint();
@@ -933,7 +940,6 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
     for (Py_ssize_t idx = 0; idx < n; idx++) {
         auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro.object(), idx));
         Shiboken::AutoDecRef tpDict(PepType_GetDict(sub_type));
-#ifdef Py_GIL_DISABLED
         // Owned: the answer outlives the walk, and the class can drop it.
         // See "Dictionary lookups own their result" in the free-threading notes.
         Shiboken::AutoDecRef hom(PepDict_GetItemOwned(tpDict, name));
@@ -941,14 +947,21 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
             if (auto *realFunc = _getRealCallable(hom))
                 return Py_NewRef(realFunc);
         }
+    }
 #else
+    auto *mro = inst->d->shared->sourceType->tp_mro;
+    const Py_ssize_t n = PyTuple_Size(mro);
+
+    for (Py_ssize_t idx = 0; idx < n; idx++) {
+        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        Shiboken::AutoDecRef tpDict(PepType_GetDict(sub_type));
         auto *hom = PyDict_GetItem(tpDict, name);
         if (hom != nullptr && PyCallable_Check(hom) != 0) {
             if (auto *realFunc = _getRealCallable(hom))
                 return realFunc;
         }
-#endif
     }
+#endif
     return nullptr;
 }
 
@@ -1065,6 +1078,7 @@ void updateSourceObject(PyObject *source)
     if (source == nullptr)      // Bad input
        return;
 
+#ifdef Py_GIL_DISABLED
     // Called only from a generated constructor, right after the commit: the
     // object is published, and whatever keeps it alive from here is the
     // constructor's own lease. See ConstructorTailLease.
@@ -1077,6 +1091,9 @@ void updateSourceObject(PyObject *source)
         return;
     }
     Shiboken::AutoDecRef mroIterator(PyObject_GetIter(mro.object()));
+#else
+    Shiboken::AutoDecRef mroIterator(PyObject_GetIter(source->ob_type->tp_mro));
+#endif
 
     if (mroIterator.isNull())   // Not iterable
        return;
@@ -1091,6 +1108,7 @@ void updateSourceObject(PyObject *source)
         Py_ssize_t pos = 0;
         auto *type = reinterpret_cast<PyTypeObject *>(mroItem.object());
         Shiboken::AutoDecRef tpDict(PepType_GetDict(type));
+#ifdef Py_GIL_DISABLED
         Shiboken::AutoDecRef items(PepDict_IterationSnapshot(tpDict));
         if (items.isNull()) {
             PyErr_Clear();
@@ -1108,9 +1126,7 @@ void updateSourceObject(PyObject *source)
                     auto shared = std::make_shared<PySideSignalInstanceShared>();
                     shared->source = PySide::convertToQObject(source, false);
                     shared->sourceType = Py_TYPE(source);
-#ifdef Py_GIL_DISABLED
                     shared->rememberSourceType();
-#endif
                     instanceInitialize(si, key, reinterpret_cast<PySideSignal *>(value),
                                        shared, 0);
                     if (PyDict_SetItem(dict, key, signalInstance) == -1)
@@ -1118,6 +1134,27 @@ void updateSourceObject(PyObject *source)
                 }
             }
         }
+#else
+        while (PyDict_Next(tpDict, &pos, &key, &value)) {
+            if (PyObject_TypeCheck(value, PySideSignal_TypeF())) {
+                // PYSIDE-1751: We only insert an instance into the instance dict, if a signal
+                //              of the same name is in the mro. This is the equivalent action
+                //              as PyObject_SetAttr, but filtered by existing signal names.
+                if (!PyDict_GetItem(dict, key)) {
+                    auto *inst = PyObject_New(PySideSignalInstance, PySideSignalInstance_TypeF());
+                    Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(inst));
+                    auto *si = reinterpret_cast<PySideSignalInstance *>(signalInstance.object());
+                    auto shared = std::make_shared<PySideSignalInstanceShared>();
+                    shared->source = PySide::convertToQObject(source, false);
+                    shared->sourceType = Py_TYPE(source);
+                    instanceInitialize(si, key, reinterpret_cast<PySideSignal *>(value),
+                                       shared, 0);
+                    if (PyDict_SetItem(dict, key, signalInstance) == -1)
+                        return;     // An error occurred while setting the attribute
+                }
+            }
+        }
+#endif
     }
 
     if (PyErr_Occurred())       // An iteration error occurred
@@ -1304,8 +1341,15 @@ static void _addSignalToWrapper(PyTypeObject *wrapperType, const char *signalNam
 {
     Shiboken::AutoDecRef tpDict(PepType_GetDict(wrapperType));
     auto *typeDict = tpDict.object();
+#ifdef Py_GIL_DISABLED
     if (auto *homonymousMethod = PepDict_GetItemStringOwned(typeDict, signalName))
         signal->homonymousMethod = homonymousMethod;
+#else
+    if (auto *homonymousMethod = PyDict_GetItemString(typeDict, signalName)) {
+        Py_INCREF(homonymousMethod);
+        signal->homonymousMethod = homonymousMethod;
+    }
+#endif
     PyDict_SetItemString(typeDict, signalName, reinterpret_cast<PyObject *>(signal));
 }
 

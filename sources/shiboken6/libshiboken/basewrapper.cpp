@@ -34,14 +34,18 @@
 #endif
 
 #include <algorithm>
+#ifdef Py_GIL_DISABLED
 #include <atomic>
+#endif
 #include <cctype>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#ifdef Py_GIL_DISABLED
 #include <iterator>
 #include <new>
+#endif
 #include <set>
 #include <sstream>
 #include <string>
@@ -1365,6 +1369,7 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
     // Note: This special case was implemented for duck-punching, which happens
     // in the instance dict. It does not work with properties.
     // This is not cached to avoid leaking. FIXME PYSIDE 7: Remove (PYSIDE-2916)?
+#ifdef Py_GIL_DISABLED
     if (PyObject *method = PepDict_GetItemOwned(wrapper_dict, pyMethodName))
         return method;
 
@@ -1378,19 +1383,29 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
         // that storeErrorOrPrint() stashed earlier, so asking here would move
         // the point at which a GIL build raises it - on the virtual dispatch
         // of every wrapper.
-#ifdef Py_GIL_DISABLED
         if (Shiboken::Errors::occurred() == nullptr)
-#endif
         {
             Py_INCREF(Py_None);
             resultCache.publish(Py_None);
         }
-#ifdef Py_GIL_DISABLED
         wrapperRef.reset();
-#endif
         gil.release();
         return nullptr; // No override, execute C++ call
     }
+#else
+    if (PyObject *method = PyDict_GetItem(wrapper_dict, pyMethodName)) {
+        Py_INCREF(method);
+        return method;
+    }
+
+    auto *pyOverride = Shiboken::BindingManager::getOverride(wrapper, pyMethodName);
+    if (pyOverride == nullptr) {
+        Py_INCREF(Py_None);
+        resultCache.publish(Py_None);
+        gil.release();
+        return nullptr; // No override, execute C++ call
+    }
+#endif
 
     if (Shiboken::Errors::occurred() != nullptr) {
         // Give up.
@@ -2360,8 +2375,12 @@ bool isValid(PyObject *pyObj)
     if (Py_TYPE(reinterpret_cast<PyObject *>(type)) != SbkObjectType_TypeF())
         return true;
 
+#ifdef Py_GIL_DISABLED
     auto *self = reinterpret_cast<SbkObject *>(pyObj);
     auto *priv = self->d;
+#else
+    auto *priv = reinterpret_cast<SbkObject *>(pyObj)->d;
+#endif
 
     if (!priv->cppObjectCreated && isUserType(pyObj)) {
         PyErr_Format(PyExc_RuntimeError,

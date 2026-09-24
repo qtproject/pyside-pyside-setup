@@ -169,6 +169,7 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     PyTypeObject *qobjectType = PySide::qObjectType();
 
     auto *elementType = reinterpret_cast<PyTypeObject *>(data->obElementType);
+#ifdef Py_GIL_DISABLED
     // PySequence_Contains() compares, and a comparison can run Python code.
     PepMroRef elementMro(elementType);
     if (elementMro.isNull())
@@ -179,6 +180,13 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                      qobjectType->tp_name, elementType->tp_name);
         return -1;
     }
+#else
+    if (!PySequence_Contains(elementType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
+        PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
+                     qobjectType->tp_name, elementType->tp_name);
+        return -1;
+    }
+#endif
 
     data->setTypeName("QQmlListProperty<QObject>"_ba);
 

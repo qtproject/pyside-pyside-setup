@@ -123,8 +123,13 @@ static QByteArray getGlobalString(const char *name)
     if (globals.isNull())
         return {};
 
+#ifdef Py_GIL_DISABLED
     Shiboken::AutoDecRef globalVar(PepDict_GetItemStringOwned(globals, name));
     if (globalVar.isNull() || PyUnicode_Check(globalVar.object()) == 0)
+#else
+    PyObject *globalVar = PyDict_GetItemString(globals, name);
+    if (globalVar == nullptr || PyUnicode_Check(globalVar) == 0)
+#endif
         return {};
 
     const char *stringValue = PyUnicode_AsUTF8AndSize(globalVar, nullptr);
@@ -137,8 +142,13 @@ static int getGlobalInt(const char *name)
     if (globals.isNull())
         return -1;
 
+#ifdef Py_GIL_DISABLED
     Shiboken::AutoDecRef globalVar(PepDict_GetItemStringOwned(globals, name));
     if (globalVar.isNull() || PyLong_Check(globalVar.object()) == 0)
+#else
+    PyObject *globalVar = PyDict_GetItemString(globals, name);
+    if (globalVar == nullptr || PyLong_Check(globalVar) == 0)
+#endif
         return -1;
 
     long value = PyLong_AsLong(globalVar);
@@ -677,9 +687,15 @@ static std::optional<SingletonQObjectCreation>
     singletonCreateMethod(PyTypeObject *pyObjType)
 {
     Shiboken::AutoDecRef tpDict(PepType_GetDict(pyObjType));
+#ifdef Py_GIL_DISABLED
     Shiboken::AutoDecRef create(PepDict_GetItemStringOwned(tpDict.object(), "create"));
     // Method decorated by "@staticmethod"
     if (create.isNull()
+#else
+    auto *create = PyDict_GetItemString(tpDict.object(), "create");
+    // Method decorated by "@staticmethod"
+    if (create == nullptr
+#endif
         || std::strcmp(PepType_GetFullyQualifiedNameStr(Py_TYPE(create)), "staticmethod") != 0) {
         return std::nullopt;
     }
@@ -687,7 +703,11 @@ static std::optional<SingletonQObjectCreation>
     Shiboken::AutoDecRef function(PyObject_GetAttrString(create, "__func__"));
     if (function.isNull()) {
         PyErr_Format(PyExc_TypeError, "Cannot retrieve function of callback (%S).",
+#ifdef Py_GIL_DISABLED
                      create.object());
+#else
+                     create);
+#endif
         return std::nullopt;
     }
     if (!checkSingletonCallback(function.object()))

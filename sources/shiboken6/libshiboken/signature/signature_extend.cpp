@@ -24,7 +24,9 @@
 
 #include "autodecref.h"
 #include "sbkpep.h"
+#ifdef Py_GIL_DISABLED
 #include "sbkfailpoint.h"
+#endif
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
@@ -44,6 +46,7 @@ using signaturefunc = PyObject *(*)(PyObject *, PyObject *);
 
 static PyObject *_get_written_signature(signaturefunc sf, PyObject *ob, PyObject *modifier)
 {
+#ifdef Py_GIL_DISABLED
     /*
      * Be a writable Attribute, but have a computed value.
      *
@@ -59,6 +62,24 @@ static PyObject *_get_written_signature(signaturefunc sf, PyObject *ob, PyObject
     PyObject *ret = PepDict_GetItemOwned(signatureGlobals()->value_dict, ob);
     if (ret == nullptr)
         return ob == nullptr ? nullptr : sf(ob, modifier);
+#else
+    /*
+     * Be a writable Attribute, but have a computed value.
+     *
+     * If a signature has not been written, call the signature function.
+     * If it has been written, return the written value.
+     * After __del__ was called, the function value re-appears.
+     *
+     * Note: This serves also for the new version that does not allow any
+     * assignment if we have a computed value. We only need to check if
+     * a computed value exists and then forbid writing.
+     * See pyside_set___signature
+     */
+    PyObject *ret = PyDict_GetItem(signatureGlobals()->value_dict, ob);
+    if (ret == nullptr)
+        return ob == nullptr ? nullptr : sf(ob, modifier);
+    Py_INCREF(ret);
+#endif
     return ret;
 }
 
@@ -122,31 +143,29 @@ static PyObject *old_md_doc_descr = nullptr;
 static PyObject *old_tp_doc_descr = nullptr;
 static PyObject *old_wd_doc_descr = nullptr;
 
+#ifdef Py_GIL_DISABLED
 // Per thread on a free-threaded build: make_helptext() runs Python, so two
 // threads can be inside it at once and one process-wide counter makes them
 // see each other's recursion. A build with a GIL keeps the single counter it
 // has always had - the same interleaving is possible there, but curing it is
 // a change of its own and not this series' business.
 // See "Documentation recursion" in the free-threading notes.
-#ifdef Py_GIL_DISABLED
 static thread_local int handle_doc_depth = 0;
 
 // The process-wide counter, used with DocRecursionPerThread cleared.
 static int handle_doc_depth_shared = 0;
-#else
-static int handle_doc_depth = 0;
-#endif
 
 static int &handleDocDepth()
 {
-#ifdef Py_GIL_DISABLED
     if (!Shiboken::FreeThreading::optionEnabled(
             Shiboken::FreeThreading::DocRecursionPerThread)) {
         return handle_doc_depth_shared;
     }
-#endif
     return handle_doc_depth;
 }
+#else
+static int handle_doc_in_progress = 0;
+#endif
 
 static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
 {
@@ -157,6 +176,7 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
         : PepType_GetFullyQualifiedNameStr(reinterpret_cast<PyTypeObject *>(ob_type_mod.object()));
     PyObject *res{};
 
+#ifdef Py_GIL_DISABLED
     int &depth = handleDocDepth();
     if (depth != 0 || name == nullptr
         || (isModule && std::strncmp(name, "PySide6.", 8) != 0)) {
@@ -167,6 +187,16 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
         res = PyObject_CallFunction(signatureGlobals()->make_helptext_func, "(O)", ob);
         --depth;
     }
+#else
+    if (handle_doc_in_progress || name == nullptr
+        || (isModule && std::strncmp(name, "PySide6.", 8) != 0)) {
+        res = PyObject_CallMethodObjArgs(old_descr, PyMagicName::get(), ob, nullptr);
+    } else {
+        handle_doc_in_progress++;
+        res = PyObject_CallFunction(signatureGlobals()->make_helptext_func, "(O)", ob);
+        handle_doc_in_progress--;
+    }
+#endif
 
     if (res)
         return res;

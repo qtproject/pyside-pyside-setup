@@ -5,7 +5,9 @@
 #include "sbkenum.h"
 #include "sbkenum_p.h"
 #include "sbkpep.h"
+#ifdef Py_GIL_DISABLED
 #include "sbkerrors.h"
+#endif
 #include "sbkstring.h"
 #include "helper.h"
 #include "sbkstaticstrings.h"
@@ -131,6 +133,7 @@ int enumIsFlag(PyObject *ob_type)
     auto *metatype = Py_TYPE(ob_type);
     if (metatype != globals->PyEnumMeta)
         return -1;
+#ifdef Py_GIL_DISABLED
     PepMroRef mro(reinterpret_cast<PyTypeObject *>(ob_type));
     if (mro.isNull()) {
         // The int answer cannot carry the exception; store it.
@@ -143,6 +146,15 @@ int enumIsFlag(PyObject *ob_type)
         if (sub_type == reinterpret_cast<PyTypeObject *>(globals->PyFlag))
             return 1;
     }
+#else
+    auto *mro = reinterpret_cast<PyTypeObject *>(ob_type)->tp_mro;
+    const Py_ssize_t n = PyTuple_Size(mro);
+    for (Py_ssize_t idx = 0; idx < n; ++idx) {
+        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        if (sub_type == reinterpret_cast<PyTypeObject *>(globals->PyFlag))
+            return 1;
+    }
+#endif
     return 0;
 }
 
@@ -274,7 +286,13 @@ PyObject *getEnumItemFromValue(PyTypeObject *enumType, EnumValueType itemValue)
         return nullptr;
     }
     AutoDecRef ob_value(PyLong_FromLongLong(itemValue));
+#ifdef Py_GIL_DISABLED
     return PepDict_GetItemOwned(val2members, ob_value);
+#else
+    auto *result = PyDict_GetItem(val2members, ob_value);
+    Py_XINCREF(result);
+    return result;
+#endif
 }
 
 PyObject *newItem(PyTypeObject *enumType, EnumValueType itemValue,
@@ -288,10 +306,19 @@ PyObject *newItem(PyTypeObject *enumType, EnumValueType itemValue,
 
     static PyObject *const _member_map_ = String::createStaticString("_member_map_");
     AutoDecRef tpDict(PepType_GetDict(enumType));
+#ifdef Py_GIL_DISABLED
     AutoDecRef member_map(PepDict_GetItemOwned(tpDict.object(), _member_map_));
     if (member_map.isNull() || !PyDict_Check(member_map.object()))
         return nullptr;
     return PepDict_GetItemStringOwned(member_map.object(), itemName);
+#else
+    auto *member_map = PyDict_GetItem(tpDict.object(), _member_map_);
+    if (!(member_map && PyDict_Check(member_map)))
+        return nullptr;
+    auto *result = PyDict_GetItemString(member_map, itemName);
+    Py_XINCREF(result);
+    return result;
+#endif
 }
 
 EnumValueType getValue(PyObject *enumItem)

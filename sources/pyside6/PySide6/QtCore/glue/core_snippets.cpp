@@ -8,7 +8,9 @@
 
 #include "sbkpython.h"
 #include "sbkconverter.h"
+#ifdef Py_GIL_DISABLED
 #include "sbkerrors.h"
+#endif
 #include "sbkpep.h"
 #ifndef Py_LIMITED_API
 #  include <datetime.h>
@@ -277,6 +279,7 @@ void qObjectFindChildren(const QObject *parent, const QRegularExpression &patter
 
 QString qObjectTr(PyTypeObject *type, const char *sourceText, const char *disambiguation, int n)
 {
+#ifdef Py_GIL_DISABLED
     QString result = QString::fromUtf8(sourceText);
     PepMroRef mro(type);
     if (mro.isNull()) {
@@ -296,6 +299,23 @@ QString qObjectTr(PyTypeObject *type, const char *sourceText, const char *disamb
         if (result != oldResult)
             break;
     }
+#else
+    PyObject *mro = type->tp_mro;
+    auto len = PyTuple_Size(mro);
+    QString result = QString::fromUtf8(sourceText);
+    QString oldResult = result;
+    auto *sbkObjectType = reinterpret_cast<PyTypeObject *>(SbkObject_TypeF());
+    for (Py_ssize_t idx = 0; idx < len - 1; ++idx) {
+        // Skip the last class which is `object`.
+        auto *type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        if (type == sbkObjectType)
+            continue;
+        const char *context = PepType_GetNameStr(type);
+        result = QCoreApplication::translate(context, sourceText, disambiguation, n);
+        if (result != oldResult)
+            break;
+    }
+#endif
     return result;
 }
 

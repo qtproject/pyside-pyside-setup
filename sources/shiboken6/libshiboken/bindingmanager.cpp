@@ -686,24 +686,25 @@ BindingManager::~BindingManager()
     // finalization has begun. Entries still in the map are abandoned.
     // See "A retired identity leaves a tombstone" in the free-threading notes.
 #else
-#  ifndef NDEBUG
+#ifndef NDEBUG
     if (Shiboken::pyVerbose() > 0)
         dumpWrapperMap();
-#  endif
+#endif
     /* Cleanup hanging references. We just invalidate them as when
      * the BindingManager is being destroyed the interpreter is alredy
      * shutting down. */
     if (Py_IsInitialized()) {  // ensure the interpreter is still valid
         // Destroying under the lock, as this branch always did: with a GIL
         // nothing else reaches the map, and this runs at interpreter
-        // shutdown.
+        // shutdown. The branch above may not do it, and that difference is
+        // what the contract buys.
         WrapperMapGuard guard(m_d->wrapperMapLock);
         while (!m_d->wrapperMapper.empty()) {
             Object::destroy(m_d->wrapperMapper.begin()->second, const_cast<void *>(m_d->wrapperMapper.begin()->first));
         }
         assert(m_d->wrapperMapper.empty());
     }
-#endif // Py_GIL_DISABLED
+#endif
     delete m_d;
 }
 
@@ -1160,7 +1161,6 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName
     // Owned across the walk, which runs Python; each return hands it over.
     // See "A virtual dispatch owns the override it found" in the free-threading notes.
     AutoDecRef functionRef(function);
-#endif
     // A snapshot: the loop runs Python code (PepType_GetDict(), key
     // comparisons), where another thread can assign __bases__.
     PepMroRef mro(Py_TYPE(obWrapper));
@@ -1179,14 +1179,27 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName
             if (!defaultMethod.isNull()) {
                 defaultFound = true;
                 if (function != defaultMethod.object())
-#ifdef Py_GIL_DISABLED
                     return functionRef.release();
-#else
-                    return function;
-#endif
             }
         }
     }
+#else
+    PyObject *mro = Py_TYPE(obWrapper)->tp_mro;
+    bool defaultFound = false;
+    // The first class in the mro (index 0) is the class being checked and it should not be tested.
+    // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
+    for (Py_ssize_t idx = 1, size = PyTuple_Size(mro); idx < size - 1; ++idx) {
+        auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        AutoDecRef parentDict(PepType_GetDict(parent));
+        if (parentDict) {
+            if (PyObject *defaultMethod = PyDict_GetItem(parentDict.object(), pyMethodName)) {
+                defaultFound = true;
+                if (function != defaultMethod)
+                    return function;
+            }
+        }
+    }
+#endif
     // PYSIDE-2255: If no default method was found, use the method.
     if (!defaultFound)
 #ifdef Py_GIL_DISABLED
@@ -1358,6 +1371,7 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
         return false;
 
     auto *startType = Py_TYPE(self);
+#ifdef Py_GIL_DISABLED
     // Held past the loops: the type they stop at goes to PyObject_GetAttr().
     PepMroRef mro(startType);
     if (mro.isNull())
@@ -1383,6 +1397,30 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
         return false;
 
     auto *obSubType = PyTuple_GetItem(mro.object(), idx);
+#else
+    auto *mro = startType->tp_mro;
+    Py_ssize_t idx = 0;
+    const Py_ssize_t n = PyTuple_Size(mro);
+    /* No need to check the last one: it's gonna be skipped anyway.  */
+    const char *className = typeStruct.fullName;
+    for ( ; idx + 1 < n; ++idx) {
+        auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        if (std::strcmp(className, PepType_GetFullyQualifiedNameStr(lookType)) == 0)
+            break;
+    }
+    // We are now at the first non-Python class `QObject`.
+    // mro: ('C', 'A', 'QObject', 'Object', 'B', 'object')
+    // We want to catch class `B` and call its `__init__`.
+    for (idx += 1; idx + 1 < n; ++idx) {
+        auto *t = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        if (isPythonType(t))
+            break;
+    }
+    if (idx >= n)
+        return false;
+
+    auto *obSubType = PyTuple_GetItem(mro, idx);
+#endif
     auto *subType = reinterpret_cast<PyTypeObject *>(obSubType);
     if (subType == &PyBaseObject_Type)
         return false;

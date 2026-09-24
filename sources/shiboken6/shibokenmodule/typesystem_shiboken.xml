@@ -72,17 +72,6 @@
         <inject-code file="shibokenmodule.cpp" snippet="armfailpoint"/>
     </add-function>
 
-    <!-- The throwing kind, for a point inside a transaction: it throws where
-         an allocation would fail, and disarms itself. -->
-    <add-function signature="armFailpointThrow(const char *@name@)"
-                  return-type="bool">
-        <inject-code file="shibokenmodule.cpp" snippet="armfailpointthrow"/>
-    </add-function>
-
-    <add-function signature="disarmFailpointThrow()">
-        <inject-code file="shibokenmodule.cpp" snippet="disarmfailpointthrow"/>
-    </add-function>
-
     <add-function signature="releaseFailpoint(const char *@name@)" return-type="bool">
         <inject-code file="shibokenmodule.cpp" snippet="releasefailpoint"/>
     </add-function>

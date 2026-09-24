@@ -12,8 +12,10 @@
 #include <autodecref.h>
 #include <pep384ext.h>
 #include <sbkconverter.h>
+#ifdef Py_GIL_DISABLED
 #include <sbkerrors.h>
 #include <sbkfailpoint.h>
+#endif
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
@@ -599,6 +601,7 @@ static int qpropertyClear(PyObject *self)
 static PyObject *getFromType(PyTypeObject *type, PyObject *name)
 {
     AutoDecRef tpDict(PepType_GetDict(type));
+#ifdef Py_GIL_DISABLED
     if (auto *attr = PepDict_GetItemOwned(tpDict.object(), name))
         return attr;
 
@@ -621,6 +624,20 @@ static PyObject *getFromType(PyTypeObject *type, PyObject *name)
             return found;
     }
     return nullptr;
+#else
+    auto *attr = PyDict_GetItem(tpDict.object(), name);
+    if (!attr) {
+        PyObject *bases = type->tp_bases;
+        const Py_ssize_t size = PyTuple_Size(bases);
+        for (Py_ssize_t i = 0; i < size; ++i) {
+            PyObject *base = PyTuple_GetItem(bases, i);
+            attr = getFromType(reinterpret_cast<PyTypeObject *>(base), name);
+            if (attr)
+                return attr;
+        }
+    }
+    return attr;
+#endif
 }
 
 namespace PySide::Property {
@@ -686,10 +703,17 @@ PySideProperty *getObject(PyObject *source, PyObject *name)
     PyObject *attr = nullptr;
 
     attr = getFromType(Py_TYPE(source), name);
+#ifdef Py_GIL_DISABLED
     if (attr && checkType(attr))
         return reinterpret_cast<PySideProperty *>(attr);   // hands it on
 
     Py_XDECREF(attr);
+#else
+    if (attr && checkType(attr)) {
+        Py_INCREF(attr);
+        return reinterpret_cast<PySideProperty *>(attr);
+    }
+#endif
     if (!attr)
         PyErr_Clear(); //Clear possible error caused by PyObject_GenericGetAttr
 

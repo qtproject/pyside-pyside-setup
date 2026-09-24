@@ -5,7 +5,9 @@
 #include "sbkerrors.h"
 #include "autodecref.h"
 #include "sbkpep.h"
+#ifdef Py_GIL_DISABLED
 #include "sbkftoptions.h"
+#endif
 #include "sbkstring.h"
 #include "helper.h"
 
@@ -225,14 +227,14 @@ PyObject *occurred()
     return PyErr_Occurred();
 }
 
+#ifdef Py_GIL_DISABLED
 bool conversionFailed()
 {
-#ifdef Py_GIL_DISABLED
     if (!FreeThreading::optionEnabled(FreeThreading::ConversionGate))
         return false;
-#endif
     return occurred() != nullptr;
 }
+#endif
 
 Stash::Stash() : m_store(std::make_unique<ErrorStore>())
 {

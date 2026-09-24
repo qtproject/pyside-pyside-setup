@@ -219,8 +219,12 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     auto dotPos = usePySide ? names.find('.', 8) : names.find('.');
     auto startPos = dotPos + 1;
     AutoDecRef modName(String::fromCppStringView(names.substr(0, dotPos)));
+#ifdef Py_GIL_DISABLED
     AutoDecRef module(PepDict_GetItemOwned(moduleData()->sysModules, modName));
     PyObject *modOrType = module.object();
+#else
+    auto *modOrType = PyDict_GetItem(moduleData()->sysModules, modName);
+#endif
     if (modOrType == nullptr) {
         PyErr_Format(PyExc_SystemError,
                      R"(libshiboken: Error instantiating "%s": Module "%U" should already be in sys.modules)",
@@ -727,8 +731,15 @@ void AddTypeCreationFunction(PyObject *module,
 PyObject *import(const char *moduleName)
 {
     PyObject *sysModules = PyImport_GetModuleDict();
+#ifdef Py_GIL_DISABLED
     PyObject *module = PepDict_GetItemStringOwned(sysModules, moduleName);
     if (module == nullptr)
+#else
+    PyObject *module = PyDict_GetItemString(sysModules, moduleName);
+    if (module != nullptr)
+        Py_INCREF(module);
+    else
+#endif
         module = PyImport_ImportModule(moduleName);
 
     if (module == nullptr) {

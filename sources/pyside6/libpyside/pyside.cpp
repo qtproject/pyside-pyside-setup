@@ -36,7 +36,9 @@
 #include <sbkconverter.h>
 #include <sbkerrors.h>
 #include <sbkftoptions.h>
+#ifdef Py_GIL_DISABLED
 #include <sbkheldlocks.h>
+#endif
 #include <sbkpep.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
@@ -57,6 +59,7 @@
 #include <QtCore/private/qobject_p.h>
 
 #include <algorithm>
+#ifdef Py_GIL_DISABLED
 #include <cstddef>
 #include <cstring>
 #include <cctype>
@@ -65,6 +68,13 @@
 #include <vector>
 #include <optional>
 #include <type_traits>
+#else
+#include <cstring>
+#include <cctype>
+#include <memory>
+#include <vector>
+#include <optional>
+#endif
 #include <typeinfo>
 
 #ifdef Q_OS_WIN
@@ -270,6 +280,7 @@ static QByteArrayList _SbkType_LookupProperty(PyTypeObject *type,
     QByteArray origName(_sigWithOrigName(name, snake_flag));
     if (origName.isEmpty())
         return QByteArrayList{};
+#ifdef Py_GIL_DISABLED
     PepMroRef mro(type);
     if (mro.isNull()) {
         Shiboken::Errors::storeErrorOrPrint();
@@ -295,6 +306,29 @@ static QByteArrayList _SbkType_LookupProperty(PyTypeObject *type,
             }
         }
     }
+#else
+    PyObject *mro = type->tp_mro;
+    auto n = PyTuple_Size(mro);
+    auto len = std::strlen(origName);
+    for (Py_ssize_t idx = 0; idx < n; idx++) {
+        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+        if (!SbkObjectType_Check(base))
+            continue;
+        auto *props = SbkObjectType_GetPropertyStrings(base);
+        if (props == nullptr || *props == nullptr)
+            continue;
+        for (; *props != nullptr; ++props) {
+            QByteArray propStr(*props);
+            if (std::strncmp(propStr, origName, len) == 0) {
+                if (propStr[len] != ':')
+                    continue;
+                // We found the property. Return the parsed fields.
+                propStr = _sigWithMangledName(propStr, snake_flag);
+                return parseFields(propStr, flags, nullptr);
+            }
+        }
+    }
+#endif
     return QByteArrayList{};
 }
 

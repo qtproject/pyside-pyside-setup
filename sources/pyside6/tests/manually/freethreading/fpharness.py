@@ -159,14 +159,15 @@ class FailpointThrow:
         self.name = name
 
     def __enter__(self):
-        if not Shiboken.armFailpointThrow(self.name):
+        # armFailpoint() arms a throwing point as one, by its name.
+        if not Shiboken.armFailpoint(self.name):
             raise FailpointMissing(self.name)
         return self
 
     def __exit__(self, *exc):
         # Only this kind: clearFailpoints() would also disarm a Failpoint
-        # around this one.
-        Shiboken.disarmFailpointThrow()
+        # around this one. releaseFailpoint() disarms a throwing point.
+        Shiboken.releaseFailpoint(self.name)
         return False
 
 

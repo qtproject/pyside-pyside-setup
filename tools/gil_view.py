@@ -16,7 +16,8 @@ result still readable; cpp -E would expand headers and macros and destroy it.
     gil_view.py --generated     the same over the generated wrappers in the
                                 build tree, which is where the bulk sits
     gil_view.py --check         the GIL view as a test: fails when the series
-                                changes code a build with a GIL compiles
+                                changes code a build with a GIL compiles;
+                                the generator's sources are left to --wrappers
     gil_view.py --selftest      the check against cases with a known answer
     gil_view.py --check --wrappers BASE_TREE HEAD_TREE
                                 the same over the wrappers two GIL builds
@@ -24,8 +25,8 @@ result still readable; cpp -E would expand headers and macros and destroy it.
                                 nothing, it only prints the conditionals
 
 --check compares code, not text: comments and blank lines are taken out
-first. A changed file passes only if tools/gil_view_allow.txt lists it with
-the digest of exactly this change; see that file for the format.
+first. There are no exceptions: a change a build with a GIL would see goes
+behind Py_GIL_DISABLED, with the base's text in the #else branch.
 
 Writes plain diff/text files and prints their paths. Nothing to install.
 """
@@ -47,7 +48,9 @@ import sys
 REPO = pathlib.Path(os.environ.get("GIL_VIEW_REPO")
                     or pathlib.Path(__file__).resolve().parent.parent)
 DEFAULT_BASE = "@{upstream}"
-ALLOW = pathlib.Path(__file__).resolve().parent / "gil_view_allow.txt"
+# The generator is built once for both builds; what it changes shows in the
+# wrappers it emits, which --check --wrappers compares.
+GENERATOR = "sources/shiboken6_generator/"
 
 
 def git(*args: str) -> str:
@@ -59,8 +62,7 @@ FAILED: list[str] = []
 
 DIRECTIVES = ("#if ", "#ifdef ", "#ifndef ", "#elif ")
 
-# What check_wrappers() puts in front of a generated file, so that one
-# allow list can hold both kinds without them colliding.
+# What check_wrappers() puts in front of a generated file.
 GENERATED = "generated:"
 
 
@@ -164,19 +166,6 @@ def digest(lines: list[str]) -> str:
     return hashlib.sha1("\n".join(lines).encode()).hexdigest()[:12]
 
 
-def allowed() -> dict[str, tuple[str, str]]:
-    """path -> (digest, reason) from tools/gil_view_allow.txt."""
-    result = {}
-    if ALLOW.is_file():
-        for raw in ALLOW.read_text().splitlines():
-            line = raw.strip()
-            if not line or line.startswith("#"):
-                continue
-            path, dig, reason = line.split(None, 2)
-            result[path] = (dig, reason)
-    return result
-
-
 def reordered(lines: list[str]) -> bool:
     """Whether the change is a permutation - every added line is a removed one.
 
@@ -196,40 +185,28 @@ def verdict(changes: dict[str, list[str]], out: pathlib.Path, label: str,
     """Report and judge {name: changed code lines}; 0 is a pass.
 
     `wrappers` says this is the run over the generated files: they are the
-    only ones granted the permutation rule, and they have their own entries
-    in the allow list.
+    only ones granted the permutation rule.
     """
-    # One list, two runs: each sees only the entries that speak about it, or
-    # every entry of the other kind would count as unused.
-    allow = {name: value for name, value in allowed().items()
-             if name.startswith(GENERATED) == wrappers}
-    bad = accepted = moved = 0
+    bad = moved = 0
     with out.open("w") as fp:
         for name, lines in sorted(changes.items(), key=lambda kv: -len(kv[1])):
             dig = digest(lines)
-            if allow.get(name, ("", ""))[0] == dig:
-                state = "allowed"
-                accepted += 1
-            elif wrappers and reordered(lines):
+            if wrappers and reordered(lines):
                 state = "reordered"
                 moved += 1
             else:
-                state = "STALE ALLOW" if name in allow else "CHANGED"
+                state = "CHANGED"
                 bad += 1
             print(f"{len(lines):6d}  {state:11s} {dig}  {name}")
             fp.write(f"=== {name}  {dig}  {state}\n" + "\n".join(lines) + "\n\n")
-    unused = sorted(set(allow) - set(changes))
-    for name in unused:
-        print(f"        UNUSED ALLOW        {name}")
     report_failures()
-    print(f"\n{label}: {len(changes)} changed, {accepted} allowed, "
-          f"{moved} reordered, {bad} not, {len(unused)} unused allow entries, "
+    print(f"\n{label}: {len(changes)} differ, {moved} reordered, {bad} CHANGED, "
           f"{len(FAILED)} unresolved\n{out}")
-    return 1 if bad or unused or FAILED else 0
+    return 1 if bad or FAILED else 0
 
 
 def check_series(base: str, head: str, mode: str, out: pathlib.Path) -> int:
-    files = sources(base, head)
+    files = [f for f in sources(base, head) if not f.startswith(GENERATOR)]
     changes = {}
     for f in files:
         lines = code_diff(content(base, f), content(head, f), mode, f)
@@ -436,8 +413,7 @@ def main() -> int:
                          "configuration line, e.g. py3.15 or py3.12-qt6.12.0; "
                          "default is the newest build, whatever that is")
     ap.add_argument("--check", action="store_true",
-                    help="as a test: exit 1 if the view shows changed code "
-                         "that tools/gil_view_allow.txt does not list")
+                    help="as a test: exit 1 if the view shows changed code")
     ap.add_argument("--wrappers", nargs=2, metavar=("BASE_TREE", "HEAD_TREE"),
                     help="with --check: compare the wrappers two builds of "
                          "the same configuration generated")

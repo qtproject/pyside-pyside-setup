@@ -606,11 +606,15 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     // notify signals.
     for (PyTypeObject *baseType : basesToCheck) {
         AutoDecRef tpDict(PepType_GetDict(baseType));
+#ifdef Py_GIL_DISABLED
         AutoDecRef attrs(PepDict_IterationSnapshot(tpDict.object()));
         if (attrs.isNull()) {
             PyErr_Clear();
             continue;
         }
+#else
+        PyObject *attrs = tpDict.object();
+#endif
         PyObject *key = nullptr;
         PyObject *value = nullptr;
         Py_ssize_t pos = 0;
@@ -643,11 +647,15 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     // We check for this using "is_sorted()". Sorting no longer happens at all.
     for (PyTypeObject *baseType : basesToCheck) {
         AutoDecRef tpDict(PepType_GetDict(baseType));
+#ifdef Py_GIL_DISABLED
         AutoDecRef attrs(PepDict_IterationSnapshot(tpDict.object()));
         if (attrs.isNull()) {
             PyErr_Clear();
             continue;
         }
+#else
+        PyObject *attrs = tpDict.object();
+#endif
         PyObject *key = nullptr;
         PyObject *value = nullptr;
         Py_ssize_t pos = 0;

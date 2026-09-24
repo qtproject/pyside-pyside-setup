@@ -37,8 +37,10 @@ enum class RawLock : unsigned
     ConnectionHash  = 1u << 5,  ///< dynamicslot.cpp
     MetaObject      = 1u << 6,  ///< signalmanager.cpp, recursive
     ClassHierarchy  = 1u << 7,  ///< bindingmanager.cpp, publishes a snapshot
+#ifdef Py_GIL_DISABLED
     PostRoutine     = 1u << 8,  ///< core_snippets.cpp, one container operation
     QObjectMetaType = 1u << 9,  ///< pyside.cpp, one name registration
+#endif
 };
 
 /// The order they may be taken in. A thread may only take a lock whose rank
@@ -63,9 +65,13 @@ enum class RawLock : unsigned
 enum class LockRank : int
 {
     LazyType = 1, ClassHierarchy, ModuleData, MetaObject, ConnectionHash,
+#ifdef Py_GIL_DISABLED
     WrapperMap, MainThreadDelete,
     /// The leaves.
     State, PostRoutine = State, QObjectMetaType = State,
+#else
+    WrapperMap, MainThreadDelete, State,
+#endif
 };
 
 /// The rank of \a lock. Defined in both builds: the order is a property of

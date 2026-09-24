@@ -23,8 +23,10 @@ int lockRank(RawLock lock)
     case RawLock::WrapperMap:       return int(LockRank::WrapperMap);
     case RawLock::MainThreadDelete: return int(LockRank::MainThreadDelete);
     case RawLock::State:            return int(LockRank::State);
+#ifdef Py_GIL_DISABLED
     case RawLock::PostRoutine:      return int(LockRank::PostRoutine);
     case RawLock::QObjectMetaType:  return int(LockRank::QObjectMetaType);
+#endif
     }
     return 0;
 }
@@ -33,7 +35,11 @@ int lockRank(RawLock lock)
 
 // One counter per lock rather than one bit: three of the locks are recursive,
 // and a nested acquisition has to survive the inner release.
+#ifdef Py_GIL_DISABLED
 static constexpr size_t LockCount = 10;
+#else
+static constexpr size_t LockCount = 8;
+#endif
 
 static std::array<unsigned, LockCount> &heldCounts()
 {
@@ -54,8 +60,12 @@ static const char *lockName(size_t index)
 {
     static const char *names[LockCount] = {
         "state", "wrapper map", "main-thread deletion", "lazy type",
+#ifdef Py_GIL_DISABLED
         "module data", "connection hash", "meta-object", "class hierarchy",
         "post routines", "qobject-pointer metatype"
+#else
+        "module data", "connection hash", "meta-object", "class hierarchy"
+#endif
     };
     return names[index];
 }

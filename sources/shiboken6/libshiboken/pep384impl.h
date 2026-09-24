@@ -499,6 +499,7 @@ LIBSHIBOKEN_API PyTypeObject *PepType_Type_tp_new(PyTypeObject *metatype,
 
 LIBSHIBOKEN_API PyObject *PepType_GetDict(PyTypeObject *type);
 
+#ifdef Py_GIL_DISABLED
 /// An owned snapshot of a type's mro or bases, held for the walk that took
 /// it. An assignment to `__bases__` replaces both tuples, and owning the type
 /// does not own them.
@@ -559,6 +560,7 @@ LIBSHIBOKEN_API PyObject *PepDict_GetItemStringOwned(PyObject *dict, const char 
 /// dict itself otherwise. Returns a new reference, null with an exception.
 LIBSHIBOKEN_API PyObject *PepDict_IterationSnapshot(PyObject *dict);
 
+#endif
 // This function does not exist as PyType_SetDict. But because tp_dict
 // is no longer considered to be accessible, we treat it as such.
 LIBSHIBOKEN_API int PepType_SetDict(PyTypeObject *type, PyObject *dict);
