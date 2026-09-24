@@ -28,13 +28,16 @@ enum : int {
     SBK_ARRAY_IDX_SIZE
 };
 
-/**
- * ArrayHandle is the type expected by shiboken6's array converter
- * functions. It provides access to array data which it may own
- * (in the case of conversions from PySequence) or a flat pointer
- * to internal data (in the case of array modules like numpy).
- */
+/*!
+    \class Shiboken::Conversions::ArrayHandle
 
+    \brief ArrayHandle is the type expected by shiboken6's array converter
+    functions. It provides access to array data which it may own
+    (in the case of conversions from PySequence) or a flat pointer
+    to internal data (in the case of array modules like numpy).
+
+    \inmodule libshiboken
+*/
 template <class T>
 class ArrayHandle
 {
@@ -59,12 +62,15 @@ private:
     bool m_owned = false;
 };
 
-/**
- * Similar to ArrayHandle for fixed size 2 dimensional arrays.
- * columns is the size of the last dimension
- * It only has a setData() methods since it will be used for numpy only.
- */
+/*!
+    \class Shiboken::Conversions::Array2Handle
 
+    \brief Similar to ArrayHandle for fixed size 2 dimensional arrays.
+    \c columns is the size of the last dimension.
+    It only has a setData() method since it will be used for numpy only.
+
+    \inmodule libshiboken
+*/
 template <class T, int columns>
 class Array2Handle
 {

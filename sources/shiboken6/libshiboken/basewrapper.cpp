@@ -923,6 +923,21 @@ void _destroyParentInfo(SbkObject *obj, bool keepReference)
 
 }
 
+/*!
+    \module libshiboken
+
+    \title Shiboken utility library
+
+    \brief Contains functionality for Python bindings.
+ */
+
+/*!
+    \namespace Shiboken
+
+    \brief Root namespace for everything that is not extern "C".
+
+    \inmodule libshiboken
+*/
 namespace Shiboken
 {
 
@@ -1143,6 +1158,13 @@ inline void decRefPyObjectList(Iterator i1, Iterator i2)
         Py_DECREF(i1->second);
 }
 
+/*!
+    \namespace Shiboken::ObjectType
+
+    \brief Namespace for object type-related functionality.
+
+    \inmodule libshiboken
+*/
 namespace ObjectType
 {
 
@@ -1342,6 +1364,13 @@ bool canDowncastTo(PyTypeObject *baseType, PyTypeObject *targetType)
 } // namespace ObjectType
 
 
+/*!
+    \namespace Shiboken::Object
+
+    \brief Namespace for object instance related things.
+
+    \inmodule libshiboken
+*/
 namespace Object
 {
 

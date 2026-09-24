@@ -32,6 +32,13 @@ bool SbkObject_TypeCheck(PyTypeObject *tp, PyObject *ob)
     return Py_TYPE(ob) == tp || PyType_IsSubtype(Py_TYPE(ob), tp);
 }
 
+/*!
+    \namespace Shiboken::Conversions
+
+    \brief Namespace for converter-related functionality.
+
+    \inmodule libshiboken
+*/
 namespace Shiboken::Conversions {
 
 void initArrayConverters();
@@ -916,6 +923,13 @@ bool pythonTypeIsWrapperType(const SbkConverter *converter)
     return converter->pointerToPython != nullptr;
 }
 
+/*!
+    \class Shiboken::Conversions::SpecificConverter
+
+    \brief C++ Wrapper around a type converter, which is constructed from a name.
+
+    \inmodule libshiboken
+*/
 SpecificConverter::SpecificConverter(const char *typeName)
     : m_converter(getConverter(typeName)), m_type(InvalidConversion)
 {

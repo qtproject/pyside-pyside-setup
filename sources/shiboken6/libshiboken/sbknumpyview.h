@@ -18,9 +18,15 @@ namespace Shiboken::Numpy
 /// \return Whether it is a PyArrayObject
 LIBSHIBOKEN_API bool check(PyObject *pyIn);
 
-/// A simple view of an up to 2 dimensional, C-contiguous array of a standard
-/// type. It can be passed to compilation units that do not include the
-/// numpy headers.
+/*!
+    \class Shiboken::Numpy::View
+
+    \brief A simple view of an up to 2 dimensional, C-contiguous array of a standard
+    type. It can be passed to compilation units that do not include the
+    numpy headers.
+
+    \inmodule libshiboken
+*/
 struct LIBSHIBOKEN_API View
 {
     enum Type { Int, Unsigned, Float, Double, Int16, Unsigned16, Int64, Unsigned64 };

@@ -241,6 +241,13 @@ static PyObject *create_missing_func(PyObject *klass)
 
 } // extern "C"
 
+/*!
+    \namespace Shiboken::Enum
+
+    \brief Namespace for enum-related functionality.
+
+    \inmodule libshiboken
+*/
 namespace Shiboken::Enum {
 
 int enumOption{};

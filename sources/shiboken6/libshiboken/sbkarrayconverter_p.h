@@ -12,11 +12,13 @@ extern "C"
 {
 
 using IsArrayConvertibleToCppFunc = PythonToCppFunc (*)(PyObject *, int dim1, int dim2);
-/**
- *  \internal
- *  Private structure of SbkArrayConverter.
- */
 
+/*!
+    \struct SbkArrayConverter
+    \internal
+    \brief Private structure of SbkArrayConverter.
+    \inmodule libshiboken
+*/
 struct SbkArrayConverter
 {
     std::vector<IsArrayConvertibleToCppFunc> toCppConversions;
