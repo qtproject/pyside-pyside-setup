@@ -49,6 +49,10 @@
         <inject-code file="shibokenmodule.cpp" snippet="dump"/>
     </add-function>
 
+    <add-function signature="dumpTree(PyObject*)" return-type="const char *">
+        <inject-code file="shibokenmodule.cpp" snippet="dump-tree"/>
+    </add-function>
+
     <add-function signature="getAllValidWrappers(void)" return-type="PySequence*">
         <inject-code file="shibokenmodule.cpp" snippet="getallvalidwrappers"/>
     </add-function>

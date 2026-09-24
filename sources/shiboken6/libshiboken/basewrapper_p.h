@@ -172,6 +172,8 @@ std::vector<SbkObject *> splitPyObject(PyObject *pyObj);
 
 int getNumberOfCppBaseClasses(PyTypeObject *baseType);
 
+std::vector<PyTypeObject *> getCppBaseClasses(PyTypeObject *baseType);
+
 namespace Object
 {
 /**

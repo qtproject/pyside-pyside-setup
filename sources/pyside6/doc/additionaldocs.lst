@@ -548,7 +548,14 @@ qtwidgets/webxml/qt-add-ui.webxml
 qtwidgets/webxml/qt-wrap-ui.webxml
 qtwidgets/webxml/qtwidgets-styling-approaches.webxml
 qtwidgets/webxml/qwidget-styling.webxml
+qtwidgets/webxml/style-aware-widgets.webxml
+qtwidgets/webxml/style-checkbox-walkthrough.webxml
+qtwidgets/webxml/style-drawing.webxml
+qtwidgets/webxml/style-reference-buttons.webxml
+qtwidgets/webxml/style-reference-containers.webxml
+qtwidgets/webxml/style-reference-menus-views.webxml
 qtwidgets/webxml/style-reference.webxml
+qtwidgets/webxml/style-widget-reference.webxml
 qtwidgets/webxml/stylesheet-customizing.webxml
 qtwidgets/webxml/stylesheet-designer.webxml
 qtwidgets/webxml/stylesheet-reference.webxml

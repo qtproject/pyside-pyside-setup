@@ -84,6 +84,16 @@ if (!Shiboken::Object::checkType(%1)) {
 }
 // @snippet dump
 
+
+// @snippet dump-tree
+if (!Shiboken::Object::checkType(%1)) {
+    %PYARG_0 = Shiboken::String::fromCString("Ordinary Python type.");
+} else {
+    std::string str = Shiboken::Object::dumpTree(reinterpret_cast<SbkObject *>(%1));
+    %PYARG_0 = Shiboken::String::fromCString(str.c_str());
+}
+// @snippet dump-tree
+
 // @snippet replacemoduledict
 const bool ok = Shiboken::Module::replaceModuleDict(%1, %2, %3);
 %PYARG_0 = %CONVERTTOPYTHON[bool](ok);

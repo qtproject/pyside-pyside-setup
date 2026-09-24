@@ -58,6 +58,7 @@ set(libshiboken_SOVERSION "${shiboken6_library_so_version}")
 set(libshiboken_SRC
 autodecref.h
 basewrapper.cpp basewrapper.h basewrapper_p.h
+basewrapper_info.cpp
 bindingmanager.cpp bindingmanager.h
 bufferprocs_py37.cpp bufferprocs_py37.h
 debugfreehook.cpp debugfreehook.h

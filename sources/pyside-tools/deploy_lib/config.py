@@ -31,6 +31,8 @@ PERMISSION_MAP = {"Bluetooth": "NSBluetoothAlwaysUsageDescription:BluetoothAcces
                   "Location": "NSLocationUsageDescription:LocationAccess",
                   }
 
+DEFAULT_NUITKA_MODE = "onefile"
+
 
 class BaseConfig:
     """Wrapper class around any .spec file with function to read and set values for the .spec file
@@ -411,7 +413,7 @@ class DesktopConfig(Config):
 
     def __init__(self, config_file: Path, source_file: Path, dry_run: bool,
                  existing_config_file: bool = False, extra_ignore_dirs: list[str] = None,
-                 mode: str = "onefile", name: str = None):
+                 mode: str | None = None, name: str = None):
         _project_dir = source_file.parent if source_file else config_file.parent
         _pyproject_overrides = read_deploy_section(_project_dir)
         super().__init__(config_file, source_file, dry_run, existing_config_file,
@@ -441,10 +443,27 @@ class DesktopConfig(Config):
             else:
                 self.permissions = self._find_permissions()
 
-        self._mode = self.NuitkaMode.ONEFILE
-        if self.get_value("nuitka", "mode") == self.NuitkaMode.STANDALONE.value:
-            self._mode = self.NuitkaMode.STANDALONE
-        elif mode == self.NuitkaMode.STANDALONE.value:
+        # Precedence: CLI > pyproject.toml > pysidedeploy.spec > built-in default.
+        # pyproject.toml overrides are already merged into self.parser above, so
+        # spec_mode already reflects a pyproject value when one was set.
+        spec_mode = self.get_value("nuitka", "mode")
+        self._mode_explicit = bool(mode or spec_mode)
+        resolved = mode or spec_mode or DEFAULT_NUITKA_MODE
+        try:
+            self._mode = self.NuitkaMode(resolved)
+        except ValueError:
+            valid = ", ".join(m.value for m in self.NuitkaMode)
+            logging.warning(f"[DEPLOY] Unknown Nuitka mode '{resolved}'. "
+                            f"Valid modes: {valid}. Using {DEFAULT_NUITKA_MODE}.")
+            self._mode = self.NuitkaMode(DEFAULT_NUITKA_MODE)
+            self._mode_explicit = False
+        if mode:
+            # persist the CLI choice so a later run without --mode repeats it
+            self.mode = self._mode
+
+        if sys.platform == "darwin" and self._mode is self.NuitkaMode.ONEFILE:
+            logging.warning("[DEPLOY] onefile mode is not supported on macOS. "
+                            "Creating an application bundle instead.")
             self.mode = self.NuitkaMode.STANDALONE
 
         if DesignStudioProject.is_ds_project(self.source_file):

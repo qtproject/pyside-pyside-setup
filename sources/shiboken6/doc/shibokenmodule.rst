@@ -19,6 +19,7 @@
         *    :py:func:`ownedByPython`
         *    :py:func:`createdByPython`
         *    :py:func:`dump`
+        *    :py:func:`dumpTree`
         *    :py:func:`disassembleFrame`
         *    :py:func:`dumpTypeGraph`
         *    :py:func:`dumpWrapperMap`
@@ -106,6 +107,15 @@
         This method should be used **only** for debug purposes by developers
         creating their own bindings as no guarantee is provided that
         the string format will be the same across different versions.
+
+        If the object is not a Shiboken based object, a message is printed.
+
+        :param obj: Python object.
+
+    .. py:function:: dumpTree(obj: object) -> str
+
+        Returns a string with implementation-defined information about the
+        object (like ``dump()``), recursing down its children.
 
         If the object is not a Shiboken based object, a message is printed.
 

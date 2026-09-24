@@ -95,6 +95,17 @@ Style {
         }
     }
 
+    delayButton {
+        padding: 0
+        indicator {
+            radius: 8
+            foreground {
+                margins: 0
+                radius: 8
+            }
+        }
+    }
+
     flatButton {
         background.gradient: null
     }
@@ -120,6 +131,12 @@ Style {
     comboBox {
         background.width: 200
         pressed.background.scale: 1.0
+    }
+
+    dial {
+        handle.width: 15
+        handle.height: 15
+        indicator.foreground.margins: 0
     }
 
     pane {
@@ -427,6 +444,10 @@ Style {
             }
         }
 
+        delayButton {
+            indicator.color: "transparent"
+        }
+
         comboBox {
             hovered.background {
                 color: palette.accent
@@ -452,11 +473,6 @@ Style {
 
         pane {
             background.color: Qt.darker("gainsboro", 1.05)
-        }
-
-        switchControl {
-            indicator.foreground.color: "white"
-            checked.indicator.foreground.color: palette.accent
         }
 
         textField {
@@ -588,6 +604,10 @@ Style {
             }
         }
 
+        delayButton {
+            indicator.color: "transparent"
+        }
+
         comboBox {
             hovered {
                 background {
@@ -632,11 +652,6 @@ Style {
 
         scrollBar {
             indicator.foreground.color: "white"
-        }
-
-        switchControl {
-            indicator.foreground.color: Qt.lighter("#8e848a", 1.3)
-            checked.indicator.foreground.color: palette.accent
         }
 
         slider {
@@ -737,6 +752,24 @@ Style {
 
             abstractButton {
                 background.color: "ghostwhite"
+            }
+
+            delayButton {
+                indicator {
+                    color: "transparent"
+                    foreground.margins: 0
+                }
+                checked.text.color: "white"
+            }
+
+            dial {
+                handle.width: 15
+                handle.height: 15
+                indicator {
+                    width: 60
+                    height: 60
+                    foreground.margins: 0
+                }
             }
 
             textInput {
@@ -941,6 +974,10 @@ Style {
                 indicator.color: "transparent"
                 indicator.foreground.color: "transparent"
                 indicator.foreground.image.color: "white"
+            }
+
+            delayButton {
+                indicator.color: "transparent"
             }
 
             pane {

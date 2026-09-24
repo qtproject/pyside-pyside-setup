@@ -103,7 +103,7 @@ def finalize(config: DesktopConfig):
 
     output_path = config.exe_dir / (config.title + exe_format)
 
-    if sys.platform == "darwin" or config.mode == DesktopConfig.NuitkaMode.STANDALONE:
+    if config.mode == DesktopConfig.NuitkaMode.STANDALONE:
         # Copy the folder that contains the executable
         logging.info(f"[DEPLOY] copying generated folder to {output_path.absolute()}")
         shutil.copytree(generated_exec_path, output_path, dirs_exist_ok=True)

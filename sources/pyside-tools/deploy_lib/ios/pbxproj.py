@@ -82,14 +82,21 @@ def _pyside6_packages_script(cfg: IOSConfig) -> str:
 
 
 def _packages_script(cfg: IOSConfig) -> str:
-    """Copy the entry script and qml dirs declared in the config directly into
-    the bundle root -- main_mm.py's runPythonApp() opens the entry script at
-    <bundle>/<name>, and its sys.path setup expects sibling modules/qml dirs
-    there too (see initPython()'s module_search_paths)."""
+    """Copy the config's scripts and qml dirs into the bundle root, each at its path relative to
+    the project directory, so that imports like `from models.item import Item` resolve inside the
+    bundle exactly as they do on desktop."""
     lines = ["set -e"]
+    made_dirs: set[str] = set()
+    # cfg.scripts is relative to project_root. The absolute prefix is
+    # $CODESIGNING_FOLDER_PATH, which only Xcode knows at build time. A
+    # top-level script's parent is ".", ie the bundle root, so nothing to create.
     for script in cfg.scripts:
         src = cfg.project_root / script
-        lines.append(f'cp -f "{src}" "$CODESIGNING_FOLDER_PATH/"')
+        parent = Path(script).parent
+        if parent != Path(".") and str(parent) not in made_dirs:
+            made_dirs.add(str(parent))
+            lines.append(f'mkdir -p "$CODESIGNING_FOLDER_PATH/{parent}"')
+        lines.append(f'cp -f "{src}" "$CODESIGNING_FOLDER_PATH/{script}"')
     # Copy app-local QML dirs next to the entry script, matching where
     # engine.addImportPath(Path(__file__).parent) expects them.
     for qml_dir in cfg.qml_dirs:
