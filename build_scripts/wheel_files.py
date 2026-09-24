@@ -662,8 +662,8 @@ def module_QtQuickControls2() -> ModuleData:
         data.qtlib.append("libQt6QuickControls2WindowsStyleImpl")
         data.qtlib.append("libQt6QuickNativeStyle")
     elif sys.platform == "darwin":
-        data.qtlib.append("libQt6QuickControls2IOSStyleImpl")
-        data.qtlib.append("libQt6QuickControls2MacOSStyleImpl")
+        data.qtlib.extend(["libQt6QuickControls2IOS", "libQt6QuickControls2IOSStyleImpl",
+                           "libQt6QuickControls2Macos", "libQt6QuickControls2MacOSStyleImpl"])
 
     data.metatypes.append("qt6quickcontrols2impl_metatypes.json")
 
