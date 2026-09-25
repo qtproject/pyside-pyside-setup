@@ -650,17 +650,19 @@ def module_QtQuickControls2() -> ModuleData:
                         "libQt6QuickControls2Imagine", "libQt6QuickControls2ImagineStyleImpl",
                         "libQt6QuickControls2Impl",
                         "libQt6QuickControls2Material", "libQt6QuickControls2MaterialStyleImpl",
+                        "libQt6QuickControls2Native",
                         "libQt6QuickControls2Universal", "libQt6QuickControls2UniversalStyleImpl",
                         "libQt6LabsStyleKit"]
     data = ModuleData("QuickControls2")
     data.qtlib.extend(QUICK_STYLE_LIBS)
     # FluentWinUI3 Style is available for all platforms, even if it
     # was originally intended for Windows.
+    data.qtlib.append("libQt6QuickControls2FluentWinUI3")
     data.qtlib.append("libQt6QuickControls2FluentWinUI3StyleImpl")
+    data.qtlib.append("libQt6QuickNativeStyle")
     if sys.platform == "win32":
         data.qtlib.append("libQt6QuickControls2Windows")
         data.qtlib.append("libQt6QuickControls2WindowsStyleImpl")
-        data.qtlib.append("libQt6QuickNativeStyle")
     elif sys.platform == "darwin":
         data.qtlib.extend(["libQt6QuickControls2IOS", "libQt6QuickControls2IOSStyleImpl",
                            "libQt6QuickControls2Macos", "libQt6QuickControls2MacOSStyleImpl"])
