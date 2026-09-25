@@ -12,6 +12,9 @@
 #  include "sbkacquiredwrapper.h"
 #endif
 
+#ifdef Py_GIL_DISABLED
+#  include <new>
+#endif
 #include <set>
 #include <utility>
 #include <vector>
@@ -147,6 +150,13 @@ public:
     /// markExternallyDying() left there, if any; harmless otherwise, which
     /// is what lets the generated operator delete call it unconditionally.
     void retireExternallyDying(void *cptr);
+
+    /// The memory for a wrapper whose class declares the operator delete
+    /// above, from ::operator new. Out of line on purpose: once the class's
+    /// operator new is inlined, GCC pairs the global new it sees with the
+    /// class's delete and reports a mismatch (-Wmismatched-new-delete).
+    static void *allocateWrapper(std::size_t size);
+    static void *allocateWrapper(std::size_t size, std::align_val_t align);
 #else // Py_GIL_DISABLED
     /// \deprecated Hands out the borrowed reference the map holds, which the
     /// caller cannot safely increment. Gone under free threading. What is

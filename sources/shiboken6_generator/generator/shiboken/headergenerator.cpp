@@ -330,9 +330,17 @@ void HeaderGenerator::writeSpecialFunctions(TextStream &s, const QString &wrappe
     // reachable through the vtable, so it is only worth having where the
     // destructor is virtual - which is also the only case where foreign code
     // deleting through a base pointer reaches ours at all.
+    // A class-specific delete with no class-specific new is a mismatch to
+    // GCC (-Wmismatched-new-delete). The new hides the global forms, so the
+    // over-aligned and the placement form come with it; the constructor uses
+    // the placement form for an address it was given.
     if (metaClass->hasVirtualDestructor()) {
         s << "#ifdef Py_GIL_DISABLED\n"
+             "static void *operator new(std::size_t size);\n"
+             "static void *operator new(std::size_t size, std::align_val_t align);\n"
+             "static void *operator new(std::size_t, void *ptr) noexcept { return ptr; }\n"
              "static void operator delete(void *ptr);\n"
+             "static void operator delete(void *ptr, std::align_val_t align);\n"
              "#endif\n\n";
     }
 }

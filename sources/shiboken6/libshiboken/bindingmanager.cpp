@@ -1064,6 +1064,16 @@ void BindingManager::retireExternallyDying(void *cptr)
     Py_DECREF(reinterpret_cast<PyObject *>(pending.type));
 }
 
+void *BindingManager::allocateWrapper(std::size_t size)
+{
+    return ::operator new(size);
+}
+
+void *BindingManager::allocateWrapper(std::size_t size, std::align_val_t align)
+{
+    return ::operator new(size, align);
+}
+
 void BindingManager::retireWrapper(SbkObject *sbkObj, void * const *cptrs,
                                    PyTypeObject *type)
 {

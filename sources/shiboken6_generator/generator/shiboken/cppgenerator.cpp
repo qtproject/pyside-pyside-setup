@@ -1096,17 +1096,30 @@ void CppGenerator::writeDestructorNative(TextStream &s,
     // The probe first, because this runs on whatever thread C++ deleted on
     // and taking a thread state for the usual case - no tombstone - would
     // cost every deletion in the process.
+    // Each in the plain and in the over-aligned form: a class-specific new
+    // hides the global ones, and an over-aligned wrapper would otherwise get
+    // the plain one.
     if (classContext.metaClass()->hasVirtualDestructor()) {
-        s << "\n#ifdef Py_GIL_DISABLED\n"
-          << "void " << classContext.wrapperName() << "::operator delete(void *ptr)\n{\n"
-          << indent
-          << "auto &bindingManager = Shiboken::BindingManager::instance();\n"
-             "if (bindingManager.hasExternallyDying(ptr)) {\n"
-          << indent << "Shiboken::GilState gil;\n"
-          << "bindingManager.retireExternallyDying(ptr);\n"
-          << outdent << "}\n"
-             "::operator delete(ptr);\n"
-          << outdent << "}\n#endif\n";
+        const QString &wrapperName = classContext.wrapperName();
+        s << "\n#ifdef Py_GIL_DISABLED\n";
+        for (const bool aligned : {false, true}) {
+            const char *param = aligned ? ", std::align_val_t align" : "";
+            const char *arg = aligned ? ", align" : "";
+            s << "void *" << wrapperName << "::operator new(std::size_t size" << param
+              << ")\n{\n" << indent
+              << "return Shiboken::BindingManager::allocateWrapper(size" << arg << ");\n"
+              << outdent << "}\n\n"
+              << "void " << wrapperName << "::operator delete(void *ptr" << param
+              << ")\n{\n" << indent
+              << "auto &bindingManager = Shiboken::BindingManager::instance();\n"
+                 "if (bindingManager.hasExternallyDying(ptr)) {\n"
+              << indent << "Shiboken::GilState gil;\n"
+              << "bindingManager.retireExternallyDying(ptr);\n"
+              << outdent << "}\n"
+                 "::operator delete(ptr" << arg << ");\n"
+              << outdent << "}\n" << (aligned ? "" : "\n");
+        }
+        s << "#endif\n";
     }
 }
 
