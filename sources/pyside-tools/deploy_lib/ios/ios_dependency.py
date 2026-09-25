@@ -65,10 +65,9 @@ def _plugin_class_name(cfg: IOSConfig, plugin_rel: str) -> str | None:
         targets_file = targets_release.with_name(
             targets_release.name.replace("-release.cmake", ".cmake")
         )
-        if not targets_file.is_file():
-            return None
-        cm = re.search(r'QT_PLUGIN_CLASS_NAME\s+"([^"]+)"', targets_file.read_text())
-        return cm.group(1) if cm else None
+        if targets_file.is_file():
+            if cm := re.search(r'QT_PLUGIN_CLASS_NAME\s+"([^"]+)"', targets_file.read_text()):
+                return cm.group(1)
     return None
 
 
@@ -195,6 +194,10 @@ _QML_RESOURCE_PATH_RE = re.compile(
     r'\$\$\[QT_INSTALL_PREFIX\]/qml/([A-Za-z0-9_]+(?:/[A-Za-z0-9_]+)*)/objects-'
 )
 
+_QML_PLUGIN_TARGETS_LOCATION_RE = re.compile(
+    r'IMPORTED_LOCATION_RELEASE\s+"[^"]*?/(qml/[^"]+)"'
+)
+
 _QT_QUICK_CONTROLS_NON_STYLE_DIRS = {"impl", "designer"}
 
 
@@ -215,17 +218,22 @@ def _qml_plugin_archive(cfg: IOSConfig, subdir: str) -> Path | None:
 
 
 def _qml_plugin_class_name(cfg: IOSConfig, archive_path: Path) -> str | None:
-    """QT_PLUGIN_CLASS_NAME for Q_IMPORT_PLUGIN, read from the plugin's own
-    CMake targets file under lib/cmake/Qt6Qml/QmlPlugins/."""
-    plugin_name = archive_path.stem
-    if plugin_name.startswith("lib"):
-        plugin_name = plugin_name[3:]
-    targets_file = (cfg.qt_ios / "lib" / "cmake" / "Qt6Qml" / "QmlPlugins"
-                    / f"Qt6{plugin_name}Targets.cmake")
-    if not targets_file.is_file():
-        return None
-    m = re.search(r'QT_PLUGIN_CLASS_NAME\s+"([^"]+)"', targets_file.read_text())
-    return m.group(1) if m else None
+    """QT_PLUGIN_CLASS_NAME for Q_IMPORT_PLUGIN, found by matching the archive
+    path against IMPORTED_LOCATION_RELEASE across lib/cmake/Qt6Qml/QmlPlugins/
+    (the CMake target name doesn't always match the archive's filename)."""
+    plugin_rel = "qml/" + archive_path.relative_to(cfg.qt_ios / "qml").as_posix()
+    targets_dir = cfg.qt_ios / "lib" / "cmake" / "Qt6Qml" / "QmlPlugins"
+    for targets_release in targets_dir.glob("*Targets-release.cmake"):
+        m = _QML_PLUGIN_TARGETS_LOCATION_RE.search(targets_release.read_text())
+        if not m or m.group(1) != plugin_rel:
+            continue
+        targets_file = targets_release.with_name(
+            targets_release.name.replace("-release.cmake", ".cmake")
+        )
+        if targets_file.is_file():
+            if cm := re.search(r'QT_PLUGIN_CLASS_NAME\s+"([^"]+)"', targets_file.read_text()):
+                return cm.group(1)
+    return None
 
 
 def resolve_qml_plugins(cfg: IOSConfig, qml_modules: list[str]) -> list[QmlPlugin]:

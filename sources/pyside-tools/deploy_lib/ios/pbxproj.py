@@ -612,6 +612,10 @@ def generate(cfg: IOSConfig, qml_plugins: list[QmlPlugin], qt_deps: QtDependenci
             w('\t\t\t\tSWIFT_OPTIMIZATION_LEVEL = "-Onone";')
         w(f"\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = {_esc(cfg.bundle_id)};")
         w('\t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";')
+        # Give the linked binary a filename distinct from PRODUCT_NAME. If
+        # title matches one of those directory names would collide with it,
+        # and rsync would fail with "mkpath: Not a directory".
+        w(f'\t\t\t\tEXECUTABLE_NAME = {_esc(product_name + "_bin")};')
         w("\t\t\t\tSWIFT_VERSION = 5.0;")
         w("\t\t\t};")
         w(f"\t\t\tname = {conf_name};")
