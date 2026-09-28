@@ -402,7 +402,9 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/qml
         qml_dll_patterns = ["*{}.dll"]
-        qml_ignore_patterns = qml_dll_patterns + [pdb_pattern]
+        qml_ignore_patterns = qml_dll_patterns + [
+            pdb_pattern, "*.a", "*.la", "*.lib", "*.cmake", "*.pc", "*.prl"
+        ]
         qml_ignore = [a.format('') for a in qml_ignore_patterns]
 
         # Copy all files that are not dlls and pdbs (.qml, qmldir).
