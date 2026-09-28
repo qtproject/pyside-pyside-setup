@@ -80,13 +80,6 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
         return name + postfix
 
     if config.is_internal_shiboken_module_build():
-        # <build>/shiboken6/doc/html/* ->
-        #   <setup>/{st_package_name}/docs/shiboken6
-        copydir(
-            f"{{build_dir}}/{SHIBOKEN}/doc/html",
-            f"{{st_build_dir}}/{{st_package_name}}/docs/{SHIBOKEN}",
-            force=False, _vars=_vars)
-
         # <install>/lib/lib* -> {st_package_name}/
         copydir(
             "{install_dir}/lib/", destination_dir,
