@@ -17,6 +17,8 @@ set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Type")
 add_subdirectory(ApiExtractor) # Uses libclang
 add_subdirectory(generator) # Uses ApiExtractor And QtCore
 
+add_subdirectory(doc)
+
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)

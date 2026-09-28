@@ -126,12 +126,12 @@ add_custom_command(OUTPUT "${RELEASED_NOTES_TARGET}"
                    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                    COMMENT "Generating release notes...")
 
-set(SHIBOKEN_INTERSPHINX_FILE "${ROOT}/pyside6/shiboken6/objects.inv")
+set(SHIBOKEN_INTERSPHINX_FILE "${ROOT}/pyside6/shiboken6_generator/objects.inv")
 set(HAS_WEBENGINE_WIDGETS 0)
 set(SKIP_SPHINX_WARNINGS 1)
 if (FULLDOCSBUILD)
     set(SKIP_SPHINX_WARNINGS 0)
-    set(SHIBOKEN_INTERSPHINX_FILE "${CMAKE_BINARY_DIR}/doc/html/shiboken6/objects.inv")
+    set(SHIBOKEN_INTERSPHINX_FILE "${CMAKE_BINARY_DIR}/doc/html/shiboken6_generator/objects.inv")
     # For Qt modules that are part of the documentation build:
     #    - Configure the module docconf file
     #    - Write shiboken header consisting of pyside6_global.h and module includes
@@ -215,13 +215,15 @@ add_custom_target(apidoc
 # create a custom commands to copy the shiboken docs
 # and generate offline help based on the output format.
 if(DOC_OUTPUT_FORMAT STREQUAL "html")
-    add_custom_command(TARGET apidoc POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken6
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                    ${CMAKE_CURRENT_BINARY_DIR}/../../shiboken6/doc/html
-                    ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken6
-            COMMENT "Copying Shiboken docs..."
-            VERBATIM)
+    foreach (dir shiboken6_generator)
+        add_custom_command(TARGET apidoc POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/${dir}
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                        ${CMAKE_CURRENT_BINARY_DIR}/../../${dir}/doc/html
+                        ${CMAKE_CURRENT_BINARY_DIR}/html/${dir}
+                COMMENT "Copying ${dir} docs..."
+                VERBATIM)
+    endforeach()
 else()
     if(qhelpgenerator_binary)
         message(STATUS "qhelpgenerator - found")

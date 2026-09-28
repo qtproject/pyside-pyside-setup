@@ -21,8 +21,6 @@ add_subdirectory(libshiboken) # Uses Python
 add_subdirectory(shibokenmodule) # Uses libshiboken
 add_subdirectory(data)
 
-add_subdirectory(doc)
-
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)

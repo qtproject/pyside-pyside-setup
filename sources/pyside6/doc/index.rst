@@ -19,7 +19,7 @@
     The project has two main components:
 
     * :ref:`PySide6 <getting-started>`, so that you can use Qt6 APIs in your Python applications, and
-    * `Shiboken6 <../shiboken6/index.html>`__, a binding generator tool, which can
+    * `Shiboken6 <../shiboken6_generator/index.html>`__, a binding generator tool, which can
       be used to expose C++ projects to Python, and a Python module with
       some utility functions.
 
@@ -170,7 +170,7 @@ Documentation
 
         Generate C++ to Python bindings.
         +++
-        .. button-link:: shiboken6/index.html
+        .. button-link:: shiboken6_generator/index.html
             :color: primary
             :outline:
             :expand:

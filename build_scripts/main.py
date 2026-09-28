@@ -869,18 +869,21 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         if run_process(cmd_make) != 0:
             raise SetupError(f"Error compiling {extension}")
 
+    def _run_doc_build(self, extension, target="doc"):
+        log.info(f"Generating {extension} documentation")
+        make_doc_cmd = [str(self.make_path), target]
+        if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE and self.make_generator == "Ninja":
+            make_doc_cmd.append("-v")
+        if run_process(make_doc_cmd) != 0:
+            raise SetupError(f"Error generating documentation for {extension}")
+
     def _build_docs(self, extension):
         """Optionally build Sphinx documentation for the given extension."""
         if OPTION["BUILD_DOCS"]:
-            if extension.lower() == SHIBOKEN:
+            if extension.lower() == SHIBOKEN_GENERATOR:
                 found = importlib.util.find_spec("sphinx")
                 if found:
-                    log.info("Generating Shiboken documentation")
-                    make_doc_cmd = [str(self.make_path), "doc"]
-                    if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE and self.make_generator == "Ninja":
-                        make_doc_cmd.append("-v")
-                    if run_process(make_doc_cmd) != 0:
-                        raise SetupError(f"Error generating documentation for {extension}")
+                    self._run_doc_build(extension)
                 else:
                     log.info("Sphinx not found, skipping documentation build")
         else:
@@ -1231,7 +1234,7 @@ class PysideBaseDocs(Command, CommandMixin):
         log.info("-- This build process will not include the API documentation. "
                  "API documentation requires a full build of pyside/shiboken.")
         self.skip = False
-        if config.is_internal_shiboken_generator_build():
+        if config.is_internal_shiboken_module_build():
             self.skip = True
         if not self.skip:
             self.name = config.package_name().lower()
@@ -1240,13 +1243,13 @@ class PysideBaseDocs(Command, CommandMixin):
             found = importlib.util.find_spec("sphinx")
             self.html_dir = Path("html")
             if found:
-                if self.name == SHIBOKEN:
+                if self.name == SHIBOKEN_GENERATOR:
                     # Delete the 'html' directory since new docs will be generated anyway
                     if self.html_dir.is_dir():
                         rmtree(self.html_dir)
                         log.info("-- Deleted old html directory")
-                    log.info("-- Generating Shiboken documentation")
-                    log.info(f"-- Documentation directory: 'html/{PYSIDE}/{SHIBOKEN}/'")
+                    log.info("-- Generating Shiboken Generator documentation")
+                    log.info(f"-- Documentation directory: 'html/{PYSIDE}/{SHIBOKEN_GENERATOR}/'")
                 elif self.name == PYSIDE:
                     log.info("-- Generating PySide documentation")
                     log.info(f"-- Documentation directory: 'html/{PYSIDE}/'")
@@ -1257,11 +1260,11 @@ class PysideBaseDocs(Command, CommandMixin):
             try:
                 if not self.html_dir.is_dir():
                     self.html_dir.mkdir(parents=True)
-                if self.name == SHIBOKEN:
+                if self.name == SHIBOKEN_GENERATOR:
                     out_pyside = self.html_dir / PYSIDE
                     if not out_pyside.is_dir():
                         out_pyside.mkdir(parents=True)
-                    out_shiboken = out_pyside / SHIBOKEN
+                    out_shiboken = out_pyside / SHIBOKEN_GENERATOR
                     if not out_shiboken.is_dir():
                         out_shiboken.mkdir(parents=True)
                     self.out_dir = out_shiboken
@@ -1331,7 +1334,7 @@ class PysideBaseDocs(Command, CommandMixin):
                 else:
                     log.warning("Release notes script for generating .rst for release notes"
                                 f"not found: {release_notes}")
-            elif self.name == SHIBOKEN:
+            elif self.name == SHIBOKEN_GENERATOR:
                 self.sphinx_src = self.out_dir
 
             sphinx_cmd = ["sphinx-build", "-b", "html", "-j", "auto", "-n", "-c",
