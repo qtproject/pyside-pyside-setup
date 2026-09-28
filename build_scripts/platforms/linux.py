@@ -109,6 +109,8 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
             pyside_build.update_rpath_for_linux(RpathTargetType.plugins, paths=copied_plugins)
 
     if copy_qml:
+        qml_ignore = ["*.debug", "*.la", "*.a", "*.cmake", "*.pc", "*.prl"]
+
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
         qml_plugins_target = destination_qt_dir / "qml"
         copydir("{qt_qml_dir}",
@@ -116,7 +118,7 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
                 _filter=None,
                 force=False,
                 recursive=True,
-                ignore=["*.debug"],
+                ignore=qml_ignore,
                 _vars=_vars)
         copied_plugins = pyside_build.get_shared_libraries_in_path_recursively(
             qml_plugins_target)
