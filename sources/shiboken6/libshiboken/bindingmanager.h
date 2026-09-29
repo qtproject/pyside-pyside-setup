@@ -35,9 +35,6 @@ public:
     bool hasWrapper(const void *cptr) const;
 
     void registerWrapper(SbkObject *pyObj, void *cptr);
-    /// Take the object out of the wrapper map, leaving its flags alone.
-    /// Deallocation uses this to make the wrapper unreachable before it runs
-    /// any Python code; releaseWrapper() below is the same plus invalidation.
     void unregisterWrapper(SbkObject *sbkObj);
     void releaseWrapper(SbkObject *sbkObj);
 
@@ -49,39 +46,15 @@ public:
     static PyObject *getOverride(SbkObject *wrapper, PyObject *pyMethodName);
 
     void addClassInheritance(Module::TypeInitStruct *parent, Module::TypeInitStruct *child);
-    /// Try to find the correct type of cptr via type discovery knowing that it's at least
-    /// of type \p type. If a derived class is found, it returns a cptr cast to the type
-    /// (which may be different in case of  multiple inheritance.
-    /// \param cptr a pointer to the instance of type \p type
-    /// \param type type of cptr
     using TypeCptrPair = std::pair<PyTypeObject *, void *>;
     TypeCptrPair findDerivedType(void *cptr, PyTypeObject *type) const;
 
-    /// If \p probeType has a type discovery function, run it passing \p type
-    /// and return the (cast'ed) pointer or nullptr.
-    /// \param cptr a pointer to the instance of type \p type
-    /// \param probeType type to run the check with
-    /// \param type type of cptr
     static void *runTypeDiscovery(void *cptr, PyTypeObject *probeType, PyTypeObject *type);
 
-    /**
-     * Try to find the correct type of *cptr knowing that it's at least of type \p type.
-     * In case of multiple inheritance this function may change the contents of cptr.
-     * \param cptr a pointer to a pointer to the instance of type \p type
-     * \param type type of *cptr
-     * \warning This function is slow, use it only as last resort.
-     */
     [[deprecated]] PyTypeObject *resolveType(void **cptr, PyTypeObject *type);
 
     std::set<PyObject *> getAllPyObjects();
 
-    /**
-     * Calls the function \p visitor for each object registered on binding manager.
-     * \note As various C++ pointers can point to the same PyObject due to multiple inheritance
-     *       a PyObject can be called more than one time for each PyObject.
-     * \param visitor function called for each object.
-     * \param data user data passed as second argument to the visitor function.
-     */
     void visitAllPyObjects(ObjectVisitor visitor, void *data);
 
     bool dumpTypeGraph(const char *fileName) const;

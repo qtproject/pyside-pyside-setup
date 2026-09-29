@@ -32,8 +32,10 @@ class PyObjectHolder
 public:
     PyObjectHolder() noexcept = default;
 
-    /// PyObjectHolder constructor.
-    /// \param pyobj A reference to a Python object
+    /*!
+        Constructs a PyObjectHolder holding a new reference to the Python
+        object \a pyObj.
+    */
     explicit PyObjectHolder(PyObject *pyObj) noexcept : m_pyObj(pyObj)
     {
         assert(pyObj != nullptr);
@@ -62,13 +64,17 @@ public:
         return *this;
     }
 
-    /// Decref the python reference
+    /*!
+        Decrements the reference count of the held Python object.
+    */
     ~PyObjectHolder() { release(); }
 
     [[nodiscard]] bool isNull() const { return m_pyObj == nullptr; }
     [[nodiscard]] operator bool() const { return m_pyObj != nullptr; }
 
-    /// Returns the pointer of the Python object being held.
+    /*!
+        Returns the pointer of the Python object being held.
+    */
     [[nodiscard]] PyObject *object() const { return m_pyObj; }
     [[nodiscard]] operator PyObject *() const { return m_pyObj; }
 

@@ -11,7 +11,7 @@
 
 #include <memory>
 
-/// Craving for C++20 and std::source_location::current()
+// Craving for C++20 and std::source_location::current()
 #if defined(_MSC_VER)
 #  define SBK_FUNC_INFO     __FUNCSIG__
 #elif defined(__GNUC__)
@@ -38,7 +38,6 @@ namespace Errors
 
 struct ErrorStore;
 
-/// Temporarily stash an error set in Python
 class Stash
 {
 public:
@@ -50,9 +49,7 @@ public:
     LIBSHIBOKEN_API operator bool() const { return getException() != nullptr; }
     [[nodiscard]] LIBSHIBOKEN_API PyObject *getException() const;
 
-    /// Restore the stored error
     LIBSHIBOKEN_API void restore();
-    /// Discard the stored error
     LIBSHIBOKEN_API void release();
 
 private:
@@ -74,25 +71,36 @@ LIBSHIBOKEN_API void setSequenceTypeError(const char *expectedType);
 LIBSHIBOKEN_API void setSetterTypeError(const char *name, const char *expectedType);
 LIBSHIBOKEN_API void setWrongContainerType();
 
-/// Report an error ASAP: Instead of printing, store for later re-raise.
-/// This replaces `PyErr_Print`, which cannot report errors as exception.
-/// To be used in contexts where raising errors is impossible.
+/*!
+    Reports an error ASAP: Instead of printing, store for later re-raise.
+    This replaces \c PyErr_Print, which cannot report errors as exception.
+    To be used in contexts where raising errors is impossible.
+*/
 LIBSHIBOKEN_API void storeErrorOrPrint();
 
-/// Call storeErrorOrPrint() and print the context to report
-/// errors when calling Python overrides of virtual functions.
+/*!
+    Calls storeErrorOrPrint() and prints the context (\a className,
+    \a funcName) to report errors when calling Python overrides of
+    virtual functions.
+*/
 LIBSHIBOKEN_API void storePythonOverrideErrorOrPrint(const char *className, const char *funcName);
 
-/// Handle an error as in PyErr_Occurred(), but also check for errors which
-/// were captured by `storeErrorOrPrint`.
-/// To be used in normal error checks.
+/*!
+    Handles an error as in \c PyErr_Occurred(), but also checks for errors
+    which were captured by storeErrorOrPrint().
+    To be used in normal error checks.
+*/
 LIBSHIBOKEN_API PyObject *occurred();
 
 } // namespace Errors
 
 namespace Warnings
 {
-/// Warn about invalid return value of overwritten virtual
+/*!
+    Warns about an invalid return value of the overridden virtual function
+    \a functionName of class \a className (\a actualType returned instead
+    of \a expectedType).
+*/
 LIBSHIBOKEN_API void warnInvalidReturnValue(const char *className, const char *functionName,
                                             const char *expectedType, const char *actualType);
 LIBSHIBOKEN_API void warnDeprecated(const char *functionName);

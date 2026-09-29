@@ -212,6 +212,36 @@ SbkConverter *createConverterObject(PyTypeObject *type,
     return converter;
 }
 
+/*!
+    Creates a converter for a wrapper type.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a type
+            \li A Shiboken.ObjectType that will receive the new converter.
+        \row
+            \li \a toCppPointerConvFunc
+            \li Function to retrieve the C++ pointer held by a Python wrapper.
+        \row
+            \li \a toCppPointerCheckFunc
+            \li Check and return the retriever function of the C++ pointer
+                held by a Python wrapper.
+        \row
+            \li \a pointerToPythonFunc
+            \li Function to convert a C++ object to a Python \a type wrapper,
+                keeping their identity.
+        \row
+            \li \a copyToPythonFunc
+            \li Function to convert a C++ object to a Python \a type,
+                copying the object.
+        \row
+            \li \e Return
+            \li The new converter referred by the wrapper \a type.
+    \endtable
+*/
 SbkConverter *createConverter(PyTypeObject *type,
                               PythonToCppFunc toCppPointerConvFunc,
                               IsConvertibleToCppFunc toCppPointerCheckFunc,

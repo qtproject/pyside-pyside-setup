@@ -298,6 +298,8 @@ PyTypeObject *SbkVoidPtr_TypeF(void)
 } // extern "C"
 
 /*!
+    \namespace VoidPtr
+
     \brief Namespace for VoidPtr-related functionality.
 
     \inmodule libshiboken

@@ -17,9 +17,9 @@
 namespace Shiboken::Numpy
 {
 
-/// Check whether the object is a PyArrayObject
-/// \param pyIn object
-/// \return Whether it is a PyArrayObject
+/*!
+    Returns whether the object \a pyIn is a PyArrayObject.
+*/
 LIBSHIBOKEN_API bool check(PyObject *pyIn);
 
 } //namespace Shiboken::Numpy

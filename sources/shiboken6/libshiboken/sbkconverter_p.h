@@ -554,7 +554,10 @@ SbkConverter *createConverterObject(PyTypeObject *type,
 
 LIBSHIBOKEN_API void dumpConverters();
 
-/// Interface for sbkmodule which must reset cache when new module is loaded.
+/*!
+    \internal
+    Interface for sbkmodule which must reset the cache when a new module is loaded.
+*/
 LIBSHIBOKEN_API void clearNegativeLazyCache();
 
 } // namespace Shiboken::Conversions

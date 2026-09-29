@@ -12,7 +12,10 @@ namespace Shiboken::String
 {
     LIBSHIBOKEN_API bool check(PyObject *obj);
     LIBSHIBOKEN_API bool checkIterable(PyObject *obj);
-    /// Check for iterable function arguments (excluding enumerations)
+    /*!
+        Returns whether \a obj is an iterable function argument (excluding
+        enumerations).
+    */
     LIBSHIBOKEN_API bool checkIterableArgument(PyObject *obj);
     LIBSHIBOKEN_API bool checkPath(PyObject *path);
     LIBSHIBOKEN_API bool checkType(PyTypeObject *type);

@@ -146,6 +146,9 @@ static void dumpTreeRecursion(std::ostream &s, SbkObject *self, unsigned depth =
     }
 }
 
+/*!
+    Like info(), but creates a dump of the entire object tree starting from \a self.
+ */
 std::string dumpTree(SbkObject *self)
 {
     std::ostringstream s;
@@ -153,6 +156,10 @@ std::string dumpTree(SbkObject *self)
     return s.str();
 }
 
+/*!
+    Returns a string with information about the internal state of the instance
+    object \a self, useful for debug purposes.
+ */
 std::string info(SbkObject *self)
 {
     std::ostringstream s;

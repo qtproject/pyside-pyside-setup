@@ -19,62 +19,64 @@ struct TypeInitStruct;
 
 struct SbkObject;
 
-/**
- *  This is a convenience function identical to Python's PyObject_TypeCheck,
- *  except that the arguments have swapped places, for the great convenience
- *  of generator.
- */
+/*!
+    This is a convenience function identical to Python's PyObject_TypeCheck(),
+    checking whether \a ob is of type \a tp, except that the arguments have
+    swapped places, for the great convenience of the generator.
+*/
 LIBSHIBOKEN_API  bool SbkObject_TypeCheck(PyTypeObject *tp, PyObject *ob);
 
 extern "C"
 {
 
-/**
- *  SbkConverter is used to perform type conversions from C++
- *  to Python and vice-versa;.and it is also used for type checking.
- *  SbkConverter is a private structure that must be accessed
- *  using the functions provided by the converter API.
- */
+/*!
+    SbkConverter is used to perform type conversions from C++
+    to Python and vice-versa; and it is also used for type checking.
+    SbkConverter is a private structure that must be accessed
+    using the functions provided by the converter API.
+*/
 struct SbkConverter;
 struct SbkArrayConverter;
 
-/**
- *  Given a void pointer to a C++ object, this function must return
- *  the proper Python object. It may be either an existing wrapper
- *  for the C++ object, or a newly create one. Or even the Python
- *  equivalent of the C++ value passed in the argument.
- *
- *  C++ -> Python
- */
+/*!
+    Given a void pointer to a C++ object, this function must return
+    the proper Python object. It may be either an existing wrapper
+    for the C++ object, or a newly created one. Or even the Python
+    equivalent of the C++ value passed in the argument.
+
+    C++ -> Python
+*/
 using CppToPythonFunc = PyObject *(*)(const void *);
 
-/** Same as CppToPythonFunc, but additionally receives the 'PyTypeObject *'.
-  * This is handy for some converters, namely enumeration converters or
-  * dynamic user-defined converters that invoke the type object. */
+/*!
+    Same as CppToPythonFunc, but additionally receives the \c{PyTypeObject *}.
+    This is handy for some converters, namely enumeration converters or
+    dynamic user-defined converters that invoke the type object.
+*/
 using CppToPythonWithTypeFunc = PyObject *(*)(PyTypeObject *, const void *);
 
-/**
- *  This function converts a Python object to a C++ value, it may be
- *  a pointer, value, class, container or primitive type, passed via
- *  a void pointer, that will be cast properly inside the function.
- *  This function is usually returned by an IsConvertibleToCppFunc
- *  function, or obtained knowing the type of the Python object input,
- *  thus it will not check the Python object type, and will expect
- *  the void pointer to be pointing to a proper variable.
- *
- *  Python -> C++
- */
+/*!
+    This function converts a Python object to a C++ value, it may be
+    a pointer, value, class, container or primitive type, passed via
+    a void pointer, that will be cast properly inside the function.
+    This function is usually returned by an IsConvertibleToCppFunc
+    function, or obtained knowing the type of the Python object input,
+    thus it will not check the Python object type, and will expect
+    the void pointer to be pointing to a proper variable.
+
+    Python -> C++
+*/
 using PythonToCppFunc = void (*)(PyObject *,void *);
 
-/**
- *  Checks if the Python object passed in the argument is convertible to a
- *  C++ type defined inside the function, it returns the converter function
- *  that will transform a Python argument into a C++ value.
- *  It returns NULL if the Python object is not convertible to the C++ type
- *  that the function represents.
- *
- *  Python -> C++ ?
- */
+/*!
+    Checks if the Python object passed in the argument is convertible to a
+    C++ type defined inside the function, it returns the converter function
+    that will transform a Python argument into a C++ value.
+    It returns nullptr if the Python object is not convertible to the C++ type
+    that the function represents.
+
+    Python -> C++ ?
+*/
 using IsConvertibleToCppFunc = PythonToCppFunc (*)(PyObject *);
 
 } // extern "C"
@@ -112,44 +114,55 @@ private:
 };
 
 
-/**
- *  Creates a converter for a wrapper type.
- *  \param type                  A Shiboken.ObjectType that will receive the new converter.
- *  \param toCppPointerConvFunc  Function to retrieve the C++ pointer held by a Python wrapper.
- *  \param toCppPointerCheckFunc Check and return the retriever function of the C++ pointer held by a Python wrapper.
- *  \param pointerToPythonFunc   Function to convert a C++ object to a Python \p type wrapper, keeping their identity.
- *  \param copyToPythonFunc      Function to convert a C++ object to a Python \p type, copying the object.
- *  \returns                     The new converter referred by the wrapper \p type.
- */
 LIBSHIBOKEN_API SbkConverter *createConverter(PyTypeObject *type,
                                               PythonToCppFunc toCppPointerConvFunc,
                                               IsConvertibleToCppFunc toCppPointerCheckFunc,
                                               CppToPythonFunc pointerToPythonFunc,
                                               CppToPythonFunc copyToPythonFunc = nullptr);
 
-/**
- *  Creates a converter for a non wrapper type (primitive or container type).
- *  \param type         Python type representing to the new converter.
- *  \param toPythonFunc Function to convert a C++ object to a Python \p type.
- *  \returns            A new type converter.
- */
+/*!
+    Creates a converter for a non wrapper type (primitive or container type)
+    represented by the Python type \a type using the function \a toPythonFunc
+    to convert a C++ object to a Python \a type.
+
+    Returns the new type converter.
+*/
 LIBSHIBOKEN_API SbkConverter *createConverter(PyTypeObject *type, CppToPythonFunc toPythonFunc);
+
+/*!
+    \overload
+
+    Creates a converter for a non wrapper type represented by the Python type
+    \a type using the function \a toPythonFunc which additionally receives the
+    type object.
+*/
 LIBSHIBOKEN_API SbkConverter *createConverter(PyTypeObject *type, CppToPythonWithTypeFunc toPythonFunc);
 
+/*!
+    Deletes the \a converter.
+*/
 LIBSHIBOKEN_API void deleteConverter(SbkConverter *converter);
 
-/// Sets the Python object to C++ pointer conversion function.
+/*!
+    Sets the C++ pointer to Python object conversion function of
+    \a converter to \a pointerToPythonFunc.
+*/
 LIBSHIBOKEN_API void setCppPointerToPythonFunction(SbkConverter *converter, CppToPythonFunc pointerToPythonFunc);
 
-/// Sets the C++ pointer to Python object conversion functions.
+/*!
+    Sets the Python object to C++ pointer conversion functions of \a converter
+    to \a toCppPointerConvFunc and the check function \a toCppPointerCheckFunc.
+*/
 LIBSHIBOKEN_API void setPythonToCppPointerFunctions(SbkConverter *converter,
                                                     PythonToCppFunc toCppPointerConvFunc,
                                                     IsConvertibleToCppFunc toCppPointerCheckFunc);
 
-/**
- *  Adds a new conversion of a Python object to a C++ value.
- *  This is used in copy and implicit conversions.
- */
+/*!
+    Adds a new conversion of a Python object to a C++ value to \a converter
+    consisting of the conversion function \a pythonToCppFunc and the check
+    function \a isConvertibleToCppFunc.
+    This is used in copy and implicit conversions.
+*/
 LIBSHIBOKEN_API void addPythonToCppValueConversion(SbkConverter *converter,
                                                    PythonToCppFunc pythonToCppFunc,
                                                    IsConvertibleToCppFunc isConvertibleToCppFunc);
@@ -166,36 +179,68 @@ LIBSHIBOKEN_API void addPythonToCppValueConversion(Shiboken::Module::TypeInitStr
 
 // C++ -> Python ---------------------------------------------------------------------------
 
-/**
- *  Retrieves the Python wrapper object for the given \p cppIn C++ pointer object.
- *  This function is used only for Value and Object Types.
- *  Example usage:
- *      TYPE *var;
- *      PyObject *pyVar = pointerToPython(SBKTYPE, &var);
- */
+/*!
+    Retrieves the Python wrapper object of \a type for the given \a cppIn
+    C++ pointer object.
+    This function is used only for Value and Object Types.
+    Example usage:
+
+    \code
+        TYPE *var;
+        PyObject *pyVar = pointerToPython(SBKTYPE, &var);
+    \endcode
+*/
 LIBSHIBOKEN_API PyObject *pointerToPython(PyTypeObject *type, const void *cppIn);
+
+/*!
+    \overload
+
+    Retrieves the Python wrapper object for the given \a cppIn
+    C++ pointer object using \a converter.
+*/
 LIBSHIBOKEN_API PyObject *pointerToPython(const SbkConverter *converter, const void *cppIn);
 
-/**
- *  For the given \p cppIn C++ reference it returns the Python wrapper object,
- *  always for Object Types, and when they already exist for reference types;
- *  for when the latter doesn't have an existing wrapper type, the C++ object
- *  is copied to Python.
- *  Example usage:
- *      TYPE &var = SOMETHING;
- *      PyObject *pyVar = referenceToPython(SBKTYPE, &var);
- */
+/*!
+    For the given \a cppIn C++ reference it returns the Python wrapper object
+    of \a type, always for Object Types, and when they already exist for
+    reference types; for when the latter doesn't have an existing wrapper type,
+    the C++ object is copied to Python.
+    Example usage:
+
+    \code
+        TYPE &var = SOMETHING;
+        PyObject *pyVar = referenceToPython(SBKTYPE, &var);
+    \endcode
+*/
 LIBSHIBOKEN_API PyObject *referenceToPython(PyTypeObject *type, const void *cppIn);
+
+/*!
+    \overload
+
+    Returns the Python wrapper object for the given \a cppIn C++ reference
+    using \a converter.
+*/
 LIBSHIBOKEN_API PyObject *referenceToPython(const SbkConverter *converter, const void *cppIn);
 
-/**
- *  Retrieves the Python wrapper object for the given C++ value pointed by \p cppIn.
- *  This function is used only for Value Types.
- *  Example usage:
- *      TYPE var;
- *      PyObject *pyVar = copyToPython(SBKTYPE, &var);
- */
+/*!
+    Retrieves the Python wrapper object of \a type for the given C++ value
+    pointed to by \a cppIn.
+    This function is used only for Value Types.
+    Example usage:
+
+    \code
+        TYPE var;
+        PyObject *pyVar = copyToPython(SBKTYPE, &var);
+    \endcode
+*/
 LIBSHIBOKEN_API PyObject *copyToPython(PyTypeObject *type, const void *cppIn);
+
+/*!
+    \overload
+
+    Retrieves the Python wrapper object for the given C++ value
+    pointed to by \a cppIn using \a converter.
+*/
 LIBSHIBOKEN_API PyObject *copyToPython(const SbkConverter *converter, const void *cppIn);
 
 // Python -> C++ ---------------------------------------------------------------------------
@@ -214,33 +259,40 @@ struct PythonToCppConversion
     Type type = Invalid;
 };
 
-/**
- *  Returns a Python to C++ conversion function if the Python object is convertible to a C++ pointer.
- *  It returns NULL if the Python object is not convertible to \p type.
- */
+/*!
+    Returns a Python to C++ conversion function if the Python object \a pyIn
+    is convertible to a C++ pointer.
+    It returns nullptr if the Python object is not convertible to \a type.
+*/
 LIBSHIBOKEN_API PythonToCppFunc isPythonToCppPointerConvertible(PyTypeObject *type, PyObject *pyIn);
 LIBSHIBOKEN_API PythonToCppConversion pythonToCppPointerConversion(PyTypeObject *type, PyObject *pyIn);
 LIBSHIBOKEN_API PythonToCppConversion pythonToCppPointerConversion(Module::TypeInitStruct typeStruct, PyObject *pyIn);
 
-/**
- *  Returns a Python to C++ conversion function if the Python object is convertible to a C++ value.
- *  The resulting converter function will create a copy of the Python object in C++, or implicitly
- *  convert the object to the expected \p type.
- *  It returns NULL if the Python object is not convertible to \p type.
- */
+/*!
+    Returns a Python to C++ conversion function if the Python object \a pyIn
+    is convertible to a C++ value.
+    The resulting converter function will create a copy of the Python object
+    in C++, or implicitly convert the object to the expected \a type.
+    It returns nullptr if the Python object is not convertible to \a type.
+*/
 LIBSHIBOKEN_API PythonToCppFunc isPythonToCppValueConvertible(PyTypeObject *type, PyObject *pyIn);
 LIBSHIBOKEN_API PythonToCppConversion pythonToCppValueConversion(PyTypeObject *type, PyObject *pyIn);
 
-/**
- *  Returns a Python to C++ conversion function if the Python object is convertible to a C++ reference.
- *  The resulting converter function will return the underlying C++ object held by the Python wrapper,
- *  or a new C++ value if it must be a implicit conversion.
- *  It returns NULL if the Python object is not convertible to \p type.
- */
+/*!
+    Returns a Python to C++ conversion function if the Python object \a pyIn
+    is convertible to a C++ reference.
+    The resulting converter function will return the underlying C++ object
+    held by the Python wrapper, or a new C++ value if it must be an implicit
+    conversion.
+    It returns nullptr if the Python object is not convertible to \a type.
+*/
 LIBSHIBOKEN_API PythonToCppFunc isPythonToCppReferenceConvertible(PyTypeObject *type, PyObject *pyIn);
 LIBSHIBOKEN_API PythonToCppConversion pythonToCppReferenceConversion(PyTypeObject *type, PyObject *pyIn);
 
-/// This is the same as isPythonToCppValueConvertible function.
+/*!
+    This is the same as the isPythonToCppValueConvertible() function,
+    checking \a pyIn using \a converter.
+*/
 LIBSHIBOKEN_API PythonToCppFunc isPythonToCppConvertible(const SbkConverter *converter, PyObject *pyIn);
 LIBSHIBOKEN_API PythonToCppConversion pythonToCppReferenceConversion(const SbkConverter *converter, PyObject *pyIn);
 
@@ -250,112 +302,197 @@ LIBSHIBOKEN_API PythonToCppFunc isPythonToCppConvertible(const SbkArrayConverter
 LIBSHIBOKEN_API PythonToCppConversion pythonToCppConversion(const SbkArrayConverter *converter,
                                                                 int dim1, int dim2, PyObject *pyIn);
 
-/**
- *  Returns the C++ pointer for the \p pyIn object cast to the type passed via \p desiredType.
- *  It differs from Shiboken::Object::cppPointer because it casts the pointer to a proper
- *  memory offset depending on the desired type.
- */
+/*!
+    Returns the C++ pointer for the \a pyIn object cast to the type passed via
+    \a desiredType.
+    It differs from Shiboken::Object::cppPointer() because it casts the pointer
+    to a proper memory offset depending on the desired type.
+*/
 LIBSHIBOKEN_API void *cppPointer(PyTypeObject *desiredType, SbkObject *pyIn);
 
-/// Converts a Python object \p pyIn to C++ and stores the result in the C++ pointer passed in \p cppOut.
+/*!
+    Converts a Python object \a pyIn of \a type to C++ and stores the result
+    in the C++ pointer passed in \a cppOut.
+*/
 LIBSHIBOKEN_API void pythonToCppPointer(PyTypeObject *type, PyObject *pyIn, void *cppOut);
+
+/*!
+    \overload
+
+    Converts a Python object \a pyIn to C++ using \a converter and stores
+    the result in the C++ pointer passed in \a cppOut.
+*/
 LIBSHIBOKEN_API void pythonToCppPointer(const SbkConverter *converter, PyObject *pyIn, void *cppOut);
 
-/// Converts a Python object \p pyIn to C++, and copies the result in the C++ variable passed in \p cppOut.
+/*!
+    Converts a Python object \a pyIn of \a type to C++, and copies the result
+    to the C++ variable passed in \a cppOut.
+*/
 LIBSHIBOKEN_API void pythonToCppCopy(PyTypeObject *type, PyObject *pyIn, void *cppOut);
+
+/*!
+    \overload
+
+    Converts a Python object \a pyIn to C++ using \a converter, and copies
+    the result to the C++ variable passed in \a cppOut.
+*/
 LIBSHIBOKEN_API void pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void *cppOut);
 
-/**
- *  Helper function returned by generated convertible checking functions
- *  that returns a C++ NULL when the input Python object is None.
- */
+/*!
+    Helper function returned by generated convertible checking functions
+    that sets \a cppOut to a C++ nullptr when the input Python object is None.
+*/
 LIBSHIBOKEN_API void nonePythonToCppNullPtr(PyObject *, void *cppOut);
 
-/**
- *  Returns true if the \p toCpp function passed is an implicit conversion of Python \p type.
- *  It is used when C++ expects a reference argument, so it may be the same object received
- *  from Python, or another created through implicit conversion.
- */
+/*!
+    Returns true if the \a toCpp function passed is an implicit conversion of
+    Python \a type.
+    It is used when C++ expects a reference argument, so it may be the same
+    object received from Python, or another created through implicit conversion.
+*/
 [[deprecated]] LIBSHIBOKEN_API bool isImplicitConversion(PyTypeObject *type, PythonToCppFunc toCpp);
 
-/// Registers a converter with a type name that may be used to retrieve the converter.
-/// Use for fully qualified names (main type). This will overwrite existing converters
-/// of the same name.
+/*!
+    Registers a \a converter with a type name \a typeName that may be used to
+    retrieve the converter.
+    Use for fully qualified names (main type). This will overwrite existing
+    converters of the same name.
+*/
 LIBSHIBOKEN_API void registerConverterName(SbkConverter *converter, const char *typeName);
 
-/// Registers a converter with a type name that may be used to retrieve the converter
-/// unless there is already a converter for the name. Use for partially qualified names.
+/*!
+    Registers a \a converter with a type name \a typeName that may be used to
+    retrieve the converter unless there is already a converter for the name.
+    Use for partially qualified names.
+*/
 LIBSHIBOKEN_API void registerConverterAlias(SbkConverter *converter, const char *typeName);
 
-/// Returns the converter for a given type name, or NULL if it wasn't registered before.
+/*!
+    Returns the converter for a given \a typeName, or nullptr if it wasn't
+    registered before.
+*/
 LIBSHIBOKEN_API SbkConverter *getConverter(const char *typeName);
 
-/// Returns the converter for a primitive type.
+/*!
+    Returns the converter for a primitive type identified by \a index.
+*/
 LIBSHIBOKEN_API SbkConverter *primitiveTypeConverter(int index);
 
-/// Returns true if a Python sequence is comprised of objects of the given \p type.
+/*!
+    Returns true if a Python sequence \a pyIn is comprised of objects of the
+    given \a type.
+*/
 LIBSHIBOKEN_API bool checkSequenceTypes(PyTypeObject *type, PyObject *pyIn);
 
-/// Returns true if a Python type is iterable and comprised of objects of the
-/// given \p type.
+/*!
+    Returns true if a Python object \a pyIn is iterable and comprised of
+    objects of the given \a type.
+*/
 LIBSHIBOKEN_API bool checkIterableTypes(PyTypeObject *type, PyObject *pyIn);
 
-/// Returns true if a Python sequence is comprised of objects of a type convertible to the one represented by the given \p converter.
+/*!
+    Returns true if a Python sequence \a pyIn is comprised of objects of a type
+    convertible to the one represented by the given \a converter.
+*/
 LIBSHIBOKEN_API bool convertibleSequenceTypes(const SbkConverter *converter, PyObject *pyIn);
 
-/// Returns true if a Python sequence is comprised of objects of a type convertible to \p type.
+/*!
+    Returns true if a Python sequence \a pyIn is comprised of objects of a type
+    convertible to \a type.
+*/
 LIBSHIBOKEN_API bool convertibleSequenceTypes(PyTypeObject *type, PyObject *pyIn);
 
-/// Returns true if a Python type is iterable and comprised of objects of a
-/// type convertible to the one represented by the given \p converter.
+/*!
+    Returns true if a Python object \a pyIn is iterable and comprised of
+    objects of a type convertible to the one represented by the given
+    \a converter.
+*/
 LIBSHIBOKEN_API bool convertibleIterableTypes(const SbkConverter *converter, PyObject *pyIn);
 
-/// Returns true if a Python type is iterable and comprised of objects of a
-/// type convertible to \p type.
+/*!
+    Returns true if a Python object \a pyIn is iterable and comprised of
+    objects of a type convertible to \a type.
+*/
 LIBSHIBOKEN_API bool convertibleIterableTypes(PyTypeObject *type, PyObject *pyIn);
 
-/// Returns true if a Python sequence can be converted to a C++ pair.
+/*!
+    Returns true if a Python sequence \a pyIn can be converted to a C++ pair
+    of \a firstType and \a secondType.
+*/
 LIBSHIBOKEN_API bool checkPairTypes(PyTypeObject *firstType, PyTypeObject *secondType, PyObject *pyIn);
 
-/// Returns true if a Python sequence can be converted to a C++ pair.
+/*!
+    Returns true if a Python sequence \a pyIn can be converted to a C++ pair
+    using \a firstConverter and \a secondConverter. \a firstCheckExact and
+    \a secondCheckExact indicate whether an exact type check is to be
+    performed.
+*/
 LIBSHIBOKEN_API bool convertiblePairTypes(const SbkConverter *firstConverter, bool firstCheckExact,
                                           const SbkConverter *secondConverter, bool secondCheckExact,
                                           PyObject *pyIn);
 
-/// Returns true if a Python dictionary can be converted to a C++ hash or map.
+/*!
+    Returns true if a Python dictionary \a pyIn can be converted to a C++ hash
+    or map of \a keyType and \a valueType.
+*/
 LIBSHIBOKEN_API bool checkDictTypes(PyTypeObject *keyType, PyTypeObject *valueType, PyObject *pyIn);
 
-/// Returns true if a Python dictionary can be converted to a C++ multi hash/map.
-/// The Python dictionary is expected to contain lists of values
+/*!
+    Returns true if a Python dictionary \a pyIn can be converted to a C++
+    multi hash/map of \a keyType and \a valueType.
+    The Python dictionary is expected to contain lists of values.
+*/
 bool checkMultiDictTypes(PyTypeObject *keyType, PyTypeObject *valueType,
                          PyObject *pyIn);
 
-/// Returns true if a Python dictionary can be converted to a C++ hash or map.
+/*!
+    Returns true if a Python dictionary \a pyIn can be converted to a C++ hash
+    or map using \a keyConverter and \a valueConverter. \a keyCheckExact and
+    \a valueCheckExact indicate whether an exact type check is to be performed.
+*/
 LIBSHIBOKEN_API bool convertibleDictTypes(const SbkConverter *keyConverter, bool keyCheckExact,
                                           const SbkConverter *valueConverter, bool valueCheckExact,
                                           PyObject *pyIn);
 
-/// Returns true if a Python dictionary can be converted to a C++ multi hash/map.
-/// The Python dictionary is expected to contain lists of values
+/*!
+    Returns true if a Python dictionary \a pyIn can be converted to a C++
+    multi hash/map using \a keyConverter and \a valueConverter.
+    \a keyCheckExact and \a valueCheckExact indicate whether an exact type
+    check is to be performed.
+    The Python dictionary is expected to contain lists of values.
+*/
 LIBSHIBOKEN_API bool convertibleMultiDictTypes(const SbkConverter *keyConverter,
                                                bool keyCheckExact,
                                                const SbkConverter *valueConverter,
                                                bool valueCheckExact,
                                                PyObject *pyIn);
 
-/// Returns the Python type object associated with the given \p converter.
+/*!
+    Returns the Python type object associated with the given \a converter.
+*/
 LIBSHIBOKEN_API PyTypeObject *getPythonTypeObject(const SbkConverter *converter);
 
-/// Returns the Python type object for the given \p typeName.
+/*!
+    Returns the Python type object for the given \a typeName.
+*/
 LIBSHIBOKEN_API PyTypeObject *getPythonTypeObject(const char *typeName);
 
-/// Returns true if the Python type associated with the converter is a value type.
+/*!
+    Returns true if the Python type associated with the \a converter is a
+    value type.
+*/
 LIBSHIBOKEN_API bool pythonTypeIsValueType(const SbkConverter *converter);
 
-/// Returns true if the Python type associated with the converter is an object type.
+/*!
+    Returns true if the Python type associated with the \a converter is an
+    object type.
+*/
 LIBSHIBOKEN_API bool pythonTypeIsObjectType(const SbkConverter *converter);
 
-/// Returns true if the Python type associated with the converter is a wrapper type.
+/*!
+    Returns true if the Python type associated with the \a converter is a
+    wrapper type.
+*/
 LIBSHIBOKEN_API bool pythonTypeIsWrapperType(const SbkConverter *converter);
 
 enum  : int {
@@ -405,11 +542,10 @@ template<> inline SbkConverter *PrimitiveTypeConverter<std::nullptr_t>() { retur
 
 } // namespace Shiboken::Conversions
 
-/**
-*   This function template is used to get the PyTypeObject of a C++ type T.
-*   All implementations should be provided by template specializations generated by the generator when
-*   T isn't a C++ primitive type.
-*   \see SpecialCastFunction
+/*!
+    This function template is used to get the PyTypeObject of a C++ type \c T.
+    All implementations should be provided by template specializations
+    generated by the generator when \c T isn't a C++ primitive type.
 */
 template<typename T> PyTypeObject *SbkType() { return nullptr; }
 

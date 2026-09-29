@@ -15,6 +15,13 @@
 
 #include <algorithm>
 
+/*!
+    \namespace Shiboken::Numpy
+
+    \brief Namespace for numpy-related functionality.
+
+    \inmodule libshiboken
+*/
 namespace Shiboken::Numpy
 {
 

@@ -7,6 +7,14 @@
 #include <cstdlib>
 #include <cstring>
 
+/*!
+    \namespace Shiboken::Buffer
+
+    \brief Namespace for Python buffer-related functionality.
+
+    \inmodule libshiboken
+*/
+
 bool Shiboken::Buffer::checkType(PyObject *pyObj)
 {
     return PyObject_CheckBuffer(pyObj) != 0;
