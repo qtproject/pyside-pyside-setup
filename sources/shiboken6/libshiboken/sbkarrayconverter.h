@@ -87,7 +87,10 @@ private:
    RowType *m_rows = nullptr;
 };
 
-/// Returns the converter for an array type.
+/*!
+    Returns the converter for an array type identified by \a index
+    of \a dimension.
+*/
 LIBSHIBOKEN_API SbkArrayConverter *arrayTypeConverter(int index, int dimension = 1);
 
 template <class T>

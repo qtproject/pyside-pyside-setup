@@ -21,35 +21,25 @@ struct SbkObject;
 namespace Shiboken
 {
 
-/**
-* It transforms a python sequence into two C variables, argc and argv.
-* This function tries to find the application (script) name and put it into argv[0], if
-* the application name can't be guessed, defaultAppName will be used.
-*
-* No memory is allocated is an error occur.
-*
-* \note argc must be a valid address.
-* \note The argv array is allocated using new operator and each item is allocated using malloc.
-* \returns True on sucess, false otherwise.
-*/
 LIBSHIBOKEN_API bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defaultAppName = nullptr);
 
-/// Delete a a list of arguments created by listToArgcArgv()
+/*!
+    Deletes a list of arguments \a argv of size \a argc created by
+    listToArgcArgv().
+*/
 LIBSHIBOKEN_API void deleteArgv(int argc, char **argv);
 
-/**
- * Convert a python sequence into a heap-allocated array of ints.
- *
- * \returns The newly allocated array or NULL in case of error or empty sequence. Check with PyErr_Occurred
- *          if it was successfull.
- */
 LIBSHIBOKEN_API int *sequenceToIntArray(PyObject *obj, bool zeroTerminated = false);
 
-/// Fix a type name returned by typeid(t).name(), depending on compiler.
-/// \returns Fixed name (allocated).
+/*!
+    Fixes a type name \a typeIdName returned by \c typeid(t).name(),
+    depending on compiler, and returns the fixed name (allocated).
+*/
 LIBSHIBOKEN_API const char *typeNameOf(const char *typeIdName);
 
-/// Returns whether \a method is a compiled method (Nuitka).
+/*!
+    Returns whether \a method is a compiled method (Nuitka).
+*/
 LIBSHIBOKEN_API bool isCompiledMethod(PyObject *method);
 
 /*!
@@ -81,9 +71,10 @@ LIBSHIBOKEN_API ThreadId mainThreadId();
 
 LIBSHIBOKEN_API int pyVerbose();
 
-/**
- * An utility function used to call PyErr_WarnEx with a formatted message.
- */
+/*!
+    A utility function used to call \c PyErr_WarnEx with the warning
+    \a category, the \a stacklevel and a message formatted from \a format.
+*/
 LIBSHIBOKEN_API int warning(PyObject *category, int stacklevel, const char *format, ...);
 
 struct LIBSHIBOKEN_API debugPyObject

@@ -253,6 +253,9 @@ PyObject *Stash::getException() const
     return m_store ? m_store->exc : nullptr;
 }
 
+/*!
+    Restores the stored error.
+*/
 void Stash::restore()
 {
     if (m_store) {
@@ -261,6 +264,9 @@ void Stash::restore()
     }
 }
 
+/*!
+    Discards the stored error.
+*/
 void Stash::release()
 {
     if (m_store) {

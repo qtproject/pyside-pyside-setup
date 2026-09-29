@@ -13,28 +13,28 @@
 namespace Shiboken::Numpy
 {
 
-/// Create a one-dimensional numpy array of type uint8/NPY_BYTE
-/// \param size Size
-/// \param data Data
-/// \return PyArrayObject
+/*!
+    Creates a one-dimensional numpy array (PyArrayObject) of type uint8/NPY_BYTE
+    of \a size from \a data.
+*/
 LIBSHIBOKEN_API PyObject *createByteArray1(Py_ssize_t size, const uint8_t *data);
 
-/// Create a one-dimensional numpy array of type double/NPY_DOUBLE
-/// \param size Size
-/// \param data Data
-/// \return PyArrayObject
+/*!
+    Creates a one-dimensional numpy array (PyArrayObject) of type double/NPY_DOUBLE
+    of \a size from \a data.
+*/
 LIBSHIBOKEN_API PyObject *createDoubleArray1(Py_ssize_t size, const double *data);
 
-/// Create a one-dimensional numpy array of type float/NPY_FLOAT
-/// \param size Size
-/// \param data Data
-/// \return PyArrayObject
+/*!
+    Creates a one-dimensional numpy array (PyArrayObject) of type float/NPY_FLOAT
+    of \a size from \a data.
+*/
 LIBSHIBOKEN_API PyObject *createFloatArray1(Py_ssize_t size, const float *data);
 
-/// Create a one-dimensional numpy array of type int/NPY_INT
-/// \param size Size
-/// \param data Data
-/// \return PyArrayObject
+/*!
+    Creates a one-dimensional numpy array (PyArrayObject) of type int/NPY_INT
+    of \a size from \a data.
+*/
 LIBSHIBOKEN_API PyObject *createIntArray1(Py_ssize_t size, const int *data);
 
 } //namespace Shiboken::Numpy

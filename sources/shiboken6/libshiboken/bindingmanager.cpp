@@ -332,6 +332,11 @@ void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
     m_d->assignWrapper(pyObj, cptr, d->mi_offsets);
 }
 
+/*!
+    Takes the object \a sbkObj out of the wrapper map, leaving its flags alone.
+    Deallocation uses this to make the wrapper unreachable before it runs
+    any Python code; releaseWrapper() is the same plus invalidation.
+*/
 void BindingManager::unregisterWrapper(SbkObject *sbkObj)
 {
     const auto cptrs = Shiboken::cppPointersSpan(sbkObj);
@@ -434,11 +439,22 @@ void BindingManager::addClassInheritance(Module::TypeInitStruct *parent,
     m_d->classHierarchy.addEdge(GraphNode(parent), GraphNode(child));
 }
 
+/*!
+    Tries to find the correct type of \a cptr via type discovery knowing that
+    it is at least of type \a type. If a derived class is found, it returns
+    the type and \a cptr cast to the type (which may be different in case of
+    multiple inheritance).
+*/
 BindingManager::TypeCptrPair BindingManager::findDerivedType(void *cptr, PyTypeObject *type) const
 {
     return m_d->classHierarchy.identifyType(cptr, type, type);
 }
 
+/*!
+    If \a probeType has a type discovery function, runs it passing \a cptr
+    (a pointer to the instance of type \a type) and \a type and returns the
+    (cast) pointer or nullptr.
+*/
 void *BindingManager::runTypeDiscovery(void *cptr, PyTypeObject *probeType, PyTypeObject *type)
 {
     auto *sotp = PepType_SOTP(probeType);
@@ -447,6 +463,16 @@ void *BindingManager::runTypeDiscovery(void *cptr, PyTypeObject *probeType, PyTy
 }
 
 // FIXME PYSIDE7: remove, just for compatibility
+/*!
+    Tries to find the correct type of *\a cptr knowing that it is at least
+    of type \a type.
+
+    \a cptr is a pointer to a pointer to the instance of type \a type.
+    In case of multiple inheritance, this function may change the contents
+    of \a cptr.
+
+    \warning This function is slow, use it only as last resort.
+*/
 PyTypeObject *BindingManager::resolveType(void **cptr, PyTypeObject *type)
 {
     auto result = findDerivedType(*cptr, type);
@@ -467,6 +493,13 @@ std::set<PyObject *> BindingManager::getAllPyObjects()
     return pyObjects;
 }
 
+/*!
+    Calls the function \a visitor for each object registered on binding manager,
+    passing \a data (user data) as second argument.
+
+    \note As various C++ pointers can point to the same PyObject due to multiple
+    inheritance, the visitor can be called more than once for each PyObject.
+*/
 void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void *data)
 {
     WrapperMap copy = m_d->wrapperMapper;

@@ -22,6 +22,36 @@ static const ArgumentNameIndexMapping *
     });
 }
 
+/*!
+    Function binding helper: Parses the keyword arguments in dict \a kwds
+    according to \a mapping (name->index) and stores them in array \a pyArgs
+    under their index. Fails if an entry is missing or duplicate entries
+    occur.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a kwds
+            \li Dict of keyword arguments.
+        \row
+            \li \a mapping
+            \li Array of name->index mappings.
+        \row
+            \li \a size
+            \li Size of \a mapping.
+        \row
+            \li \a errInfo
+            \li Receives error information.
+        \row
+            \li \a pyArgs
+            \li Array of arguments to be populated.
+        \row
+            \li \e Return
+            \li true on success, false otherwise.
+    \endtable
+*/
 bool parseKeywordArguments(PyObject *kwds,
                            const ArgumentNameIndexMapping *mapping, size_t size,
                            Shiboken::AutoDecRef &errInfo, PyObject **pyArgs)
@@ -49,6 +79,37 @@ bool parseKeywordArguments(PyObject *kwds,
     return true;
 }
 
+/*!
+    Function binding helper: Parses the keyword arguments of a QObject
+    constructor in dict \a kwds according to \a mapping (name->index) and
+    stores them in array \a pyArgs under their index. Fails if duplicate
+    entries occur. Unmapped entries (QObject properties) are stored in a dict
+    in \a errInfo for further processing.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a kwds
+            \li Dict of keyword arguments.
+        \row
+            \li \a mapping
+            \li Array of name->index mappings.
+        \row
+            \li \a size
+            \li Size of \a mapping.
+        \row
+            \li \a errInfo
+            \li Receives error information or the dict of unmapped entries.
+        \row
+            \li \a pyArgs
+            \li Array of arguments to be populated.
+        \row
+            \li \e Return
+            \li true on success, false otherwise.
+    \endtable
+*/
 bool parseConstructorKeywordArguments(PyObject *kwds,
                                       const ArgumentNameIndexMapping *mapping, size_t size,
                                       Shiboken::AutoDecRef &errInfo, PyObject **pyArgs)

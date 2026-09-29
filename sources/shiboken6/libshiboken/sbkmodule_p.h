@@ -9,7 +9,10 @@
 
 namespace Shiboken::Module {
 
-/// PYSIDE-2404: Make sure that mentioned classes really exist.
+/*!
+    \internal
+    Makes sure that classes mentioned by \a name really exist (PYSIDE-2404).
+*/
 void loadLazyClassesWithNameStd(const std::string &name);
 
 } // namespace Shiboken::Module

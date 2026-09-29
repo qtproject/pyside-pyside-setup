@@ -1178,6 +1178,11 @@ bool isUserType(PyTypeObject *type)
     return checkType(type) && PepType_SOTP(type)->is_user_type;
 }
 
+/*!
+    Returns true if the constructor of \a ctorType can be called for an instance
+    of type \a myType.
+    \note This function sets a Python error when returning false.
+*/
 bool canCallConstructor(PyTypeObject *myType, PyTypeObject *ctorType)
 {
     auto findBasePred = [ctorType](PyTypeObject *type) { return type == ctorType; };
@@ -1189,11 +1194,25 @@ bool canCallConstructor(PyTypeObject *myType, PyTypeObject *ctorType)
     return true;
 }
 
+/*!
+    Returns true if the \a type represents an object of a class with multiple
+    inheritance in C++. When this occurs, the C++ pointer held by the
+    Python wrapper will need to be cast when
+    passed as a parameter that expects a type of its ancestry.
+
+    This means a call to ObjectType::cast() is needed to obtain the correct
+    C++ pointer for Python objects of type \a type.
+*/
 bool hasCast(PyTypeObject *type)
 {
     return PepType_SOTP(type)->mi_specialcast != nullptr;
 }
 
+/*!
+    Cast the C++ pointer held by a Python object \a obj of type \a sourceType,
+    to a C++ pointer of a C++ class indicated by type \a pyTargetType
+    and return the cast C++ pointer.
+*/
 void *cast(PyTypeObject *sourceType, SbkObject *obj, PyTypeObject *pyTargetType)
 {
     auto *sotp = PepType_SOTP(sourceType);
@@ -1248,6 +1267,42 @@ void setDestructorFunction(PyTypeObject *type, ObjectDestructor func)
     PepType_SOTP(type)->cpp_dtor = func;
 }
 
+/*!
+    Initializes a Shiboken wrapper type and adds it to the module,
+    or to the enclosing class if the type is an inner class.
+    This function also calls setDestructorFunction().
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a enclosingObject
+            \li The module or enclosing class to which the new type will be added.
+        \row
+            \li \a typeName
+            \li Name by which the type will be known in Python.
+        \row
+            \li \a originalName
+            \li Original C++ name of the type.
+        \row
+            \li \a typeSpec
+            \li The new type to be initialized and added to the module.
+        \row
+            \li \a cppObjDtor
+            \li Memory deallocation function for the C++ object held by the type.
+                Should not be used if the underlying C++ class has a private
+                destructor.
+        \row
+            \li \a bases
+            \li Base types from which the new type inherits.
+        \row
+            \li \a wrapperFlags
+            \li Flags, see WrapperFlags.
+    \endtable
+
+    Returns the new type or \nullptr if the initialization failed.
+ */
 PyTypeObject *
 introduceWrapperType(PyObject *enclosingObject,
                      const char *typeName,
@@ -1734,7 +1789,36 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
     return nullptr;
 }
 
-// Legacy, for compatibility only.
+/*!
+    Bind a C++ object to Python. Forwards to
+    newObjectWithHeuristics(), newObjectForType() depending on \a isExactType.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a instanceType
+            \li equivalent Python type for the C++ object.
+        \row
+            \li \a cptr
+            \li C++ instance.
+        \row
+            \li \a hasOwnership
+            \li If true, Python will try to delete the underlying C++ object
+                when there are no more references.
+        \row
+            \li \a isExactType
+            \li If false, Shiboken will use some heuristics to detect the
+                correct Python type of this C++ object. In any case,
+                \a instanceType must be provided; it'll be used as search
+                starting point and as fallback.
+        \row
+            \li \a typeName
+            \li If non-null, this will be used as helper to find the correct
+                Python type for this object.
+    \endtable
+*/
 PyObject *newObject(PyTypeObject *instanceType,
                     void *cptr,
                     bool hasOwnership,
@@ -1775,6 +1859,31 @@ static PyObject *newObjectWithHeuristicsHelper(PyTypeObject *instanceType,
     return newObjectForType(instanceType, cptr, hasOwnership);
 }
 
+/*!
+    Bind a C++ object to Python for polymorphic pointers. Calls
+    newObjectWithHeuristics() with an additional check for multiple
+    inheritance, in which case it will fall back to instanceType.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a instanceType
+            \li Equivalent Python type for the C++ object.
+        \row
+            \li \a cptr
+            \li C++ instance.
+        \row
+            \li \a hasOwnership
+            \li If true, Python will try to delete the underlying C++ object
+                when there are no more references.
+        \row
+            \li \a typeName
+            \li If non-null, this will be used as helper to find the correct
+                Python type for this object (obtained by typeid().name()).
+    \endtable
+*/
 PyObject *newObjectForPointer(PyTypeObject *instanceType,
                               void *cptr,
                               bool hasOwnership,
@@ -1783,7 +1892,31 @@ PyObject *newObjectForPointer(PyTypeObject *instanceType,
     return newObjectWithHeuristicsHelper(instanceType, typeName, cptr, hasOwnership);
 }
 
+/*!
+    Bind a C++ object to Python using some heuristics to detect the correct
+    Python type of this C++ object. In any case \a instanceType must be provided;
+    it'll be used as search starting point and as fallback.
 
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a instanceType
+            \li Equivalent Python type for the C++ object.
+        \row
+            \li \a cptr
+            \li C++ instance.
+        \row
+            \li \a hasOwnership
+            \li If true, Python will try to delete the underlying C++ object
+                when there are no more references.
+        \row
+            \li \a typeName
+            \li If non-null, this will be used as helper to find the correct
+                Python type for this object (obtained by typeid().name()).
+    \endtable
+*/
 PyObject *newObjectWithHeuristics(PyTypeObject *instanceType,
                                   void *cptr,
                                   bool hasOwnership,
@@ -1793,6 +1926,25 @@ PyObject *newObjectWithHeuristics(PyTypeObject *instanceType,
                                          cptr, hasOwnership);
 }
 
+/*!
+    Bind a C++ object to Python using the given type.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a instanceType
+            \li Equivalent Python type for the C++ object.
+        \row
+            \li \a cptr
+            \li C++ instance.
+        \row
+            \li \a hasOwnership
+            \li If true, Python will try to delete the underlying
+                C++ object when there are no more references.
+    \endtable
+*/
 PyObject *newObjectForType(PyTypeObject *instanceType, void *cptr, bool hasOwnership)
 {
     auto &bindingManager = BindingManager::instance();
@@ -2020,6 +2172,36 @@ static void removeRefCountKey(SbkObject *self, const std::string &key)
     }
 }
 
+/*!
+    Increments the reference count of the referred Python object.
+    A previous Python object in the same position identified by \a keyC
+    will have its reference counter decremented automatically when replaced
+    unless \a append is true.
+    All the kept references should be decremented when the Python wrapper
+    indicated by \a self dies.
+    No checking is done for any of the passed arguments, since it is meant to
+    be used by generated code it is supposed that the generator is correct.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a self
+            \li The wrapper instance that keeps references to other objects.
+        \row
+            \li \a keyC
+            \li A key that identifies the C++ method signature and argument
+                where the referred object came from.
+        \row
+            \li \a referredObject
+            \li The object whose reference is used by the \a self object.
+        \row
+            \li \a append
+            \li If true, \a referredObject is appended to the list of
+                references kept under \a keyC instead of replacing them.
+    \endtable
+*/
 void keepReference(SbkObject *self, const char *keyC, PyObject *referredObject, bool append)
 {
     std::string key(keyC);
@@ -2052,6 +2234,25 @@ void keepReference(SbkObject *self, const char *keyC, PyObject *referredObject, 
     Py_INCREF(referredObject);
 }
 
+/*!
+    Removes any reference previously added by keepReference().
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a self
+            \li The wrapper instance that keeps references to other objects.
+        \row
+            \li \a key
+            \li A key that identifies the C++ method signature and argument
+                where the referred object came from.
+        \row
+            \li \a referredObject
+            \li The object whose reference is used by the \a self object.
+    \endtable
+*/
 void removeReference(SbkObject *self, const char *key, PyObject *referredObject)
 {
     if (!isNone(referredObject))

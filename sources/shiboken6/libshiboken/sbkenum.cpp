@@ -512,6 +512,30 @@ PyTypeObject *createPythonEnum(PyObject *module,
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
 }
 
+/*!
+    Creates a Python enum type from a set of provided key/value pairs.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a fullName
+            \li The full name (including module and package depth) to be used
+                for the newly created enum type.
+        \row
+            \li \a pyEnumItems
+            \li The key/value pairs to be used for the enum.
+        \row
+            \li \a enumTypeName
+            \li The name of the enum type to be used (i.e., "IntEnum", "Flag", etc)
+                from Python's enum module.
+        \row
+            \li \a callDict
+            \li The dictionary to be used for the call, allowing for additional
+                keyword arguments to be passed, such as "boundary=KEEP".
+    \endtable
+*/
 PyTypeObject *createPythonEnum(const char *fullName, PyObject *pyEnumItems,
                                const char *enumTypeName, PyObject *callDict)
 {

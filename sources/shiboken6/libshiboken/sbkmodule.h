@@ -21,40 +21,52 @@ struct TypeInitStruct
     const char *fullName;
 };
 
-/// PYSIDE-2404: Replacing the arguments in cpythonTypeNameExt by a function.
+/*!
+    Returns the type of \a typeStruct, creating it if needed.
+    PYSIDE-2404: Replacing the arguments in cpythonTypeNameExt by a function.
+*/
 LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct);
 
-/// PYSIDE-2404: Make sure that mentioned classes really exist.
+/*!
+    Makes sure that classes mentioned by \a name really exist (PYSIDE-2404).
+*/
 LIBSHIBOKEN_API void loadLazyClassesWithName(const char *name);
 
-/// PYSIDE-2404: incarnate all classes for star imports.
+/*!
+    Incarnates all classes of \a module for star imports (PYSIDE-2404).
+*/
 LIBSHIBOKEN_API void resolveLazyClasses(PyObject *module);
 
-/**
- *  Imports and returns the module named \p moduleName, or a NULL pointer in case of failure.
- *  If the module is already imported, it increments its reference count before returning it.
- *  \returns the module specified in \p moduleName or NULL if an error occurs.
- */
+/*!
+    Imports and returns the module named \a moduleName, or a nullptr in case
+    of failure. If the module is already imported, it increments its reference
+    count before returning it.
+*/
 LIBSHIBOKEN_API PyObject *import(const char *moduleName);
 
-/**
- *  Creates a new Python module named \p moduleName using the information passed in \p moduleData
- *  and calls exec() on it.
- *  \returns a newly created module.
- */
+/*!
+    Creates and returns a new Python module named \a moduleName using the
+    information passed in \a moduleData and calls exec() on it.
+*/
 [[deprecated]] LIBSHIBOKEN_API PyObject *create(const char *moduleName, PyModuleDef *moduleData);
 
-/// Creates a new Python module named \p moduleName using the information passed in \p moduleData.
-/// exec() is not called (Support for Nuitka).
-/// \returns a newly created module.
+/*!
+    Creates and returns a new Python module named \a moduleName using the
+    information passed in \a moduleData. exec() is not called (Support for
+    Nuitka).
+*/
 LIBSHIBOKEN_API PyObject *createOnly(const char *moduleName, PyModuleDef *moduleData);
 
-/// Executes a module (multi-phase initialization helper)
+/*!
+    Executes the \a module (multi-phase initialization helper).
+*/
 LIBSHIBOKEN_API void exec(PyObject *module);
 
 using TypeCreationFunction = PyTypeObject *(*)(PyObject *module);
 
-/// Adds a type creation function to the module.
+/*!
+    Adds a type creation function \a func for the type \a name to the \a module.
+*/
 LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
                                              const char *name,
                                              TypeCreationFunction func);
@@ -64,37 +76,34 @@ LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
                                              TypeCreationFunction func,
                                              const char *subTypeNamePath);
 
-/**
- *  Registers the list of types created by \p module.
- *  \param module   Module where the types were created.
- *  \param types    Array of PyTypeObject *objects representing the types created on \p module.
- */
+/*!
+    Registers the list of \a types (array of TypeInitStruct representing
+    the types) created by \a module.
+*/
 LIBSHIBOKEN_API void registerTypes(PyObject *module, TypeInitStruct *types);
 
-/**
- *  Retrieves the array of types.
- *  \param module   Module where the types were created.
- *  \returns        A pointer to the PyTypeObject *array of types.
- */
+/*!
+    Returns a pointer to the array of types created by \a module.
+*/
 LIBSHIBOKEN_API TypeInitStruct *getTypes(PyObject *module);
 
-/**
- *  Registers the list of converters created by \p module for non-wrapper types.
- *  \param module       Module where the converters were created.
- *  \param converters   Array of SbkConverter *objects representing the converters created on \p module.
- */
+/*!
+    Registers the list of \a converters (array of SbkConverter *) created by
+    \a module for non-wrapper types.
+*/
 LIBSHIBOKEN_API void registerTypeConverters(PyObject *module, SbkConverter **converters);
 
-/**
- *  Retrieves the array of converters.
- *  \param module   Module where the converters were created.
- *  \returns        A pointer to the SbkConverter *array of converters.
- */
+/*!
+    Returns a pointer to the array of converters created by \a module.
+*/
 LIBSHIBOKEN_API SbkConverter **getTypeConverters(PyObject *module);
 
-/**
- *  Replace the dictionary of a module. This allows to use `__missing__`.
- */
+/*!
+    Replaces the dictionary of \a module by \a dict, changing its class to
+    \a modClass. This allows for using \c __missing__.
+
+    Returns true on success, false if the arguments are of the wrong type.
+*/
 LIBSHIBOKEN_API bool replaceModuleDict(PyObject *module, PyObject *modClass, PyObject *dict);
 
 } // namespace Shiboken::Module

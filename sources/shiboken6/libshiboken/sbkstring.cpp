@@ -11,6 +11,13 @@
 #include <cstring>
 #include <cctype>
 
+/*!
+    \namespace Shiboken::String
+
+    \brief Namespace for string-related functionality.
+
+    \inmodule libshiboken
+*/
 namespace Shiboken::String
 {
 

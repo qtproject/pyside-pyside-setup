@@ -184,13 +184,25 @@ using CPtrSpan = std::span<void *>;
 using CPtrSpan = ArraySpan<void *>;
 #endif
 
-/// Utility to return a span of the instance(s) C++ pointers
+/*!
+    \internal
+
+    Utility to return a span of the C++ pointers of the instance(s) \a ob.
+*/
 CPtrSpan cppPointersSpan(SbkObject *ob);
 
-/// Utility to set the first C++ pointer (unchecked)
+/*!
+    \internal
+
+    Utility to set the first C++ pointer of \a ob to \a cptr (unchecked).
+*/
 void setCppPointer(SbkObject *ob, void *cptr);
 
-/// Utility to set instance(s) C++ pointers to nullptr
+/*!
+    \internal
+
+    Utility to set the C++ pointers of the instance(s) \a ob to nullptr.
+*/
 void clearCppPointers(SbkObject *ob);
 
 unsigned getNumberOfCppBaseClasses(PyTypeObject *baseType);
@@ -199,15 +211,20 @@ std::vector<PyTypeObject *> getCppBaseClasses(PyTypeObject *baseType);
 
 namespace Object
 {
-/**
-*   Decrements the reference counters of every object referred by self.
-*   \param self    the wrapper instance that keeps references to other objects.
+/*!
+    \internal
+
+    Decrements the reference counters of every object referred by \a self,
+    the wrapper instance that keeps references to other objects.
 */
 void clearReferences(SbkObject *self);
 
-/**
- * Destroy internal data
- **/
+/*!
+    \internal
+
+    Destroys the internal data of \a self, performing a cleanup
+    if \a doCleanup is true.
+*/
 void deallocData(SbkObject *self, bool doCleanup);
 
 

@@ -23,25 +23,19 @@ struct ArgumentNameIndexMapping
     int index;
 };
 
-/// Function binding helper: Parse the keyword arguments in dict \a kwds
-/// according to \a mapping (name->index) and store them in array \a pyArgs
-/// under their index. Fails if an entry is missing or duplicate entries
-/// occur.
 LIBSHIBOKEN_API bool
     parseKeywordArguments(PyObject *kwds,
                           const ArgumentNameIndexMapping *mapping, size_t size,
                           Shiboken::AutoDecRef &errInfo, PyObject **pyArgs);
 
-/// Function binding helper: Parse the keyword arguments of a QObject constructor
-/// in dict \a kwds according to \a mapping (name->index) and store them in array
-/// \a pyArgs under their index. Fails if duplicate entries occur. Unmapped entries
-/// (QObject properties) are stored in a dict in errInfo for further processing.
 LIBSHIBOKEN_API bool
     parseConstructorKeywordArguments(PyObject *kwds,
                                      const ArgumentNameIndexMapping *mapping, size_t size,
                                      Shiboken::AutoDecRef &errInfo, PyObject **pyArgs);
 
-/// Returns whether we are running in compiled mode (Nuitka).
+/*!
+    Returns whether we are running in compiled mode (Nuitka).
+*/
 LIBSHIBOKEN_API bool isCompiled();
 
 } // namespace Shiboken

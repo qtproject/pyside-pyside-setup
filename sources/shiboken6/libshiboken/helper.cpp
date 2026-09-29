@@ -495,9 +495,26 @@ static char *strDup(const char *s) // strdup() using new[] for symmetry with the
     return result;
 }
 
-// PySide-510: Changed from PySequence to PyList, which is correct.
+/*!
+    Transforms a Python list \a argList into two C variables, \a argcIn
+    and \a argvIn.
+
+    This function tries to find the application (script) name and puts it
+    into \c{argv[0]}. If the application name can't be guessed,
+    \a defaultAppName will be used.
+
+    No memory is allocated if an error occurs.
+
+    Returns true on success, false otherwise.
+
+    \note \a argcIn must be a valid address.
+    \note The argv array is allocated using the new operator and each item
+    is allocated using \c{new[]}.
+    \sa deleteArgv()
+*/
 bool listToArgcArgv(PyObject *argList, int *argcIn, char ***argvIn, const char *defaultAppName)
 {
+    // PySide-510: Changed from PySequence to PyList, which is correct.
     *argcIn = 0;
     *argvIn = nullptr;
     if (!PyList_Check(argList))
@@ -551,6 +568,13 @@ void deleteArgv(int argc, char **argv)
     delete [] argv;
 }
 
+/*!
+    Converts a Python sequence \a obj into a heap-allocated array of ints,
+    which is terminated by 0 if \a zeroTerminated is true.
+
+    Returns the newly allocated array or nullptr in case of error or empty
+    sequence. Check with \c PyErr_Occurred() if it was successful.
+*/
 int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
 {
     AutoDecRef seq(PySequence_Fast(obj, "Sequence of ints expected"));

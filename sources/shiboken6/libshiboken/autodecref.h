@@ -73,7 +73,8 @@ public:
     }
 
     /*!
-        Decref the current borrowed python reference and borrow \a other.
+        Decrements the reference count of the currently held Python object
+        and takes ownership of \a other.
     */
     void reset(PyObject *other)
     {

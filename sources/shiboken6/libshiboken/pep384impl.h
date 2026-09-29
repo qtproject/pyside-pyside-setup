@@ -136,7 +136,10 @@ inline PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name) { return _P
 
 #endif // Py_LIMITED_API
 
-/// PYSIDE-939: We need the runtime version, given major << 16 + minor << 8 + micro
+/*!
+    Returns the Python runtime version as \c{major << 16 + minor << 8 + micro}.
+    \note PYSIDE-939: We need the runtime version.
+*/
 LIBSHIBOKEN_API long _PepRuntimeVersion();
 /*****************************************************************************
  *
@@ -159,11 +162,15 @@ LIBSHIBOKEN_API void PepType_SETP_delete(SbkEnumType *enumType);
 
 // functions used everywhere
 
-/// (convenience) Return the unqualified type name
+/*!
+    Convenience function returning the unqualified type name of \a type.
+*/
 LIBSHIBOKEN_API const char *PepType_GetNameStr(PyTypeObject *type);
 
-/// (convenience) Return the fully qualified type name(PepType_GetFullyQualifiedNameStr())
-/// as C-string
+/*!
+    Convenience function returning the fully qualified type name of \a type
+    as C-string.
+*/
 LIBSHIBOKEN_API const char *PepType_GetFullyQualifiedNameStr(PyTypeObject *type);
 
 LIBSHIBOKEN_API PyObject *PepType_GetQualName(PyTypeObject *type);

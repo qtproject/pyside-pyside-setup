@@ -13,18 +13,28 @@ extern "C"
 
 LIBSHIBOKEN_API bool PyEnumMeta_Check(PyObject *ob);
 
-/// exposed for the signature module
+/*!
+    \internal
+    Exposed for the signature module.
+*/
 LIBSHIBOKEN_API void init_enum();
 
 struct SbkConverter;
 struct SbkEnumType;
 
-/// PYSIDE-1735: Pass on the Python enum/flag information.
+/*!
+    PYSIDE-1735: Pass on the Python enum/flag information of \a type.
+*/
 LIBSHIBOKEN_API void initEnumFlagsDict(PyTypeObject *type);
 
-/// PYSIDE-1735: Make sure that we can import the Python enum implementation.
+/*!
+    PYSIDE-1735: Make sure that we can import the Python enum implementation.
+*/
 LIBSHIBOKEN_API PyTypeObject *getPyEnumMeta();
-/// PYSIDE-1735: Helper function supporting QEnum
+/*!
+    PYSIDE-1735: Helper function supporting QEnum, checking whether
+    \a ob_type is a flag.
+*/
 LIBSHIBOKEN_API int enumIsFlag(PyObject *ob_type);
 
 }
@@ -57,14 +67,20 @@ LIBSHIBOKEN_API EnumValueType getValue(PyObject *enumItem);
 LIBSHIBOKEN_API PyObject *getEnumItemFromValue(PyTypeObject *enumType,
                                                EnumValueType itemValue);
 
-/// Sets the enum/flag's type converter.
+/*!
+    Sets the type converter of the enum/flag \a type to \a converter
+    and \a flagsConverter.
+*/
 LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *type, SbkConverter *converter,
                                       SbkConverter *flagsConverter = nullptr);
 
 LIBSHIBOKEN_API SbkConverter *getConverter(SbkEnumType *type);
 LIBSHIBOKEN_API SbkConverter *getFlagsConverter(SbkEnumType *type);
 
-/// Creating Python enums for different types.
+/*!
+    Creates a Python enum named \a fullName in \a module from the item
+    names \a enumItemStrings and the values \a enumValues.
+*/
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
     const char *fullName, const char *enumItemStrings[], const int64_t enumValues[]);
 
@@ -89,7 +105,12 @@ LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
     const char *fullName, const char *enumItemStrings[], const uint8_t enumValues[]);
 
-/// This template removes duplication by inlining necessary type casts.
+/*!
+    Creates a Python enum named \a fullName in \a scope from the item
+    names \a enumItemStrings and the values \a enumValues.
+
+    This template removes duplication by inlining necessary type casts.
+*/
 template <typename IntT>
 inline PyTypeObject *createPythonEnum(PyTypeObject *scope,
     const char *fullName, const char *enumItemStrings[], const IntT enumValues[])
@@ -98,17 +119,6 @@ inline PyTypeObject *createPythonEnum(PyTypeObject *scope,
     return createPythonEnum(obScope, fullName, enumItemStrings, enumValues);
 }
 
-/**
- * @brief Creates a Python enum type from a set of provided key/values pairs
- *
- * @param fullName     The full name (including module and package depth) to be used for the newly
- *                     created enum type.
- * @param pyEnumItems  The key/value pairs to be used for the enum.
- * @param enumTypeName The name of the enum type to be used (i.e., "PyIntEnum", "PyFlag", etc)
- *                     from Python's enum module.
- * @param callDict     The dictionary to be used for the call, allowing for additional keyword
- *                     arguments to be passed, such as "boundary=KEEP".
- */
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(const char *fullName,
                                                PyObject *pyEnumItems,
                                                const char *enumTypeName = "Enum",

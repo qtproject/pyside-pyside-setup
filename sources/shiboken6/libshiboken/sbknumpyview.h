@@ -13,9 +13,9 @@
 namespace Shiboken::Numpy
 {
 
-/// Check whether the object is a PyArrayObject
-/// \param pyIn object
-/// \return Whether it is a PyArrayObject
+/*!
+    \brief Check whether the object \a pyIn is a PyArrayObject
+*/
 LIBSHIBOKEN_API bool check(PyObject *pyIn);
 
 /*!
@@ -35,9 +35,13 @@ struct LIBSHIBOKEN_API View
 
     operator bool() const { return ndim > 0; }
 
-    /// Return whether rhs is of the same type and dimensionality
+    /*!
+        Returns whether \a rhs is of the same type and dimensionality.
+    */
     bool sameLayout(const View &rhs) const;
-    /// Return whether rhs is of the same type dimensionality and size
+    /*!
+        Returns whether \a rhs is of the same type, dimensionality and size.
+    */
     bool sameSize(const View &rhs) const;
 
     int ndim = 0;
