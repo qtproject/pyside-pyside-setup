@@ -1,0 +1,35 @@
+project = libshiboken
+description = libshiboken Documentation
+
+# Global configuration and required variables
+QT_VERSION = @shiboken_MAJOR_VERSION@.@shiboken_MINOR_VERSION@.@shiboken_MICRO_VERSION@
+QT_VER = @shiboken_MAJOR_VERSION@.@shiboken_MINOR_VERSION@
+QT_VERSION_TAG = @shiboken_MAJOR_VERSION@@shiboken_MINOR_VERSION@@shiboken_MICRO_VERSION@
+BUILDDIR = @CMAKE_CURRENT_BINARY_DIR@
+include(@Qt5Help_DIR@/global/qt-module-defaults.qdocconf)
+
+navigation.homepage = https://doc.qt.io/qtforpython-6/
+
+sources.fileextensions = "*.cpp"
+headers.fileextensions = "*.h"
+
+moduleheader = @CMAKE_CURRENT_SOURCE_DIR@/shiboken.h
+
+documentationinheaders = true
+
+# Include binary for sbkversion.h
+includepaths += @CMAKE_CURRENT_SOURCE_DIR@ \
+    @CMAKE_CURRENT_BINARY_DIR@ \
+    @SHIBOKEN_PYTHON_INCLUDE_DIRS@ \
+    @NUMPY_INCLUDE_DIR@
+
+headerdirs += @CMAKE_CURRENT_SOURCE_DIR@ \
+    @CMAKE_CURRENT_SOURCE_DIR@/signature
+sourcedirs += @CMAKE_CURRENT_SOURCE_DIR@ \
+    @CMAKE_CURRENT_SOURCE_DIR@/signature
+
+excludefiles += @CMAKE_CURRENT_SOURCE_DIR@/sbknumpyarrayconverter.cpp \
+    @CMAKE_CURRENT_SOURCE_DIR@/sbknumpyview.cpp
+
+outputdir = @CMAKE_CURRENT_BINARY_DIR@/doc/html
+outputformats = HTML

@@ -24,6 +24,7 @@ using namespace Shiboken;
 
 extern "C" {
 
+#ifndef Q_QDOC
 static const char *PySide_CompressedSignaturePackage[] = {
 #include "embed/signature_inc.h"
     };
@@ -31,6 +32,7 @@ static const char *PySide_CompressedSignaturePackage[] = {
 static const unsigned char PySide_SignatureLoader[] = {
 #include "embed/signature_bootstrap_inc.h"
     };
+#endif // Q_QDOC
 
 static void init_phase_1(safe_globals_struc *p)
 {
