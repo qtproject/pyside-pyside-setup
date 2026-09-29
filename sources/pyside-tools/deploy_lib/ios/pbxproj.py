@@ -5,6 +5,7 @@
 import os
 import re
 from pathlib import Path
+from shlex import quote
 
 from .ios_config import IOSConfig
 from .ios_dependency import QmlPlugin, QtDependencies, enabled_plugins
@@ -53,8 +54,8 @@ def _stdlib_script(cfg: IOSConfig) -> str:
     xcframework_rel = os.path.relpath(cfg.xcframework_path, cfg.output_dir)
     return (
         f'set -e\n'
-        f'source "$PROJECT_DIR/{xcframework_rel}/build/utils.sh"\n'
-        f'install_python "{xcframework_rel}"\n'
+        f'source "$PROJECT_DIR"/{quote(xcframework_rel)}/build/utils.sh\n'
+        f'install_python {quote(xcframework_rel)}\n'
     )
 
 
@@ -72,11 +73,11 @@ def _pyside6_packages_script(cfg: IOSConfig) -> str:
         'rsync -a --delete \\',
         '    --exclude="*.a" --exclude="*.h" --exclude="include/" \\',
         '    --exclude="__pycache__/" --exclude="*.pyc" \\',
-        f'    "{cfg.pyside6_dir}/" "$PKG/PySide6/"',
+        f'    {quote(str(cfg.pyside6_dir))}/ "$PKG/PySide6/"',
         # shiboken6 — same exclusions
         'rsync -a --delete \\',
         '    --exclude="*.a" --exclude="*.h" --exclude="__pycache__/" --exclude="*.pyc" \\',
-        f'    "{cfg.shiboken_dir}/" "$PKG/shiboken6/"',
+        f'    {quote(str(cfg.shiboken_dir))}/ "$PKG/shiboken6/"',
     ]
     return "\n".join(lines) + "\n"
 
@@ -95,8 +96,8 @@ def _packages_script(cfg: IOSConfig) -> str:
         parent = Path(script).parent
         if parent != Path(".") and str(parent) not in made_dirs:
             made_dirs.add(str(parent))
-            lines.append(f'mkdir -p "$CODESIGNING_FOLDER_PATH/{parent}"')
-        lines.append(f'cp -f "{src}" "$CODESIGNING_FOLDER_PATH/{script}"')
+            lines.append(f'mkdir -p "$CODESIGNING_FOLDER_PATH"/{quote(str(parent))}')
+        lines.append(f'cp -f {quote(str(src))} "$CODESIGNING_FOLDER_PATH"/{quote(script)}')
     # Copy app-local QML dirs next to the entry script, matching where
     # engine.addImportPath(Path(__file__).parent) expects them.
     for qml_dir in cfg.qml_dirs:
@@ -104,7 +105,7 @@ def _packages_script(cfg: IOSConfig) -> str:
         dest_name = Path(qml_dir).name
         lines.append(
             f'rsync -a --delete \\\n'
-            f'    "{src}/" "$CODESIGNING_FOLDER_PATH/{dest_name}/"'
+            f'    {quote(str(src))}/ "$CODESIGNING_FOLDER_PATH"/{quote(dest_name)}/'
         )
     return "\n".join(lines) + "\n"
 

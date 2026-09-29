@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 # Qt-Security score:significant reason:build-tool
 
+import json
 from .ios_config import IOSConfig
 from .ios_dependency import QmlPlugin, QtDependencies, resolve_plugin_class_names
 
@@ -147,7 +148,7 @@ def generate(cfg: IOSConfig, qml_plugins: list[QmlPlugin], qt_deps: QtDependenci
         '    PyImport_AppendInittab("shiboken6.Shiboken", PyInit_Shiboken);'
     )
 
-    entry_script = cfg.scripts[0]
+    entry_script = json.dumps(cfg.scripts[0])
 
     plugin_imports = "\n".join(
         f"Q_IMPORT_PLUGIN({name})" for name in resolve_plugin_class_names(cfg)
