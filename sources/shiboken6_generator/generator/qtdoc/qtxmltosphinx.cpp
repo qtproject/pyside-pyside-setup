@@ -289,29 +289,29 @@ static const WebXmlTagHash &webXmlTagHash()
 }
 
 QtXmlToSphinx::QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
-                             const QtXmlToSphinxParameters &parameters,
+                             const QtXmlToSphinxParameters &parameters, const QtXmlToSphinxOptions &options,
                              const QString& doc, const QString& context) :
-    QtXmlToSphinx(docGenerator, parameters, context)
+    QtXmlToSphinx(docGenerator, parameters, options, context)
 {
     m_result = transform(doc);
 }
 
 QtXmlToSphinx::QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
-                             const QtXmlToSphinxParameters &parameters,
+                             const QtXmlToSphinxParameters &parameters, const QtXmlToSphinxOptions &options,
                              QIODevice &ioDevice,
                              const QString& context) :
-    QtXmlToSphinx(docGenerator, parameters, context)
+    QtXmlToSphinx(docGenerator, parameters, options, context)
 {
     QXmlStreamReader reader(&ioDevice);
     m_result = transform(reader);
 }
 
 QtXmlToSphinx::QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
-                             const QtXmlToSphinxParameters &parameters,
+                             const QtXmlToSphinxParameters &parameters, const QtXmlToSphinxOptions &options,
                              const QString& context)
     : m_output(static_cast<QString *>(nullptr)),
     m_context(context),
-    m_generator(docGenerator), m_parameters(parameters)
+    m_generator(docGenerator), m_parameters(parameters), m_options(options)
 {
 }
 
@@ -699,7 +699,8 @@ void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
         // Levels are 1..n. We start at #2 since <page> already uses '#' (1) for the title.
-        const auto typeIdx = std::size_t(reader.attributes().value(u"level"_s).toUInt()); // level 1..n
+        const auto typeIdx = m_options.headingOffset
+                             + std::size_t(reader.attributes().value(u"level"_s).toUInt()); // level 1..n
         type = types[std::min(typeIdx, std::strlen(types) - 1)];
     } else if (token == QXmlStreamReader::EndElement) {
         m_output << disableIndent << Pad(type, headingSize) << "\n\n"

@@ -45,7 +45,7 @@ QtXmlToSphinxLink QtXmlToSphinxTest::resolveLink(const QtXmlToSphinxLink &link) 
 
 QString QtXmlToSphinxTest::transformXml(const QString &xml) const
 {
-    return QtXmlToSphinx(this, m_parameters, xml, QString{} /* context */).result();
+    return QtXmlToSphinx(this, m_parameters, {}, xml, QString{} /* context */).result();
 }
 
 void QtXmlToSphinxTest::testTable_data()

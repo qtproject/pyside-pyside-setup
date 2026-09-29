@@ -369,23 +369,23 @@ void QtDocGenerator::writeFormattedBriefText(TextStream &s, const Documentation 
                                              const QString &scope,
                                              QtXmlToSphinxImages *images) const
 {
-    writeFormattedText(s, doc.brief(), doc.format(), scope, images);
+    writeFormattedText(s, doc.brief(), doc.format(), {}, scope, images);
 }
 
 void QtDocGenerator::writeFormattedDetailedText(TextStream &s, const Documentation &doc,
-                                                const QString &scope,
+                                                const QtXmlToSphinxOptions &options, const QString &scope,
                                                 QtXmlToSphinxImages *images) const
 {
-    writeFormattedText(s, doc.detailed(), doc.format(), scope, images);
+    writeFormattedText(s, doc.detailed(), doc.format(), options, scope, images);
 }
 
 void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
-                                        DocumentationFormat format,
+                                        DocumentationFormat format, const QtXmlToSphinxOptions &options,
                                         const QString &scope,
                                         QtXmlToSphinxImages *images) const
 {
     if (format == DocumentationFormat::Native) {
-        QtXmlToSphinx x(this, m_options.parameters, doc, scope);
+        QtXmlToSphinx x(this, m_options.parameters, options, doc, scope);
         s << x;
         images->append(x.images());
     } else {
@@ -503,8 +503,10 @@ void QtDocGenerator::writeDetailedDescription(TextStream &s,
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass,
                              parsedImages);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass,
-                                  parsedImages))
-        writeFormattedDetailedText(s, documentation, scope, parsedImages);
+                                  parsedImages)) {
+        QtXmlToSphinxOptions options{.headingOffset = 3};
+        writeFormattedDetailedText(s, documentation, options, scope, parsedImages);
+    }
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass,
                              parsedImages);
 }
@@ -565,7 +567,7 @@ void QtDocGenerator::doGenerateClass(TextStream &s, const QString &targetDir,
         // use a 'more' label for the detailed text to be written further down.
         QString brief = documentation.brief();
         brief.insert(brief.lastIndexOf(u'<'), "<rst> More_...</rst>"_L1);
-        writeFormattedText(s, brief, documentation.format(), scope, &parsedImages);
+        writeFormattedText(s, brief, documentation.format(), {}, scope, &parsedImages);
     }
         break;
     }
@@ -682,7 +684,7 @@ void QtDocGenerator::writeProperties(TextStream &s,
         s <<  ".. py:property:: " << propertyRefTarget(prop.name)
             << "\n   :type: " << type << "\n\n\n";
         if (!prop.documentation.isEmpty()) {
-            writeFormattedText(s, prop.documentation.detailed(), DocumentationFormat::Native,
+            writeFormattedText(s, prop.documentation.detailed(), DocumentationFormat::Native, {},
                                scope, images);
         }
         s << "**Access functions:**\n";
@@ -704,7 +706,7 @@ void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaEnumList &enums
     for (const AbstractMetaEnum &en : enums) {
         s << pyClass(en.name());
         Indentation indent(s);
-        writeFormattedDetailedText(s, en.documentation(), scope, images);
+        writeFormattedDetailedText(s, en.documentation(), {}, scope, images);
         const auto version = versionOf(en.typeEntry());
         if (!version.isNull())
             s << rstVersionAdded(version);
@@ -720,7 +722,7 @@ void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClassCPtr &cpp
     const QString scope = classScope(cppClass);
     for (const AbstractMetaField &field : cppClass->fields()) {
         s << section_title << cppClass->fullName() << "." << field.name() << "\n\n";
-        writeFormattedDetailedText(s, field.documentation(), scope, images);
+        writeFormattedDetailedText(s, field.documentation(), {}, scope, images);
     }
 }
 
@@ -835,7 +837,7 @@ void QtDocGenerator::writeFormattedText(TextStream &s, const DocModification &mo
     const bool note = mod.emphasis() == DocumentationEmphasis::LanguageNote;
     if (note)
         s << ".. admonition:: Python Language Note\n\n" << indent;
-    writeFormattedText(s, mod.code(), mod.format(), scope, images);
+    writeFormattedText(s, mod.code(), mod.format(), {}, scope, images);
     if (note)
         s << outdent;
 }
@@ -1129,7 +1131,7 @@ void QtDocGenerator::writeFunctionDocumentation(TextStream &s, const AbstractMet
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, modifications,
                                   func, scope, images)) {
         writeFormattedBriefText(s, func->documentation(), scope, images);
-        writeFormattedDetailedText(s, func->documentation(), scope, images);
+        writeFormattedDetailedText(s, func->documentation(), {}, scope, images);
     }
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, modifications,
                              func, scope, images);
@@ -1412,7 +1414,7 @@ void QtDocGenerator::writeModuleDocumentation()
         } else if (!webXmlModuleDoc.isEmpty()) {
             // try the normal way
             if (webXmlModuleDoc.format() == DocumentationFormat::Native) {
-                QtXmlToSphinx x(this, m_options.parameters, webXmlModuleDoc.detailed(), context);
+                QtXmlToSphinx x(this, m_options.parameters, {}, webXmlModuleDoc.detailed(), context);
                 s << x;
                 parsedImages += x.images();
             } else {
@@ -1714,7 +1716,7 @@ bool QtDocGenerator::convertToRst(const QString &sourceFileName,
     }
 
     FileOut targetFile(targetFileName);
-    QtXmlToSphinx x(this, m_options.parameters, sourceFile, context);
+    QtXmlToSphinx x(this, m_options.parameters, {}, sourceFile, context);
     targetFile.stream << x;
     copyParsedImages(x.images(), {sourceFileName},
                      QFileInfo(targetFileName).absolutePath());

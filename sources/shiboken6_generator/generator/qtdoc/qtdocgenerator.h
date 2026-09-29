@@ -106,13 +106,13 @@ private:
     void writeFormattedText(TextStream &s, const DocModification &mod,
                             const QString &scope, QtXmlToSphinxImages *images) const;
     void writeFormattedText(TextStream &s, const QString &doc,
-                            DocumentationFormat format,
+                            DocumentationFormat format, const QtXmlToSphinxOptions &options,
                             const QString &scope,
                             QtXmlToSphinxImages *images) const;
     void writeFormattedBriefText(TextStream &s, const Documentation &doc,
                                  const QString &scope, QtXmlToSphinxImages *images) const;
     void writeFormattedDetailedText(TextStream &s, const Documentation &doc,
-                                    const QString &scope,
+                                    const QtXmlToSphinxOptions &options, const QString &scope,
                                     QtXmlToSphinxImages *images) const;
 
     bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,

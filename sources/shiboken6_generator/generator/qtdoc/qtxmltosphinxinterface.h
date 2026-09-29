@@ -34,6 +34,11 @@ struct QtXmlToSphinxParameters
     bool snippetComparison = false;
 };
 
+struct QtXmlToSphinxOptions
+{
+    unsigned int headingOffset = 0; // Offset the heading level when nesting documents
+};
+
 struct QtXmlToSphinxLink
 {
     enum Type : std::uint16_t

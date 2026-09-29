@@ -93,11 +93,11 @@ public:
     };
 
     explicit QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
-                           const QtXmlToSphinxParameters &parameters,
+                           const QtXmlToSphinxParameters &parameters, const QtXmlToSphinxOptions &options,
                            const QString& doc,
                            const QString& context);
     explicit QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
-                           const QtXmlToSphinxParameters &parameters,
+                           const QtXmlToSphinxParameters &parameters, const QtXmlToSphinxOptions &options,
                            QIODevice &ioDevice,
                            const QString& context);
     ~QtXmlToSphinx();
@@ -113,6 +113,7 @@ public:
 private:
     explicit QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
                            const QtXmlToSphinxParameters &parameters,
+                           const QtXmlToSphinxOptions &options,
                            const QString& context = QString());
 
     using StringSharedPtr = std::shared_ptr<QString>;
@@ -177,6 +178,7 @@ private:
     QString m_context;
     const QtXmlToSphinxDocGeneratorInterface *m_generator;
     const QtXmlToSphinxParameters &m_parameters;
+    const QtXmlToSphinxOptions &m_options;
     int m_formattingDepth = 0;
     bool m_insideBold = false;
     bool m_insideItalic = false;
