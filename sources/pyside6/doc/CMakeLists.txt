@@ -127,7 +127,6 @@ add_custom_command(OUTPUT "${RELEASED_NOTES_TARGET}"
                    COMMENT "Generating release notes...")
 
 set(SHIBOKEN_INTERSPHINX_FILE "${ROOT}/pyside6/shiboken6_generator/objects.inv")
-set(HAS_WEBENGINE_WIDGETS 0)
 set(SKIP_SPHINX_WARNINGS 1)
 if (FULLDOCSBUILD)
     set(SKIP_SPHINX_WARNINGS 0)

@@ -21,8 +21,6 @@ from docutils.parsers.rst import roles
 # documentation root, use Path(path).resolve() to make it absolute, like shown here.
 sys.path.append('@CMAKE_CURRENT_SOURCE_DIR@')
 sys.path.append('@pyside_BINARY_DIR@')
-if @HAS_WEBENGINE_WIDGETS@:
-    sys.path.append('@CMAKE_CURRENT_SOURCE_DIR@/../../../examples/webenginewidgets/tabbedbrowser')
 
 # -- General configuration -----------------------------------------------------
 

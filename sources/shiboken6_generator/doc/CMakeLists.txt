@@ -56,15 +56,6 @@ else()
     if(NOT SPHINX_BUILD)
         message(WARNING "sphinx-build - not found! doc target disabled")
     endif()
-    if (WIN32)
-        # if jom is used and we have no sphinx, then jom will crash.
-        # so for windows, we always create a doc target (until jom gets fixed...)
-        add_custom_target(doc echo.
-            COMMAND echo +++ This is a fake build, to make 'jom' happy.
-            COMMAND echo +++ The documentation was _not_ built!
-            COMMAND echo.
-        )
-    endif()
 endif()
 
 if (NOT WIN32)
