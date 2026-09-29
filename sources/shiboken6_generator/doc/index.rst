@@ -55,6 +55,18 @@ Documentation
     .. grid-item-card::
         :class-item: text-center
 
+        Utility library.
+        +++
+        .. button-link:: ../shiboken6/libshiboken/libshiboken-module.html
+            :color: primary
+            :outline:
+            :expand:
+
+            Shiboken Library
+
+    .. grid-item-card::
+        :class-item: text-center
+
         Python utility module.
         +++
         .. button-ref:: shibokenmodule

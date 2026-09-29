@@ -253,3 +253,13 @@ if(NOT is_pyside6_superproject_build)
             DESTINATION "${LIB_INSTALL_DIR}/wheels/cmake/Shiboken6"
             FILE Shiboken6Targets.cmake)
 endif()
+
+set(libshiboken_qdocconf "${CMAKE_CURRENT_BINARY_DIR}/libshiboken.qdocconf")
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libshiboken.qdocconf.in"
+               "${libshiboken_qdocconf}" @ONLY)
+
+add_custom_target(libshiboken_qdoc
+                  COMMAND qdoc "${libshiboken_qdocconf}"
+                  COMMENT "Generating libshiboken documentation"
+                  VERBATIM)
