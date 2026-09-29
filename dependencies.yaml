@@ -1,61 +1,61 @@
 dependencies:
   ../../qt/qt3d:
-    ref: d2cc9aa1cf03a2294b6046f9ae23929e23d8fd01
+    ref: 506c7bfdae15817d0ad663f6a1e8c5ef9291d1dc
     required: true
   ../../qt/qt5compat:
-    ref: 7d8f1e2797837d6b91352a0faa5edb8576d99e18
+    ref: 55e471705eba7f8deee97e898e9cafc1de922892
     required: true
   ../../qt/qtcanvaspainter:
-    ref: 63f0fdd1e70bf5ea5fab6596b81fa0b4c4584562
+    ref: 0adc22c73b205a64673883c45f81b575aeb85a47
     required: true
   ../../qt/qtconnectivity:
-    ref: b8b4570aa2fa43be4119f06bb231feb5d4d8887a
+    ref: f704ed4a8e2411ff9e45d4f1cf2154e0d27c3219
     required: true
   ../../qt/qtdatavis3d:
-    ref: c4fb4488c0227cc0fa6a68a10ed24db0aa53874f
+    ref: 7de2bf75dd9b73aab95c551c9598429540ed55fc
     required: true
   ../../qt/qtdoc:
-    ref: d92da6fac0a88b1352432834b0c37fdbd9288962
+    ref: bbc6e48754a57726e9027df2b54be7b4a4203fa1
     required: true
   ../../qt/qtgrpc:
-    ref: 46d5fb566d9079a7de7e0e3e042012ffac4cb2ed
+    ref: 6c6d8b54764acef164c2ddf7738b08005f72aeaa
     required: true
   ../../qt/qtlottie:
-    ref: 3c1805d38f152de28ee34d06a61732ba1040df81
+    ref: 91aa3da44e4a725eb59b2a91ea8499cb59d5224c
     required: true
   ../../qt/qtnetworkauth:
-    ref: 1c9e7e3b901a4f613ff9feb315c2fec27de02781
+    ref: a003a259bc6c6f9950dd46c7fed3efa8c065d999
     required: true
   ../../qt/qtopenapi:
-    ref: 5d7b36926497c4ed0a8553caf2aba3df94dcea6c
+    ref: d3cf6e38eb43a8d1f8e70c2a773c00322eba0bc5
     required: true
   ../../qt/qtqa:
-    ref: ecf60468acdcc2fa2f5e0a178be0d07e8012b199
+    ref: 582b38c8a7e34fa1c62b957880cf4434ceb40062
     required: true
   ../../qt/qtquickeffectmaker:
-    ref: 488ecdb038c3830f48819ea987003112bce22459
+    ref: aa623dc7543e23db9304ea4f8783e1d8d4336e76
     required: true
   ../../qt/qtremoteobjects:
-    ref: ccc54ebd00d472ec234f4358f75f6117165b71c2
+    ref: 3805a657df803ff01cf2b487c32e9737253ca532
     required: true
   ../../qt/qtscxml:
-    ref: 6f3fb0623d71e7eec5582edbb408f1cbabaf8b79
+    ref: 1b962579eba6c434abfe037f7361dbf2e213e422
     required: true
   ../../qt/qtserialbus:
-    ref: a9bd18847447ec1031b92ab2b3d19821b837e6bb
+    ref: b65000bdad22d39bd6ec22df33a02d08e0d4b508
     required: true
   ../../qt/qtspeech:
-    ref: 2a4745d2df1825eca347b1bb17d1c2574df28a14
+    ref: 0f8e565ea6c3705cc8416dfb17f38dae572f1b4f
     required: true
   ../../qt/qttranslations:
-    ref: 9797db9725707b805dd56cb8487109a78120146b
+    ref: d4e8575dd5a7c5d39fe145f2719e0d911d155ec0
     required: true
   ../../qt/qtvirtualkeyboard:
-    ref: 04d099f1edcee95503ecfb0b19c0f30492bb7698
+    ref: dc26972ec67b28c4cb5062f40295de7af5ea3ca5
     required: true
   ../../qt/qtwayland:
-    ref: 835291f4ed33b42ab349b56c9ad03a6709d2a29e
+    ref: f56ff2099593a7e9b0550604d7a690543119d972
     required: true
   ../../qt/qtwebview:
-    ref: a0e4edc4b6571c5b035852d953b3a761ee33bd76
+    ref: c424dc690b4dad6a51ac05c67dbe33f442e324fb
     required: true
