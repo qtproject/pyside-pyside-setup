@@ -214,7 +214,7 @@ add_custom_target(apidoc
 # create a custom commands to copy the shiboken docs
 # and generate offline help based on the output format.
 if(DOC_OUTPUT_FORMAT STREQUAL "html")
-    foreach (dir shiboken6/libshiboken shiboken6_generator pyside6/libpyside)
+    foreach (dir shiboken6/libshiboken shiboken6_generator pyside6/libpyside pyside6/libpysideremoteobjects)
         add_custom_command(TARGET apidoc POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/${dir}
                 COMMAND ${CMAKE_COMMAND} -E copy_directory

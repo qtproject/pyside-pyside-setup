@@ -1,0 +1,28 @@
+project = libpysideremoteobjects
+description = libpysideremoteobjects Documentation
+
+# Global configuration and required variables
+QT_VERSION = @QT_VERSION_MAJOR@.@QT_VERSION_MINOR@.@QT_VERSION_PATCH@
+QT_VER = @QT_VERSION_MAJOR@.@QT_VERSION_MINOR@
+QT_VERSION_TAG = @QT_VERSION_MAJOR@@QT_VERSION_MINOR@@QT_VERSION_PATCH@
+BUILDDIR = @CMAKE_CURRENT_BINARY_DIR@
+include(@Qt5Help_DIR@/global/qt-module-defaults.qdocconf)
+
+navigation.homepage = https://doc.qt.io/qtforpython-6/
+
+sources.fileextensions = "*.cpp"
+headers.fileextensions = "*.h"
+
+documentationinheaders = true
+
+# Include binary for sbkversion.h
+includepaths += @CMAKE_CURRENT_SOURCE_DIR@ \
+    @CMAKE_CURRENT_SOURCE_DIR@/../libpyside \
+    @CMAKE_CURRENT_SOURCE_DIR@/../../shiboken6/libshiboken \
+    @SHIBOKEN_PYTHON_INCLUDE_DIRS@
+
+headerdirs += @CMAKE_CURRENT_SOURCE_DIR@
+sourcedirs += @CMAKE_CURRENT_SOURCE_DIR@
+
+outputdir = @CMAKE_CURRENT_BINARY_DIR@/doc/html
+outputformats = HTML

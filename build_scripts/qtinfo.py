@@ -32,6 +32,9 @@ class QtInfo(metaclass=Singleton):
         self._qt_target_path = qt_target_path
         self._cmake_toolchain_file = cmake_toolchain_file
 
+    def find_tool(self, name):
+        return self._get_qtpaths_output(["--find-exe", name], suppress_error=True).strip()
+
     @property
     def qmake_command(self):
         return self._qmake_command
@@ -132,7 +135,7 @@ class QtInfo(metaclass=Singleton):
             return None
         return self._query_dict[prop_name]
 
-    def _get_qtpaths_output(self, args_list=None, cwd=None):
+    def _get_qtpaths_output(self, args_list=None, cwd=None, suppress_error=False):
         if args_list is None:
             args_list = []
         assert self._qtpaths_command
@@ -142,7 +145,7 @@ class QtInfo(metaclass=Singleton):
                                 cwd=cwd, universal_newlines=True)
         output, error = proc.communicate()
         proc.wait()
-        if proc.returncode != 0:
+        if proc.returncode != 0 and not suppress_error:
             raise RuntimeError(f"Could not run {self._qtpaths_command}: {error}")
         return output
 
