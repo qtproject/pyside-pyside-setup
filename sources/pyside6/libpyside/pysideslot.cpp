@@ -163,6 +163,11 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
 } // extern "C"
 
+/*!
+    \namespace PySide::Slot
+    \brief Namespace for @Slot.
+    \inmodule libpyside
+*/
 namespace PySide::Slot {
 
 DataList *dataListFromCapsule(PyObject *capsule)

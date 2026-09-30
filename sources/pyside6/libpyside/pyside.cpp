@@ -97,6 +97,17 @@ static bool hasDynamicMetaObject(const QObject *o)
     return qt_object_private(o)->metaObject != nullptr;
 }
 
+/*!
+    \module libpyside
+    \title PySide utility library
+    \brief Contains functionality for Python bindings of Qt objects.
+*/
+
+/*!
+    \namespace PySide
+    \brief Root namespace.
+    \inmodule libpyside
+*/
 namespace PySide
 {
 

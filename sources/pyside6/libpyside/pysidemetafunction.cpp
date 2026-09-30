@@ -78,6 +78,11 @@ PyObject *functionCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
 } // extern "C"
 
+/*!
+    \namespace PySide::MetaFunction
+    \brief Namespace for meta functions.
+    \inmodule libpyside
+*/
 namespace PySide::MetaFunction {
 
 static const char *MetaFunction_SignatureStrings[] = {

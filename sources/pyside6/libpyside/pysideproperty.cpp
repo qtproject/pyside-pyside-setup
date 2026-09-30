@@ -603,6 +603,11 @@ static PyObject *getFromType(PyTypeObject *type, PyObject *name)
     return attr;
 }
 
+/*!
+    \namespace PySide::Property
+    \brief Namespace for type @Property.
+    \inmodule libpyside
+*/
 namespace PySide::Property {
 
 static const char *Property_SignatureStrings[] = {

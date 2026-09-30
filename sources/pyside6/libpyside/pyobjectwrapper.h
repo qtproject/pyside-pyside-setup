@@ -18,7 +18,6 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 namespace PySide
 {
 
-/// Thin wrapper for PyObject which increases the reference count at the constructor but *NOT* at destructor.
 class PYSIDE_API PyObjectWrapper
 {
 public:

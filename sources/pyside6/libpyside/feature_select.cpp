@@ -95,6 +95,11 @@ This is everything that the following code does.
 *****************************************************************************/
 
 
+/*!
+    \namespace PySide::Feature
+    \brief Namespace for feature switching (true property/snake case).
+    \inmodule libpyside
+*/
 namespace PySide::Feature {
 
 using namespace Shiboken;

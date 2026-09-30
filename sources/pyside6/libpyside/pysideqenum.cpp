@@ -164,6 +164,11 @@ QMetaType createEnumMetaTypeHelper(const QByteArray &name)
     return metaType;
 }
 
+/*!
+    \namespace PySide::QEnum
+    \brief Namespace for @QEnum.
+    \inmodule libpyside
+*/
 namespace PySide::QEnum {
 
 using EnumCollector = std::map<int, PyObject *>;
