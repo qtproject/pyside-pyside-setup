@@ -7,10 +7,58 @@
 #include <cstring>
 #include <sbkpep.h>
 
+
+/*!
+    \group pysidecapsule
+    \title Capsule code
+    \inmodule libpysideremoteobjects
+
+    This code is needed to solve, in C++ and adhering to the stable API,
+    creating what are in effect lambda functions as instance methods on custom
+    types. The goal is to be able to add methods to a dynamic type. If the .rep
+    file defines a slot `mySlot`, it need to be added to the dynamic type. For
+    Source types, this should be an abstract method that raises a
+    NotImplementedError unless defined in the Python subclass. For Replica
+    types, this should include an implementation that forwards the request
+    through the underlying QRemoteObjectReplica instance.
+
+    The stable API doesn't currently provide a way define a method that can
+    receive both the `self`, `args`, and runtime (but constant per method, i.e.,
+    lambda like) data using Py_tp_methods. Possibly post 3.13 when METH_METHOD is
+    part of the stable API. But for now, it is not.
+
+    The solution is to create a custom descriptor
+    (https://docs.python.org/3/howto/descriptor.html) that can hold the runtime
+    data and then when called, will return a PyCFunction_New generated PyObject
+    that is passed both class instance `self` and the runtime data (a PyCapsule)
+    together as a tuple as a new `self` for the method. The static method
+    definition needs to expect and handle this, but when combined in C++, we can
+    define a single handler that receives both the original `self` of the instance
+    and the runtime capsule with data for handling.
+*/
+
 extern "C"
 {
 
-// This struct is used for both CapsuleMethod and CapsuleProperty
+/*!
+    \struct CapsuleDescriptorData
+
+    The CapsuleDescriptorData struct is what will be passed as the pseudo `self`
+    from a CapsuleMethod or CapsuleProperty to the associated handler method. The
+    handler method (which should look like a standard PyMethodDef method) should
+    parse it into the payload (the "lambda variables") and the actual instance
+    (the "self").
+
+    \ingroup pysidecapsule
+*/
+
+/*!
+    \struct CapsuleDescriptor
+
+    \brief This struct is used for both CapsuleMethod and CapsuleProperty.
+
+    \ingroup pysidecapsule
+*/
 struct CapsuleDescriptor
 {
     PyTypeObject base;
