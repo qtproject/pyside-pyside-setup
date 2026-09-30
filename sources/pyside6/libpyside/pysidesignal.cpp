@@ -137,6 +137,11 @@ static SbkConverter *metaObjConnectionConverter()
     return result;
 }
 
+/*!
+    \namespace PySide::Signal
+    \brief Namespace for the Signal type.
+    \inmodule libpyside
+*/
 namespace PySide::Signal {
     static QByteArray buildSignature(const QByteArray &, const QByteArray &);
     static void instanceInitialize(PySideSignalInstance *, PyObject *, PySideSignal *,

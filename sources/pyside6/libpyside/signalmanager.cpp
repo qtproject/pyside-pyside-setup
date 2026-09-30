@@ -136,6 +136,11 @@ static PyObject *CopyCppToPythonPyObject(const void *cppIn)
     return pyOut;
 }
 
+/*!
+    \namespace PySide::SignalManager
+    \brief Namespace for signal functionality.
+    \inmodule libpyside
+*/
 namespace PySide::SignalManager {
 
 void init()

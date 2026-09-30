@@ -62,6 +62,14 @@ bool PyObjectWrapper::checkAndClearPickleRejected()
     return std::exchange(s_pickleRejected, false);
 }
 
+/*!
+    \class PySide::PyObjectWrapper
+    \brief Thin wrapper for passing PyObject in QVariant.
+
+    It increases the reference count at the constructor but \e not
+    at the destructor.
+    \inmodule libpyside
+*/
 PyObjectWrapper::PyObjectWrapper()
     :m_me(Py_None)
 {

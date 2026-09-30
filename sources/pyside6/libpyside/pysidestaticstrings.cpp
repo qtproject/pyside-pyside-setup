@@ -14,6 +14,11 @@ PyObject *funcName() \
 
 namespace PySide
 {
+/*!
+    \namespace PySide::PySideName
+    \brief Namespace for often-used strings.
+    \inmodule libpyside
+*/
 namespace PySideName
 {
 STATIC_STRING_IMPL(qtConnect, "connect")
@@ -29,6 +34,12 @@ STATIC_STRING_IMPL(parameters, "parameters")
 STATIC_STRING_IMPL(property, "property")
 STATIC_STRING_IMPL(select_id, "select_id")
 } // namespace PyName
+
+/*!
+    \namespace PySide::PySideMagicName
+    \brief Namespace for often-used Python strings.
+    \inmodule libpyside
+*/
 namespace PySideMagicName
 {
 STATIC_STRING_IMPL(code, "__code__")

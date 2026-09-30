@@ -33,6 +33,11 @@ static QList<QPoint>
     return result;
 }
 
+/*!
+    \namespace PySide::Numpy
+    \brief Namespace for numpy related code.
+    \inmodule libpyside
+*/
 namespace PySide::Numpy
 {
 

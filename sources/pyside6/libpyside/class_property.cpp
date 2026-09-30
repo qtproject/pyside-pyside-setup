@@ -36,20 +36,6 @@ static int PyClassProperty_descr_set(PyObject *self, PyObject *obj, PyObject *va
     return PepExt_Type_GetDescrSetSlot(&PyProperty_Type)(self, cls, value);
 }
 
-// PYSIDE-2230: Why is this metaclass necessary?
-//
-// The problem is that the property object already exists as a Python
-// object. We derive a subclass for class properties, without
-// repeating everything but just by adding something to support
-// the class-ness.
-//
-// But this Python property has as metaclass `type` which is incompatible
-// now with SbkObjectType, which generates physically larger types that
-// are incompatible with properties by using PEP 697.
-// Adding a compatible metaclass that is unrelated to `SbkObjectType`
-// is the correct solution. Re-using `SbkObjectType` was actually an abuse,
-// since Python properties are in no way PySide objects.
-
 static PyTypeObject *createClassPropertyTypeType()
 {
     PyType_Slot PyClassPropertyType_Type_slots[] = {
@@ -149,6 +135,25 @@ static int SbkObjectType_meta_setattro(PyObject *obj, PyObject *name, PyObject *
 /*
  * These functions are added to the SbkObjectType_TypeF() dynamically.
  */
+
+/*!
+    \namespace PySide::ClassProperty
+    \brief Namespace for the class property metaclass.
+
+     PYSIDE-2230: Why is this metaclass necessary? The problem is that the
+     property object already exists as a Python object. We derive a subclass
+     for class properties, without repeating everything but just by adding
+     something to support the class-ness.
+
+     But this Python property has as metaclass `type` which is incompatible now
+     with SbkObjectType, which generates physically larger types that are
+     incompatible with properties by using PEP 697. Adding a compatible
+     metaclass that is unrelated to `SbkObjectType` is the correct solution.
+     Re-using `SbkObjectType` was actually an abuse, since Python properties
+     are in no way PySide objects.
+
+    \inmodule libpyside
+*/
 namespace PySide::ClassProperty {
 
 static const char *PyClassProperty_SignatureStrings[] = {

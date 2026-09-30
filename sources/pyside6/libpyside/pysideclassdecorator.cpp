@@ -10,8 +10,18 @@
 #include <basewrapper.h>
 #include <sbkstring.h>
 
+/*!
+    \namespace PySide::ClassDecorator
+    \brief Namespace for decorator base classes.
+    \inmodule libpyside
+*/
 namespace PySide::ClassDecorator {
 
+/*!
+    \class PySide::ClassDecorator::DecoratorPrivate
+    \brief Base class for private objects of class decorators with parameters.
+    \inmodule libpyside
+*/
 DecoratorPrivate::DecoratorPrivate() noexcept = default;
 DecoratorPrivate::~DecoratorPrivate() = default;
 
@@ -56,6 +66,11 @@ PyObject *DecoratorPrivate::tp_call_check(PyObject *args, CheckMode checkMode) c
     return arg;
 }
 
+/*!
+    \class PySide::ClassDecorator::StringDecoratorPrivate
+    \brief Base class for private objects of class decorator with a string parameter.
+    \inmodule libpyside
+*/
 int StringDecoratorPrivate::convertToString(PyObject *self, PyObject *args)
 {
     int result = -1;
@@ -78,6 +93,11 @@ int StringDecoratorPrivate::tp_init(PyObject *self, PyObject *args, PyObject *)
     return result;
 }
 
+/*!
+    \class PySide::ClassDecorator::TypeDecoratorPrivate
+    \brief Base class for private objects of class decorator with a type parameter.
+    \inmodule libpyside
+*/
 int TypeDecoratorPrivate::tp_init(PyObject *self, PyObject *args, PyObject *)
 {
     const int result = convertToType(self, args);

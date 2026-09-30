@@ -97,6 +97,11 @@ static QVariant convertToValueList(PyObject *list)
     return var;
 }
 
+/*!
+    \namespace PySide::Variant
+    \brief Namespace for QVariant-related code.
+    \inmodule libpyside
+*/
 namespace PySide::Variant
 {
 

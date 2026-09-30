@@ -15,10 +15,8 @@
 
 #include <array>
 
-/// Helpers for class decorators with parameters
 namespace PySide::ClassDecorator {
 
-/// Base class for private objects of class decorators with parameters
 class PYSIDE_API DecoratorPrivate
 {
 public:
@@ -114,7 +112,11 @@ struct PYSIDE_API PySideClassDecorator
 
 namespace PySide::ClassDecorator {
 
-/// Helper template providing the methods (slots) for class decorators
+/*!
+    \class PySide::ClassDecorator::Methods
+    \brief Helper template providing the methods (slots) for class decorators.
+    \inmodule libpyside
+*/
 template <class DecoratorPrivate>
 struct Methods
 {

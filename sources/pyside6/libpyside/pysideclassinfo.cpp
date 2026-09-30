@@ -38,6 +38,11 @@ PyTypeObject *PySideClassInfo_TypeF(void)
 
 }  // extern "C"
 
+/*!
+    \namespace PySide::ClassInfo
+    \brief Namespace for @ClassInfo.
+    \inmodule libpyside
+*/
 namespace PySide::ClassInfo {
 
 const char *ClassInfoPrivate::name() const

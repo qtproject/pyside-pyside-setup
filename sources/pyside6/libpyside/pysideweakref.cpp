@@ -55,6 +55,11 @@ static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, 
     Py_RETURN_NONE;
 }
 
+/*!
+    \namespace PySide::WeakRef
+    \brief Namespace for Python weakref helper functions.
+    \inmodule libpyside
+*/
 namespace PySide::WeakRef {
 
 PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData, bool keepReference)
