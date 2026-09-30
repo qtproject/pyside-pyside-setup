@@ -1414,7 +1414,8 @@ void QtDocGenerator::writeModuleDocumentation()
         } else if (!webXmlModuleDoc.isEmpty()) {
             // try the normal way
             if (webXmlModuleDoc.format() == DocumentationFormat::Native) {
-                QtXmlToSphinx x(this, m_options.parameters, {}, webXmlModuleDoc.detailed(), context);
+                QtXmlToSphinxOptions options{.headingOffset = 3};
+                QtXmlToSphinx x(this, m_options.parameters, options, webXmlModuleDoc.detailed(), context);
                 s << x;
                 parsedImages += x.images();
             } else {
