@@ -888,6 +888,10 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                     log.info("Sphinx not found, skipping documentation build")
             elif extension.lower() == SHIBOKEN:
                 self._run_doc_build(extension, "libshiboken_qdoc")
+            elif extension.lower() == PYSIDE:
+                doc_targets = ["libpyside_qdoc"]
+                for target in doc_targets:
+                    self._run_doc_build(extension, target)
         else:
             log.info("-- Skipped documentation generation. Enable with '--build-docs'")
 

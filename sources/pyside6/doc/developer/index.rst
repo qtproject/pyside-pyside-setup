@@ -24,6 +24,15 @@ Development Topics
    signalmanager.md
    pythonlibraries.md
 
+Library documentation
+---------------------
+
+- `libshiboken`_
+- `libpyside`_
+
+.. _libshiboken: ../shiboken6/libshiboken/libshiboken-module.html
+.. _libpyside: ../pyside6/libpyside/libpyside-module.html
+
 Implementation details
 ----------------------
 
