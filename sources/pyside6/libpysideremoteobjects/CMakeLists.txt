@@ -55,6 +55,17 @@ qt_process_qlalr(
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_TO_ASCII")
 
+# documentation
+set(libpysideremoteobjects_qdocconf "${CMAKE_CURRENT_BINARY_DIR}/libpysideremoteobjects.qdocconf")
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libpysideremoteobjects.qdocconf.in"
+               "${libpysideremoteobjects_qdocconf}" @ONLY)
+
+add_custom_target(libpysideremoteobjects_qdoc
+                  COMMAND qdoc "${libpysideremoteobjects_qdocconf}"
+                  COMMENT "Generating libpysideremoteobjects documentation"
+                  VERBATIM)
+
 #
 # install stuff
 #

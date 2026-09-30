@@ -890,6 +890,8 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 self._run_doc_build(extension, "libshiboken_qdoc")
             elif extension.lower() == PYSIDE:
                 doc_targets = ["libpyside_qdoc"]
+                if self.qtinfo.find_tool("repc"):
+                    doc_targets.append("libpysideremoteobjects_qdoc")
                 for target in doc_targets:
                     self._run_doc_build(extension, target)
         else:
