@@ -28,25 +28,32 @@
 using namespace Qt::StringLiterals;
 using namespace Shiboken;
 
-/**
- * @file pysiderephandler.cpp
- * @brief This file contains the implementation of the PySideRepFile type and its
- * associated methods for handling Qt Remote Objects in PySide6.
- *
- * The PySideRepFile type provides functionality to parse and handle Qt Remote Objects
- * (QtRO) files, and dynamically generate Python types for QtRO sources, replicas, and
- * PODs (Plain Old Data structures).
- *
- * The RepFile_tp_methods array defines the methods available on the PySideRepFile object:
- * - source: Generates a dynamic Python type for a QtRO source class.
- * - replica: Generates a dynamic Python type for a QtRO replica class.
- * - pod: Generates a dynamic Python type for a QtRO POD class.
- *
- * When generating a source or replica type, the generateDynamicType function is
- * used, creating a new Python type based on the generated QMetaObject, and adds
- * method descriptors for the required methods. A QVariantList for the types
- * properties is also created, populated with default values if set in the input
- * .rep file.
+/*!
+    \group pysiderephandler
+    \title PySideRepFile code
+    \inmodule libpysideremoteobjects
+
+    \brief This file contains the implementation of the PySideRepFile type and its
+           associated methods for handling Qt Remote Objects in PySide6.
+
+    \section1
+
+    The PySideRepFile type provides functionality to parse and handle Qt Remote Objects
+    (QtRO) files, and dynamically generate Python types for QtRO sources, replicas, and
+    PODs (Plain Old Data structures).
+    The RepFile_tp_methods array defines the methods available on the PySideRepFile object:
+
+   \list
+       \li source: Generates a dynamic Python type for a QtRO source class.
+       \li replica: Generates a dynamic Python type for a QtRO replica class.
+       \li pod: Generates a dynamic Python type for a QtRO POD class.
+    \endlist
+
+    When generating a source or replica type, the generateDynamicType function is
+    used, creating a new Python type based on the generated QMetaObject, and adds
+    method descriptors for the required methods. A QVariantList for the types
+    properties is also created, populated with default values if set in the input
+    \c .rep file.
 */
 
 struct PySideRepFilePrivate
@@ -353,18 +360,21 @@ static void RepFile_tp_free(void *self)
     delete obj->d;
 }
 
-/**
- * @brief Sets the QVariant value based on the provided default value text.
- *
- * This function attempts to set the provided QVariant's value based on the
- * provided text. It evaluates the text as a Python expression, the the python
- * type associated with the provided QMetaType. It first retrieves the Python
- * type object corresponding to the given QMetaType, then constructs a Python
- * expression to instantiate the type with the default value. The expression is
- * evaluated using PyRun_String, and the result is then set on the QVariant.
- * Note: The variant is passed by reference and modified in place.
- *
- * @return True if the instantiation is successful, false otherwise.
+/*!
+    \brief Sets the QVariant value based on the provided default value text.
+
+    This function attempts to set the provided QVariant's \a variant value based on
+    the provided text \a defaultValue. It evaluates the text as a Python expression,
+    the python type associated with the provided QMetaType. It first retrieves the Python
+    type object corresponding to the given QMetaType, then constructs a Python
+    expression to instantiate the type with the default value. The expression is
+    evaluated using PyRun_String, and the result is then set on the QVariant.
+
+    \note The \a variant is passed by reference and modified in place.
+
+    It returns \c true if the instantiation is successful, \c false otherwise.
+
+    \ingroup pysiderephandler
  */
 bool instantiateFromDefaultValue(QVariant &variant, const QString &defaultValue)
 {
@@ -438,6 +448,31 @@ static QVariantList generateProperties(QMetaObject *meta, const ASTClass &astCla
     return properties;
 }
 
+/*!
+    \module libpysideremoteobjects
+    \title PySide Remote Objects library
+    \brief Library for implementing Qt Remote Objects functionality.
+
+    \section1 Reference
+
+    \list
+    \li \l{PySideRepFile code}
+    \li \l{Capsule code}
+    \endlist
+*/
+
+// qdoc dummy.
+/*!
+    \namespace PySide
+    \brief Root namespace.
+    \inmodule libpysideremoteobjects
+*/
+
+/*!
+    \namespace PySide::RemoteObjects
+    \brief Root namespace for code that is not extern "C".
+    \inmodule libpysideremoteobjects
+*/
 namespace PySide::RemoteObjects
 {
 

@@ -59,26 +59,34 @@ PyObject *toPython(const QVariant &variant)
     return value;
 }
 
+/*!
+    @brief Creates and manages memory for Python enum types for each QEnum in the
+    provided QMetaObject.
 
-/**
- * @brief Creates and manages memory for Python enum types for each QEnum in the
- * provided QMetaObject.
- *
- * This function iterates over the enumerators in the provided QMetaObject,
- * creates corresponding Python enum types, and stores them in a dictionary.
- * The dictionary is then set as an attribute ()"_enum_data") on the provided
- * Python object, to be accessed by the _get_enum that has been added to each
- * of our dynamic types.
- *
- * These are "managed" in the sense that the enums clean up their converters
- * using our PyCapsule method, and by adding the dictionary as a Python attribute,
- * the dictionary will be cleaned up when the containing type is garbage
- * collected.
- *
- * @param self A pointer to the Python object where the enum data will be stored.
- * @param meta A pointer to the QMetaObject containing the enumerators.
- * @return Returns 0 on success, or -1 on failure.
- */
+    This function iterates over the enumerators in the provided QMetaObject \a
+    meta, creates corresponding Python enum types, and stores them in a
+    dictionary. The dictionary is then set as an attribute ()"_enum_data") on
+    the provided Python object, to be accessed by the _get_enum that has been
+    added to each of our dynamic types.
+
+    These are "managed" in the sense that the enums clean up their converters
+    using our PyCapsule method, and by adding the dictionary as a Python
+    attribute, the dictionary will be cleaned up when the containing type is
+    garbage collected.
+
+    It returns 0 on success, or -1 on failure.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a self A pointer to the Python object where the enum data will be stored.
+            \li \a meta A pointer to the QMetaObject containing the enumerators.
+    \endtable
+
+    \inmodule libpysideremoteobjects
+*/
 int create_managed_py_enums(PyObject *self, QMetaObject *meta)
 {
     PyObject *enum_data = PyDict_New();
