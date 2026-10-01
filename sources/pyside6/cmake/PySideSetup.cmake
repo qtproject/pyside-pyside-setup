@@ -58,6 +58,7 @@ set(BINDING_API_MICRO_VERSION "${pyside_MICRO_VERSION}")
 set(BINDING_API_PRE_RELEASE_VERSION_TYPE "${pyside_PRE_RELEASE_VERSION_TYPE}")
 set(BINDING_API_PRE_RELEASE_VERSION "${pyside_PRE_RELEASE_VERSION}")
 set(pyside6_library_so_version "${SHIBOKEN_SO_VERSION}")
+set(CHROMIUM_VERSION "${pyside_CHROMIUM_VERSION}")
 
 # Detect if the Python interpreter is actually PyPy
 execute_process(

@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
+import functools
 import os
 import platform
+import re
 import sys
 import importlib.util
 import json
@@ -22,17 +24,24 @@ from build_scripts.wheel_files import (ModuleData,  # type: ignore
                                        wheel_files_pyside_webengine,
                                        wheel_files_pyside_pdf)
 from build_scripts.log import log
-from build_scripts.utils import available_pyside_tools
+from build_scripts.utils import available_pyside_tools, parse_cmake_conf_assignments_by_key
 
 
 PACKAGE_FOR_WHEELS = "package_for_wheels"
 PYSIDE_DESCRIPTION = "Python bindings for the Qt cross-platform application and UI framework"
 
+# Wheels whose content is tied to the Chromium version Qt WebEngine is built
+# against. Their version carries it as an extra component of the release
+# segment, e.g. '6.12.0.140' instead of '6.12.0', so that it is visible on
+# PyPI which Chromium a given wheel ships.
+CHROMIUM_VERSIONED_WHEELS = ("PySide6_WebEngine", "PySide6_Pdf")
+
 # Maps each wheel to the other wheels it depends on, version-pinned to the same
 # release. Wheels like shiboken6 and shiboken6_generator have no
 # dependencies, add for completeness.
 WHEEL_DEPENDENCIES: dict[str, list[str]] = {
-    "PySide6": ["PySide6_Essentials", "PySide6_Addons"],
+    "PySide6": ["PySide6_Essentials", "PySide6_Addons", "PySide6_WebEngine",
+                "PySide6_Pdf"],
     "PySide6_Examples": ["PySide6_Essentials", "PySide6_Addons", "PySide6_WebEngine",
                          "PySide6_Pdf"],
     "PySide6_WebEngine": ["PySide6_Addons"],
@@ -70,13 +79,14 @@ WHEEL_OPTIONAL_DEPENDENCIES: dict[str, dict[str, tuple[list[str], tuple[str, ...
 @dataclass
 class SetupData:
     name: str
-    version: tuple[str, str]
+    version: str
     description: str
     readme: str
     console_scripts: list[str]
 
 
-def get_version_from_package(name: str, package_path: Path) -> tuple[str, str]:
+@functools.cache
+def get_version_from_package(name: str, package_path: Path) -> str:
     # Get version from the already configured '__init__.py' file
     init_file = package_path / name / "__init__.py"
     version = ""
@@ -87,7 +97,41 @@ def get_version_from_package(name: str, package_path: Path) -> tuple[str, str]:
                 break
     if not version:
         raise ValueError(f"Unable to find '__version__' in {init_file}")
-    return version, f"{name}.__init__.__version__"
+    return version
+
+
+@functools.cache
+def get_chromium_version() -> str:
+    """Return the Chromium version Qt WebEngine is built against, as set in
+    'sources/pyside6/.cmake.conf'."""
+    pyside_project_dir = Path(__file__).resolve().parent / "sources" / "pyside6"
+    version = parse_cmake_conf_assignments_by_key(pyside_project_dir).get(
+        "pyside_CHROMIUM_VERSION")
+    if not version:
+        raise ValueError("Unable to find 'pyside_CHROMIUM_VERSION' in "
+                         f"{pyside_project_dir / '.cmake.conf'}")
+    return version
+
+
+def add_chromium_version(version: str, chromium_version: str) -> str:
+    """Append the Chromium version to the release segment of a PEP 440
+    version, keeping any pre/post/dev/local suffix in place, e.g.
+    '6.12.0a1' becomes '6.12.0.140a1'."""
+    release = re.match(r"\d+(\.\d+)*", version)
+    if not release:
+        raise ValueError(f"Unable to find the release segment of '{version}'")
+    return f"{release.group()}.{chromium_version}{version[release.end():]}"
+
+
+def get_wheel_version(wheel_name: str, package_path: Path) -> str:
+    """Return the version the given wheel is released with."""
+    # Every 'PySide6*' wheel is built out of the 'PySide6' package directory,
+    # so they all share its version.
+    package = wheel_name if wheel_name.startswith("shiboken6") else "PySide6"
+    version = get_version_from_package(package, package_path)
+    if wheel_name in CHROMIUM_VERSIONED_WHEELS:
+        version = add_chromium_version(version, get_chromium_version())
+    return version
 
 
 def create_module_plugin_json(wheel_name: str, data: list[ModuleData], package_path: Path):
@@ -213,8 +257,11 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
         _formatted_console_scripts = "\n".join(setup.console_scripts)
         _console_scripts = f"[project.scripts]\n{_formatted_console_scripts}"
 
-    # Installing dependencies
-    _dependencies = [f"{dep}=={setup.version[0]}" for dep in WHEEL_DEPENDENCIES[_name]]
+    # Installing dependencies. The pinned version is resolved per dependency
+    # because the wheels in 'CHROMIUM_VERSIONED_WHEELS' are released with a
+    # different version than the rest.
+    _dependencies = [f"{dep}=={get_wheel_version(dep, package_path)}"
+                     for dep in WHEEL_DEPENDENCIES[_name]]
     if _name == "PySide6":
         _dependencies.append('tomli>=2.0.1; python_version < "3.11"')
 
@@ -230,7 +277,7 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
     if _extras:
         _lines = ["[project.optional-dependencies]"]
         for extra_name, deps in _extras.items():
-            _pinned = [f'"{dep}=={setup.version[0]}"' for dep in deps]
+            _pinned = [f'"{dep}=={get_wheel_version(dep, package_path)}"' for dep in deps]
             _lines.append(f"{extra_name} = [{', '.join(_pinned)}]")
         _optional_deps_block = "\n".join(_lines)
 
@@ -238,7 +285,7 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
         content = (
             f.read()
             .replace('"PROJECT_NAME"', f'"{setup.name}"')
-            .replace('"PROJECT_VERSION"', f'"{setup.version[1]}"')
+            .replace('"PROJECT_VERSION"', f'"{setup.version}"')
             .replace('"PROJECT_DESCRIPTION"', f'"{setup.description}"')
             .replace('"PROJECT_README"', f'"{setup.readme}"')
             .replace('"PROJECT_TAG"', f'"{_tag}"')
@@ -312,7 +359,7 @@ def get_unwanted_pyi_files(data: list[ModuleData] | None, package_path: Path) ->
 def wheel_shiboken_generator(package_path: Path) -> tuple[SetupData, None]:
     setup = SetupData(
         name="shiboken6_generator",
-        version=get_version_from_package("shiboken6_generator", package_path),
+        version=get_wheel_version("shiboken6_generator", package_path),
         description="Python/C++ bindings generator",
         readme="README.shiboken6-generator.md",
         console_scripts=[
@@ -327,7 +374,7 @@ def wheel_shiboken_generator(package_path: Path) -> tuple[SetupData, None]:
 def wheel_shiboken_module(package_path: Path) -> tuple[SetupData, None]:
     setup = SetupData(
         name="shiboken6",
-        version=get_version_from_package("shiboken6", package_path),
+        version=get_wheel_version("shiboken6", package_path),
         description="Python/C++ bindings helper module",
         readme="README.shiboken6.md",
         console_scripts=[],
@@ -363,7 +410,7 @@ def wheel_pyside6_essentials(package_path: Path) -> tuple[SetupData, list[Module
 
     setup = SetupData(
         name="PySide6_Essentials",
-        version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
+        version=get_wheel_version("PySide6_Essentials", package_path),
         description=f"{PYSIDE_DESCRIPTION} (Essentials)",
         readme="README.pyside6_essentials.md",
         console_scripts=_console_scripts
@@ -377,7 +424,7 @@ def wheel_pyside6_essentials(package_path: Path) -> tuple[SetupData, list[Module
 def wheel_pyside6_addons(package_path: Path) -> tuple[SetupData, list[ModuleData]]:
     setup = SetupData(
         name="PySide6_Addons",
-        version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
+        version=get_wheel_version("PySide6_Addons", package_path),
         description=f"{PYSIDE_DESCRIPTION} (Addons)",
         readme="README.pyside6_addons.md",
         console_scripts=[],
@@ -391,7 +438,7 @@ def wheel_pyside6_addons(package_path: Path) -> tuple[SetupData, list[ModuleData
 def wheel_pyside6_webengine(package_path: Path) -> tuple[SetupData, list[ModuleData]]:
     setup = SetupData(
         name="PySide6_WebEngine",
-        version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
+        version=get_wheel_version("PySide6_WebEngine", package_path),
         description=f"{PYSIDE_DESCRIPTION} (WebEngine)",
         readme="README.pyside6_webengine.md",
         console_scripts=[],
@@ -405,7 +452,7 @@ def wheel_pyside6_webengine(package_path: Path) -> tuple[SetupData, list[ModuleD
 def wheel_pyside6_pdf(package_path: Path) -> tuple[SetupData, list[ModuleData]]:
     setup = SetupData(
         name="PySide6_Pdf",
-        version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
+        version=get_wheel_version("PySide6_Pdf", package_path),
         description=f"{PYSIDE_DESCRIPTION} (Pdf)",
         readme="README.pyside6_pdf.md",
         console_scripts=[],
@@ -419,7 +466,7 @@ def wheel_pyside6_pdf(package_path: Path) -> tuple[SetupData, list[ModuleData]]:
 def wheel_pyside6(package_path: Path) -> tuple[SetupData, list[ModuleData] | None]:
     setup = SetupData(
         name="PySide6",
-        version=get_version_from_package("PySide6", package_path),
+        version=get_wheel_version("PySide6", package_path),
         description=PYSIDE_DESCRIPTION,
         readme="README.pyside6.md",
         console_scripts=[],
@@ -431,7 +478,7 @@ def wheel_pyside6(package_path: Path) -> tuple[SetupData, list[ModuleData] | Non
 def wheel_pyside6_examples(package_path: Path) -> tuple[SetupData, list[ModuleData] | None]:
     setup = SetupData(
         name="PySide6_Examples",
-        version=get_version_from_package("PySide6", package_path),
+        version=get_wheel_version("PySide6_Examples", package_path),
         description="Examples for the Qt for Python project",
         readme="README.pyside6_examples.md",
         console_scripts=[],
