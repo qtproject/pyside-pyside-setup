@@ -5,6 +5,7 @@ from __future__ import annotations
 major_version = "@pyside_MAJOR_VERSION@"
 minor_version = "@pyside_MINOR_VERSION@"
 patch_version = "@pyside_MICRO_VERSION@"
+chromium_version = "@pyside_CHROMIUM_VERSION@"
 
 # For example: "a", "b", "rc"
 # (which means "alpha", "beta", "release candidate").
