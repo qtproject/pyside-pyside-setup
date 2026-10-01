@@ -83,9 +83,14 @@ def get_examples_dir():
 def package_prefix_names():
     # Note: shiboken6_generator is not needed for compile_using_nuitka,
     # but building modules with cmake needs it.
+    # Note: The order matters, each wheel is installed after the ones it
+    # depends on, so that pip does not try to fetch them from PyPI.
+    # 'pyside6_webengine' and 'pyside6_pdf' are released with the Chromium
+    # version as an extra component (e.g. '6.12.0.140'), and 'pyside6'
+    # pins them to it, so they need to be installed before 'pyside6'.
     if NEW_WHEELS:
         return ["shiboken6", "shiboken6_generator", "pyside6_essentials", "pyside6_addons",
-                "pyside6"]
+                "pyside6_webengine", "pyside6_pdf", "pyside6"]
     else:
         return ["shiboken6", "shiboken6_generator", "pyside6"]
 
