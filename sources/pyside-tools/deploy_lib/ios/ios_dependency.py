@@ -7,6 +7,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 
 from .ios_config import IOSConfig
+from . import PYSIDE_ONLY_MODULES
 
 
 # Platform + image/icon plugins are always linked. tls/sqldrivers/
@@ -165,6 +166,9 @@ def resolve_qt_dependencies(
         if mod in visited:
             return
         visited.add(mod)
+        if mod in PYSIDE_ONLY_MODULES:
+            deps.frameworks.append(mod)
+            return
         prl_path = lib_dir / f"{mod}.framework" / f"{mod}.prl"
         if not prl_path.is_file():
             return
