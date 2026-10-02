@@ -4,3 +4,7 @@
 
 from .ios_helper import IOSData, get_wheel_ios_target
 from .ios_config import IOSConfig
+
+# PySide6 modules built from PySide sources alone, with no Qt library behind
+# them. They are added to the frameworks list without reading a .prl file.
+PYSIDE_ONLY_MODULES = {"QtQmlFeatures"}
