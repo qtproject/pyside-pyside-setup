@@ -17,24 +17,37 @@
 namespace PySide::Variant
 {
 
-/// Return a QMetaType for a PyTypeObject for purposes of
-/// converting to a QVariant.
+/*!
+    Returns a QMetaType for the PyTypeObject \a type for purposes of
+    converting to a QVariant.
+*/
 PYSIDE_API QMetaType resolveMetaType(PyTypeObject *type);
 
-/// Convert a heterogenous Python list to a QVariantList by converting each
-/// item using the QVariant converter.
+/*!
+    Converts a heterogeneous Python \a list to a QVariantList by converting
+    each item using the QVariant converter.
+*/
 PYSIDE_API std::optional<QVariantList> pyListToVariantList(PyObject *list);
 
-/// Converts a list to a QVariant following the PySide semantics:
-/// - A list of strings is returned as QVariant<QStringList>
-/// - A list of convertible values is returned as QVariant<QList<Value>>
-/// - Remaining types are returned as QVariant(QVariantList)
+/*!
+    Converts a \a list to a QVariant following the PySide semantics:
+
+    \list
+        \li A list of strings is returned as \c{QVariant<QStringList>}
+        \li A list of convertible values is returned as \c{QVariant<QList<Value>>}
+        \li Remaining types are returned as \c{QVariant(QVariantList)}
+    \endlist
+*/
 PYSIDE_API QVariant convertToVariantList(PyObject *list);
 
-/// Converts a map to a QVariantMap (string keys and QVariant values)
+/*!
+    Converts a \a map to a QVariantMap (string keys and QVariant values).
+*/
 PYSIDE_API QVariant convertToVariantMap(PyObject *map);
 
-/// Converts a QVariant parameter of a JavaScript callback to Python
+/*!
+    Converts a QVariant parameter \a value of a JavaScript callback to Python.
+*/
 PYSIDE_API PyObject *javascriptVariantToPython(const QVariant &value);
 
 } // namespace PySide::Variant

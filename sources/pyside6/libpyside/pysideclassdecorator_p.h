@@ -24,73 +24,92 @@ public:
 
     virtual ~DecoratorPrivate();
 
-    /// Virtual function which is passed the decorated class type
-    /// \param args Decorated class type argument
-    /// \return class with reference count increased if the call was successful,
-    ///         else nullptr
+    /*!
+        Virtual function which is passed the decorated class type in \a args
+        for the decorator \a self.
+        Returns the class with reference count increased if the call was
+        successful, else \nullptr.
+    */
     virtual PyObject *tp_call(PyObject *self, PyObject *args, PyObject * /* kw */) = 0;
 
-    /// Virtual function which is passed the decorator parameters
-    /// \param args Decorator arguments
-    /// \return 0 if the parameters are correct
+    /*!
+        Virtual function which is passed the decorator parameters in \a args
+        and \a kwds for the decorator \a self.
+        Returns 0 if the parameters are correct.
+    */
     virtual int tp_init(PyObject *self, PyObject *args, PyObject *kwds) = 0;
     virtual const char *name() const = 0;
 
-    /// Helper that returns DecoratorPrivate instance from a PyObject
+    /*!
+        Helper that returns the DecoratorPrivate instance from a PyObject \a o.
+    */
     template <class DerivedPrivate>
     static DerivedPrivate *get(PyObject *o)
     { return static_cast<DerivedPrivate *>(DecoratorPrivate::getPrivate(o)); }
 
 protected:
-    /// Check mode for the arguments of the call operator
+    /*!
+        \enum PySide::ClassDecorator::DecoratorPrivate::CheckMode
+        Check mode for the arguments of the call operator.
+        \value None
+        \value WrappedType
+        \value QObjectType
+    */
     enum class CheckMode : std::uint8_t { None, WrappedType, QObjectType };
 
     DecoratorPrivate() noexcept;
     static DecoratorPrivate *getPrivate(PyObject *o);
 
-    /// Helper for checking the arguments of the call operator
-    /// \param args Arguments
-    /// \param checkMode Type check mode
-    /// \return The type object extracted from args tuple (borrowed reference)
-    ///         if the argument is a matching type
+    /*!
+        Helper for checking the arguments \a args of the call operator
+        according to \a checkMode.
+        Returns the type object extracted from the \a args tuple
+        (borrowed reference) if the argument is a matching type.
+    */
     PyObject *tp_call_check(PyObject *args,
                             CheckMode checkMode = CheckMode::QObjectType) const;
 };
 
-/// Base class for private objects of class decorator with a string parameter
 class PYSIDE_API StringDecoratorPrivate : public DecoratorPrivate
 {
 public:
-    /// Init function that retrieves the string parameter using convertToString()
+    /*!
+        Init function that retrieves the string parameter from \a args for
+        \a self using convertToString(); \a kwds is ignored.
+    */
     int tp_init(PyObject *self, PyObject *args, PyObject *kwds) override;
 
     QByteArray string() const { return m_string; }
 
 protected:
-    /// Helper function that retrieves the string parameter
-    /// \param self self
-    /// \param args Arguments
-    /// \return 0 if the parameter is correct, else -1 (for tp_init())
+    /*!
+        Helper function that retrieves the string parameter from \a args
+        for \a self.
+        Returns 0 if the parameter is correct, else -1 (for tp_init()).
+    */
     static int convertToString(PyObject *self, PyObject *args);
 
 private:
     QByteArray m_string;
 };
 
-/// Base class for private objects of class decorator with a type parameter
 class PYSIDE_API TypeDecoratorPrivate : public DecoratorPrivate
 {
 public:
-    /// Init function that retrieves the type parameter using convertToType()
+    /*!
+        Init function that retrieves the type parameter from \a args for
+        \a self using convertToType(); \a kwds is ignored.
+    */
     int tp_init(PyObject *self, PyObject *args, PyObject *kwds) override;
 
     PyTypeObject *type() const { return m_type; }
 
 protected:
-    /// Helper function that retrieves the type parameter
-    /// \param self self
-    /// \param args Arguments
-    /// \return 0 if the parameter is correct, else -1 (for tp_init())
+    /*!
+        Helper function that retrieves the type parameter from \a args
+        for \a self.
+        Returns 0 if the parameter is correct, else -1 (for tp_init()).
+    */
     static int convertToType(PyObject *self, PyObject *args);
 
 private:
@@ -102,7 +121,7 @@ private:
 extern "C"
 {
 
-/// Python type for class decorators with DecoratorPrivate
+// Python type for class decorators with DecoratorPrivate
 struct PYSIDE_API PySideClassDecorator
 {
     PyObject_HEAD

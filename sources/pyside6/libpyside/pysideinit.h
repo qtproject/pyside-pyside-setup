@@ -14,13 +14,17 @@ namespace PySide
 
 PYSIDE_API void init(PyObject *module);
 
-/// Registers a dynamic "qt.conf" file with the Qt resource system.
-///
-/// This is used in a standalone build, to inform QLibraryInfo of the Qt prefix
-/// (where Qt libraries are installed) so that plugins can be successfully loaded.
-///
-/// This is also used if PySide runs from inside a conda environment to solve
-/// conflicts with the qt.conf installed by Anaconda Qt packages.
+/*!
+    Registers a dynamic \c qt.conf file with the Qt resource system.
+
+    This is used in a standalone build, to inform QLibraryInfo of the Qt prefix
+    (where Qt libraries are installed) so that plugins can be successfully loaded.
+
+    This is also used if PySide runs from inside a conda environment to solve
+    conflicts with the \c qt.conf installed by Anaconda Qt packages.
+
+    Returns whether the registration succeeded.
+*/
 PYSIDE_API bool registerInternalQtConf();
 
 } //namespace PySide

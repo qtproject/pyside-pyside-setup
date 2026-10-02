@@ -12,7 +12,9 @@ namespace PySide
 
 using CleanupFunction = void(*)();
 
-/// Register a function to be called before python dies
+/*!
+    Registers a function \a func to be called before Python dies.
+*/
 PYSIDE_API void registerCleanupFunction(CleanupFunction func);
 PYSIDE_API void runCleanupFunctions();
 

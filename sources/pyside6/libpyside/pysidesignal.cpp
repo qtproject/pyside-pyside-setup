@@ -1129,6 +1129,26 @@ static void instanceInitialize(PySideSignalInstance *self, PyObject *name,
     }
 }
 
+/*!
+    Initializes the Signal object by creating a PySideSignalInstance.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a self
+            \li A Signal object used as base for the PySideSignalInstance.
+        \row
+            \li \a name
+            \li The name to be used for the PySideSignalInstance.
+        \row
+            \li \a object
+            \li The PyObject to which the signal will be attached.
+    \endtable
+
+    Returns a new reference to the PySideSignalInstance.
+*/
 PySideSignalInstance *initialize(PySideSignal *self, PyObject *name, PyObject *object)
 {
     PyTypeObject *pyQObjectType = PySide::qObjectType();
@@ -1167,6 +1187,28 @@ bool connect(PyObject *source, const char *signal, PyObject *callback)
     return result;
 }
 
+/*!
+    Creates a Signal object which stays attached to a QObject class based
+    on a list of QMetaMethods.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a sourceQObject
+            \li The QObject emitting the signal.
+        \row
+            \li \a source
+            \li The Python object of \a sourceQObject on which the signal
+                is registered.
+        \row
+            \li \a methods
+            \li A list of QMetaMethod containing the supported signatures.
+    \endtable
+
+    Returns a new reference to a PySideSignalInstance.
+*/
 PySideSignalInstance *newObjectFromMethod(QObject *sourceQObject, PyObject *source,
                                           const QList<QMetaMethod>& methods)
 {
@@ -1283,6 +1325,29 @@ EmitterData getEmitterData(PySideSignalInstance *signal)
     return result;
 }
 
+/*!
+    Returns the signature of a callback based on the signal and the receiver
+    callback.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a signal
+            \li The signal.
+        \row
+            \li \a receiver
+            \li The QObject which will receive the signal.
+        \row
+            \li \a callback
+            \li Callback function which will be connected to the signal.
+        \row
+            \li \a encodeName
+            \li Specifies whether the returned signature will be encoded in
+                Qt signal/slot style.
+    \endtable
+*/
 QByteArray getCallbackSignature(QMetaMethod signal, QObject *receiver,
                                 PyObject *callback, bool encodeName)
 {

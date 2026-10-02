@@ -45,8 +45,11 @@ public:
     static int metaTypeId();
     static void registerMetaType();
 
-    // Returns true (and clears the per-thread flag) if operator>> blocked a
-    // deserialization attempt.  Call with the GIL held, after Py_END_ALLOW_THREADS.
+    /*!
+        Returns true (and clears the per-thread flag) if \c{operator>>}
+        blocked a deserialization attempt. Call with the GIL held, after
+        \c Py_END_ALLOW_THREADS.
+    */
     static bool checkAndClearPickleRejected();
 
 private:

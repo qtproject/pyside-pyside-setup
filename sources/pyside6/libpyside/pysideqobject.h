@@ -20,64 +20,75 @@ QT_FORWARD_DECLARE_CLASS(QMutex)
 namespace PySide
 {
 
-/// Return PyTypeObject for QObject
-/// \return type object
+/*!
+    Returns the PyTypeObject for QObject.
+*/
 PYSIDE_API PyTypeObject *qObjectType();
 
-/// Set the PyTypeObject for QObject to \a t (called from QtCore module).
+/*!
+    Sets the PyTypeObject for QObject to \a t (called from QtCore module).
+*/
 PYSIDE_API void setQObjectType(PyTypeObject *t);
 
-/// Fill QObject properties and do signal connections using the values found in \p kwds dictionary.
-/// \param qObj PyObject fot the QObject.
-/// \param metaObj QMetaObject of \p qObj.
-/// \param kwds key->value dictonary.
-/// \return True if everything goes well, false with a Python error set otherwise.
 PYSIDE_API bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj,
                                  PyObject *kwds, bool allowErrors);
 
-/// Initialize the DynamicMetaObject helper for a wrapped Qt type (generated code)
+/*!
+    Initializes the DynamicMetaObject helper for a wrapped Qt \a type
+    (generated code) with the meta object \a base of the C++ class
+    of size \a cppObjSize.
+*/
 PYSIDE_API void initDynamicMetaObject(PyTypeObject *type, const QMetaObject *base,
                                       std::size_t cppObjSize);
-/// Initialize a Python-derived type
+/*!
+    Initializes a Python-derived \a type created with the
+    arguments \a args and \a kwds.
+*/
 PYSIDE_API void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject *kwds);
 
-/// Return the size in bytes of a type that inherits QObject.
+/*!
+    Returns the size in bytes of a \a type that inherits QObject.
+*/
 PYSIDE_API std::size_t getSizeOfQObject(PyTypeObject *type);
 
-/// Check if a PyTypeObject or its bases contains a QObject
-/// \param pyType is the PyTypeObject to check
-/// \param raiseError controls if a TypeError is raised when an object does not
-/// inherit QObject
+/*!
+    Returns whether the PyTypeObject \a pyType or its bases contain
+    a QObject. \a raiseError controls whether a TypeError is raised
+    when the type does not inherit QObject.
+*/
 PYSIDE_API bool isQObjectDerived(PyTypeObject *pyType, bool raiseError);
 
-/// Convenience to convert a PyObject to QObject
+/*!
+    Convenience to convert a PyObject \a object to QObject.
+    \a raiseError controls whether a TypeError is raised
+    when the conversion fails.
+*/
 PYSIDE_API QObject *convertToQObject(PyObject *object, bool raiseError);
 
-/// Check for properties and signals registered on MetaObject and return these.
-/// Also handle Python properties when true_property was selected.
-/// \param cppSelf Is the QObject which contains the metaobject
-/// \param self Python object of cppSelf
-/// \param name Name of the argument which the function will try retrieve from MetaData
-/// \return The Python object which contains the Data obtained in metaObject or the Python
-/// method pulled out of a Python property.
 PYSIDE_API PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name);
 
-/// Mutex for accessing QObject memory helpers from multiple threads
+/*!
+    Returns the mutex for accessing QObject memory helpers from
+    multiple threads.
+*/
 PYSIDE_API QMutex &nextQObjectMemoryAddrMutex();
 PYSIDE_API void *nextQObjectMemoryAddr();
-/// Set the address where to allocate the next QObject (for QML)
+/*!
+    Sets the address \a addr where to allocate the next QObject (for QML).
+*/
 PYSIDE_API void setNextQObjectMemoryAddr(void *addr);
 
 PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type);
 
-/// Return the best-matching type for a QObject (Helper for QObject.findType())
-/// \param cppSelf QObject instance
-/// \return type object
+/*!
+    Returns the best-matching type for the QObject \a cppSelf
+    (Helper for \c{QObject.findType()}).
+*/
 PYSIDE_API PyTypeObject *getTypeForQObject(const QObject *cppSelf);
 
 } //namespace PySide
 
-/// Deletion handler for "delete-in-owner-thread"
+// Deletion handler for "delete-in-owner-thread"
 extern "C" PYSIDE_API void deferredDeleteQObject(void *cppSelf);
 
 #endif // PYSIDEQOBJECT_H

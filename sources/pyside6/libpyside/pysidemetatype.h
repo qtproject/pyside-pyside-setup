@@ -17,16 +17,16 @@ QT_FORWARD_DECLARE_STRUCT(QMetaObject)
 namespace PySide
 {
 
-/// Returns the QMetaType matching a PyTypeObject
-/// \param
-/// \param type TypeObject
-/// \return QMetaType
+/*!
+    Returns the QMetaType matching the PyTypeObject \a type.
+*/
 PYSIDE_API QMetaType qMetaTypeFromPyType(PyTypeObject *type);
 
-/// Create a QMetaType for a pointer to a QObject-derived Python class
-/// for use in signal/slot connections (SIGNAL("mySignal(MyClass*)")).
-/// \param metaObject QMetaObject
-/// \return QMetaType
+/*!
+    Creates a QMetaType for a pointer to a QObject-derived Python class
+    described by \a metaObject for use in signal/slot connections
+    (\c{SIGNAL("mySignal(MyClass*)")}).
+*/
 PYSIDE_API QMetaType createQObjectPtrMetaType(const QMetaObject *metaObject);
 } //namespace PySide
 

@@ -12,7 +12,10 @@ namespace PySide
 
 PYSIDE_API void initQApp();
 
-/// Destroy a QCoreApplication taking care of destroy all instances of QObject first.
+/*!
+    Destroys a QCoreApplication taking care of destroying all instances
+    of QObject first.
+*/
 PYSIDE_API void destroyQCoreApplication();
 
 } //namespace PySide

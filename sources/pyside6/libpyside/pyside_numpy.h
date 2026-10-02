@@ -16,20 +16,16 @@
 namespace PySide::Numpy
 {
 
-/// Create a list of QPointF from 2 equally sized numpy array of x and y data
-/// (float,double).
-/// \param pyXIn X data array
-/// \param pyYIn Y data array
-/// \return List of QPointF
-
+/*!
+    Creates a list of QPointF from 2 equally sized numpy arrays of x data
+    \a pyXIn and y data \a pyYIn (float, double).
+*/
 PYSIDE_API QList<QPointF> xyDataToQPointFList(PyObject *pyXIn, PyObject *pyYIn);
 
-/// Create a list of QPoint from 2 equally sized numpy array of x and y data
-/// (int).
-/// \param pyXIn X data array
-/// \param pyYIn Y data array
-/// \return List of QPoint
-
+/*!
+    Creates a list of QPoint from 2 equally sized numpy arrays of x data
+    \a pyXIn and y data \a pyYIn (int).
+*/
 PYSIDE_API QList<QPoint> xyDataToQPointList(PyObject *pyXIn, PyObject *pyYIn);
 
 } //namespace PySide::Numpy

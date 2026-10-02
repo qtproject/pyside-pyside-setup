@@ -366,6 +366,32 @@ static std::optional<QMetaMethod> findSignal(const QMetaObject *mo,
     return base != nullptr ? findSignal(base, name) : std::nullopt;
 }
 
+/*!
+    Fills QObject properties and does signal connections using the values
+    found in the \a kwds dictionary.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a qObj
+            \li PyObject for the QObject.
+        \row
+            \li \a metaObj
+            \li QMetaObject of \a qObj.
+        \row
+            \li \a kwds
+            \li Key/value dictionary.
+        \row
+            \li \a allowErrors
+            \li If true, keys that are neither properties nor signals
+                are ignored.
+    \endtable
+
+    Returns true if everything goes well, false with a Python error set
+    otherwise.
+*/
 bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj,
                       PyObject *kwds, bool allowErrors)
 {
@@ -679,6 +705,30 @@ static PyObject *getHiddenMetaMethodDataFromQObject(int featureFlags,
     return nullptr;
 }
 
+/*!
+    Checks for properties and signals registered on the meta object and
+    returns these. Also handles Python properties when \c true_property
+    was selected.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a cppSelf
+            \li The QObject which contains the meta object.
+        \row
+            \li \a self
+            \li Python object of \a cppSelf.
+        \row
+            \li \a name
+            \li Name of the attribute which the function will try to
+                retrieve from the meta data.
+    \endtable
+
+    Returns the Python object which contains the data obtained from
+    the meta object or the Python method pulled out of a Python property.
+*/
 PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)
 {
     // PYSIDE-68-bis: This getattr finds signals early by `signalDescrGet`.
