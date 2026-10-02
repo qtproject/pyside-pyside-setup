@@ -27,13 +27,11 @@ extern "C"
 
 namespace PySide::MetaFunction {
 
-/**
- * This function creates a MetaFunction object
- *
- * @param   source the QObject witch this fuction is part of
- * @param   methodIndex The index of this function on MetaObject
- * @return  Return a new reference of PySideMetaFunction
- **/
+/*!
+    Creates a MetaFunction object for the method \a methodIndex
+    of the meta object of the QObject \a source.
+    Returns a new reference to the PySideMetaFunction.
+*/
 PYSIDE_API PySideMetaFunction *newObject(QObject *source, int methodIndex);
 
 } //namespace PySide::MetaFunction

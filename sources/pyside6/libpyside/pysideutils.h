@@ -18,32 +18,50 @@ QT_FORWARD_DECLARE_CLASS(QStringView)
 namespace PySide
 {
 
-/// Check if self inherits from class_name
-/// \param self Python object
-/// \param class_name strict with the class name
-/// \return Returns true if self object inherits from class_name, otherwise returns false
+/*!
+    Returns whether the type \a self inherits from the class named
+    \a class_name.
+*/
 PYSIDE_API bool inherits(PyTypeObject *self, const char *class_name);
 
-/// Given A PyObject representing Unicode data, returns an equivalent QString.
+/*!
+    Given a PyObject \a str representing Unicode data, returns an
+    equivalent QString.
+*/
 PYSIDE_API QString pyUnicodeToQString(PyObject *str);
 
-/// Given a QString, return the PyObject repeesenting Unicode data.
+/*!
+    Given a string \a s, returns the PyObject representing Unicode data.
+*/
 PYSIDE_API PyObject *qStringToPyUnicode(QStringView s);
 
-/// Given A PyObject representing ASCII or Unicode data, returns an equivalent QString.
+/*!
+    Given a PyObject \a str representing ASCII or Unicode data, returns
+    an equivalent QString.
+*/
 PYSIDE_API QString pyStringToQString(PyObject *str);
 
-/// Provide an efficient, correct PathLike interface.
+/*!
+    Provides an efficient, correct PathLike interface converting
+    \a path to a QString.
+*/
 PYSIDE_API QString pyPathToQString(PyObject *path);
 
-/// Returns whether \a method is a compiled method (Nuitka).
-/// \sa Shiboken::isCompiledMethod()
+/*!
+    Returns whether \a callback is a compiled method (Nuitka).
+    See also \c{Shiboken::isCompiledMethod()}.
+*/
 PYSIDE_API bool isCompiledMethod(PyObject *callback);
 
-/// Returns the Python binary (value of sys.executable).
+/*!
+    Returns the Python binary (value of \c sys.executable).
+*/
 PYSIDE_API QString sysExecutable();
 
-/// Returns whether name is a valid class name in a .ui file (C++ or Python)
+/*!
+    Returns whether \a name is a valid class name in a \c .ui file
+    (C++ or Python).
+*/
 PYSIDE_API bool isUiClassName(QStringView name);
 
 struct debugPyTypeObject

@@ -31,9 +31,9 @@ public:
     bool m_alreadyWrapped = false;
 };
 
-/**
- * Init PySide QProperty support system
- */
+/*!
+    Initializes the PySide ClassInfo support system in \a module.
+*/
 void init(PyObject* module);
 
 

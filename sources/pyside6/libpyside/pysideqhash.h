@@ -12,8 +12,8 @@
 namespace PySide
 {
 
-/// Hash function used to enable hash on objects not supported by the native Qt
-/// library which have a toString() function.
+// Hash function used to enable hash on objects not supported by the native Qt
+// library which have a toString() function.
 template<class T>
 [[deprecated]] inline Py_ssize_t hash(const T& value)
 {

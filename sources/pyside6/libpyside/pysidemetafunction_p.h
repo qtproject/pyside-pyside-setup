@@ -16,9 +16,11 @@ QT_END_NAMESPACE
 namespace PySide::MetaFunction {
 
     void init(PyObject *module);
-    /**
-     * Does a Qt metacall on a QObject
-     */
+    /*!
+        Does a Qt metacall on the QObject \a self for the method
+        \a methodIndex with the arguments \a args, storing the
+        return value in \a retVal if it is not \nullptr.
+    */
     bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal = nullptr);
 
 } //namespace PySide::MetaFunction

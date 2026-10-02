@@ -48,35 +48,29 @@ public:
 
 namespace PySide::Property {
 
-/**
- * Init PySide QProperty support system
- */
+/*!
+    Initializes the PySide QProperty support system in \a module.
+*/
 void init(PyObject* module);
 
-/**
- * This function call reset property function
- * This function does not check the property object type
- *
- * @param   self The property object
- * @param   source The QObject witch has the property
- * @return  Return 0 if ok or -1 if this function fail
- **/
+/*!
+    Calls the reset function of the property \a self on the QObject
+    \a source. This function does not check the property object type.
+    Returns 0 on success or -1 on failure.
+*/
 int reset(PySideProperty* self, PyObject* source);
 
 
-/**
- * This function return the property type
- * This function does not check the property object type
- *
- * @param   self The property object
- * @return  Return the property type name
- **/
+/*!
+    Returns the type name of the property \a self.
+    This function does not check the property object type.
+*/
 const char* getTypeName(const PySideProperty* self);
 
-/// This function returns the type object of the property. It is either a real
-/// PyTypeObject ("@Property(int)") or a string "@Property('QVariant')".
-/// @param  self The property object
-/// @return type object
+/*!
+    Returns the type object of the property \a self. It is either a real
+    PyTypeObject (\c{@Property(int)}) or a string (\c{@Property('QVariant')}).
+*/
 PyObject *getTypeObject(const PySideProperty* self);
 
 } // namespace PySide::Property

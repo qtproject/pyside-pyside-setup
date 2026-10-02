@@ -26,52 +26,49 @@ namespace PySide::Property {
 
 PYSIDE_API bool checkType(PyObject *pyObj);
 
-/**
- * This function call set property function and pass value as arg
- * This function does not check the property object type
- *
- * @param   self The property object
- * @param   source The QObject witch has the property
- * @param   value The value to set in property
- * @return  Return 0 if ok or -1 if this function fail
- **/
+/*!
+    Calls the setter function of the property \a self on the QObject
+    \a source passing \a value as argument.
+    This function does not check the property object type.
+    Returns 0 on success or -1 on failure.
+*/
 PYSIDE_API int setValue(PySideProperty *self, PyObject *source, PyObject *value);
 
-/**
- * This function call get property function
- * This function does not check the property object type
- *
- * @param   self The property object
- * @param   source The QObject witch has the property
- * @return  Return the result of property get function or 0 if this fail
- **/
+/*!
+    Calls the getter function of the property \a self on the QObject
+    \a source. This function does not check the property object type.
+    Returns the result of the getter function or \nullptr on failure.
+*/
 PYSIDE_API PyObject *getValue(PySideProperty *self, PyObject *source);
 
-/**
- * This function return the notify name used on this property
- *
- * @param   self The property object
- * @return  Return a const char with the notify name used
- **/
+/*!
+    Returns the notify signal name used by the property \a self.
+*/
 PYSIDE_API const char *getNotifyName(PySideProperty *self);
 
 
-/**
- * This function search in the source object for desired property
- *
- * @param   source The QObject object
- * @param   name The property name
- * @return  Return a new reference to property object
- **/
+/*!
+    Searches the QObject \a source for the property named \a name.
+    Returns a new reference to the property object.
+*/
 PYSIDE_API PySideProperty *getObject(PyObject *source, PyObject *name);
 
 PYSIDE_API void setTypeName(PySideProperty *self, const char *typeName);
 
-/// Create a property from type, getter, setter and notification signature.
+/*!
+    Creates a property from the type name \a typeName, the \a getter,
+    the \a setter and the notification signature \a notifySignature,
+    optionally passing the private data \a data.
+*/
 PYSIDE_API PyObject *create(const char *typeName, PyObject *getter,
                             PyObject *setter, PyObject *notifySignature,
                             PySidePropertyBase *data = nullptr);
-/// Create a property from type, getter, optional setter and notification signature.
+/*!
+    \overload
+    Creates a property from the type name \a typeName, the \a getter,
+    the optional \a setter and the notification signature \a notifySignature,
+    optionally passing the private data \a data.
+*/
 PYSIDE_API PyObject *create(const char *typeName, PyObject *getter,
                             PyObject *setter = nullptr,
                             const char *notifySignature = nullptr,
