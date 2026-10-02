@@ -96,7 +96,7 @@ static void initPython(int argc, char *argv[])
 static void runPythonApp()
 {{
     NSString *bundlePath = [[NSBundle mainBundle] resourcePath];
-    NSString *scriptPath = [bundlePath stringByAppendingPathComponent:@"{entry_script}"];
+    NSString *scriptPath = [bundlePath stringByAppendingPathComponent:@{entry_script}];
 
     FILE *fp = fopen([scriptPath UTF8String], "r");
     if (!fp) {{
