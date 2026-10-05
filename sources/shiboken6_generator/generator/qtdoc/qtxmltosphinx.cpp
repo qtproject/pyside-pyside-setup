@@ -1178,8 +1178,10 @@ QtXmlToSphinxLink QtXmlToSphinx::handleLinkStart(const QString &type, QString re
 static QString fixLinkText(const QtXmlToSphinxLink &linkContext,
                            QString linktext)
 {
-    if (linkContext.type == QtXmlToSphinxLink::External
-        || linkContext.type == QtXmlToSphinxLink::Reference) {
+    if (linkContext.type == QtXmlToSphinxLink::External)
+        return linktext;
+
+    if (linkContext.type == QtXmlToSphinxLink::Reference) {
         // Clear the link text if that matches the reference (to be converted to a .rst label)
         return linktext == linkContext.linkRef ? QString{} : linktext;
     }
