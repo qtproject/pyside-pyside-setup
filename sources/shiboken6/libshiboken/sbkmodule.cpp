@@ -282,19 +282,22 @@ static getattrofunc origModuleGetattro{};
 //              This modifies _all_ modules but should have no impact.
 static PyObject *PyModule_lazyGetAttro(PyObject *module, PyObject *name)
 {
-    // - check if the attribute is present and return it.
+    // - locate the module in the moduleTofuncs mapping
+    auto &moduleToFuncs = moduleData()->moduleToFuncs;
+    auto tableIter = moduleToFuncs.find(module);
+    // - if this is not our module, use the original. As of 3.15, this needs to be
+    //   done first since PyObject_GenericGetAttr() no longer works in the case
+    //   of lazy import proxies (PYSIDE-3471).
+    if (tableIter == moduleToFuncs.end())
+        return origModuleGetattro(module, name);
+
+    // - check if the attribute is present (non-class items) and return it.
     auto *attr = PyObject_GenericGetAttr(module, name);
     // - we handle AttributeError, only.
     if (attr != nullptr || PyErr_ExceptionMatches(PyExc_AttributeError) == 0)
         return attr;
 
     PyErr_Clear();
-    // - locate the module in the moduleTofuncs mapping
-    auto &moduleToFuncs = moduleData()->moduleToFuncs;
-    auto tableIter = moduleToFuncs.find(module);
-    // - if this is not our module, use the original
-    if (tableIter == moduleToFuncs.end())
-        return origModuleGetattro(module, name);
 
     // - locate the name and retrieve the generating function
     const char *attrNameStr = Shiboken::String::toCString(name);
