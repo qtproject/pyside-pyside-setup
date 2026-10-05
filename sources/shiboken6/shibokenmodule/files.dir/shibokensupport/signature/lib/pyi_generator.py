@@ -264,7 +264,7 @@ class Formatter(Writer, BaseFormatter, EnumFormatter, SignalFormatter, Attribute
             type_repr = self.normalize_type(attr_value.__doc__)
         else:
             type_repr = full_name
-        self.print(f"{spaces}{attr_name:25} = ...  # type: {type_repr}")
+        self.print(f"{spaces}{attr_name:25}: {type_repr} = ...")
         yield
 
     @contextmanager
