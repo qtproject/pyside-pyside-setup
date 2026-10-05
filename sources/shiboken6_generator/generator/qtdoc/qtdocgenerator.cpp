@@ -1244,8 +1244,9 @@ static void writeFancyToc(TextStream& s, QAnyStringView title,
     }
 
     table.normalize();
-    s << '\n' << headline(title) << ".. container:: pysidetoc\n\n";
+    s << '\n' << headline(title) << ".. container:: pysidetoc\n\n" << indent;
     table.format(s);
+    s << outdent;
 }
 
 bool QtDocGenerator::finishGeneration()
