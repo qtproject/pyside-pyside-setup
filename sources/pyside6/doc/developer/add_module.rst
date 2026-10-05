@@ -60,9 +60,10 @@ Add documentation
 - Add a .qdocconf.in file in ``sources/pyside6/doc/qtmodules``.
 - Add module description ``.rst`` file in ``sources/pyside6/doc/extras`` if the
   auto-generated page looks unsatisfactory:
-   * Run a full documentation build
-   * Copy the auto-generated file ``<build>/pyside6/doc/base/<Module>/index.rst``
-     to ``sources/pyside6/doc/extras/<Module>/<Module>.rst``
-   * Remove TOC, qmake/CMake instructions and class lists (cf existing files)
-   * Check the references, preferably link to converted documents
-     in PySide or add documents there (see :ref:`maintaining-additionaldocs`).
+
+  * Run a full documentation build
+  * Copy the auto-generated file ``<build>/pyside6/doc/base/<Module>/index.rst``
+    to ``sources/pyside6/doc/extras/<Module>/<Module>.rst``
+  * Remove TOC, qmake/CMake instructions and class lists (cf existing files)
+  * Check the references, preferably link to converted documents
+    in PySide or add documents there (see :ref:`maintaining-additionaldocs`).
