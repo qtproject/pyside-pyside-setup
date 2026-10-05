@@ -1,5 +1,3 @@
-.. _example_qml_quickcontrolsfrompython:
-
 Qt Quick Controls from Python
 =============================
 

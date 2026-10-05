@@ -1,5 +1,3 @@
-.. _example_qml_qmlcomponentloading:
-
 QML Component Loading
 =====================
 

@@ -128,7 +128,7 @@ Creating Debug Builds
 Installing PySide
 ~~~~~~~~~~~~~~~~~
 
-First, create the wheels using the `create_wheels.py`_ script::
+First, create the wheels using the `create_wheels.py` script::
 
     python create_wheels.py --build-dir=C:\directory\where\pyside\is\built --no-examples
 
