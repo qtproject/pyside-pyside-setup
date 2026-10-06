@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import fnmatch
 import os
+import re
 import shutil
 import zipfile
 import sys
@@ -325,6 +326,30 @@ class ExampleData:
     headline: str = ""
 
 
+SIMPLE_REFERENCE_PATTERN = re.compile(r' `([^`]+)`_')
+REFERENCE_PATTERN = re.compile(r':(ref|class|mod|func):`([^`]+)`')
+LINK_PATTERN = re.compile(r" <.*>")
+
+
+def strip_references(text):
+    """Strip all RST references: `text`_ , :ref:`text`_ or :ref:`text <https://..>`_  -> "text".
+       Also strip all remaining "`" to prevent problems with truncation.
+    """
+    while True:
+        if m := REFERENCE_PATTERN.search(text):
+            ref_text = LINK_PATTERN.sub("", m.group(1))
+            text = text[:m.start(0)] + ref_text + text[m.end(0):]
+        else:
+            break
+    while True:
+        if m := SIMPLE_REFERENCE_PATTERN.search(text):
+            ref_text = LINK_PATTERN.sub("", m.group(1))
+            text = text[:m.start(0) + 1] + ref_text + text[m.end(0):]
+        else:
+            break
+    return text.replace("`", "")
+
+
 def get_module_gallery(examples: list[ExampleData]) -> str:
     """
     This function takes a list of examples from one specific module and returns the resulting string
@@ -411,7 +436,7 @@ def get_module_gallery(examples: list[ExampleData]) -> str:
                         break
                     lines.append(line)
 
-                desc = " ".join(lines)
+                desc = strip_references(" ".join(lines))
                 if len(desc) > 120:
                     desc = desc[:120] + "..."
         else:
@@ -424,11 +449,6 @@ def get_module_gallery(examples: list[ExampleData]) -> str:
 
         if not (title := example.headline):
             title = f"{name} from ``{underline}``."
-
-        # Clean refs from desc
-        if ":ref:" in desc:
-            desc = desc.replace(":ref:`", "")
-        desc = desc.replace("`", "")
 
         gallery += f"{ind(2)}.. grid-item-card:: {title}\n"
         gallery += f"{ind(3)}:class-item: cover-img\n"
