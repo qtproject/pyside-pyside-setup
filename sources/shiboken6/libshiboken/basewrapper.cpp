@@ -678,9 +678,11 @@ static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args
     // PYSIDE-1463: Prevent feature switching while in the creation process
     auto saveFeature = initSelectableFeature(nullptr);
     for (PyTypeObject *base : bases) {
-        sotp = PepType_SOTP(base);
-        if (sotp->subtype_init)
-            sotp->subtype_init(newType, args, kwds);
+        auto *baseSotp = PepType_SOTP(base);
+        if (baseSotp->subtype_init)
+            baseSotp->subtype_init(newType, args, kwds);
+        if (baseSotp->delete_in_main_thread)
+            sotp->delete_in_main_thread = 1;
     }
     initSelectableFeature(saveFeature);
     return newType;
