@@ -23,6 +23,9 @@ QML_IMPORT_NAME = "BrowserUtils"
 QML_IMPORT_MAJOR_VERSION = 1
 
 
+DEFAULT_URL = "chrome://qt?example=Quick Nano Browser"
+
+
 def url_from_user_input(user_input):
     file_info = QFileInfo(user_input)
     if file_info.exists():
@@ -53,7 +56,7 @@ if __name__ == '__main__':
                                  nargs='?', type=str)
     options = argument_parser.parse_args()
 
-    url = url_from_user_input(options.url) if options.url else QUrl("chrome://qt")
+    url = url_from_user_input(options.url) if options.url else QUrl(DEFAULT_URL)
 
     app_args = sys.argv
     if options.single_process:

@@ -72,13 +72,14 @@ class WebAuthDialog(QDialog):
             case QWebEngineWebAuthUxRequest.WebAuthUxState.RequestFailed:
                 self.setupErrorUI()
 
+        self.uiWebAuthDialog.m_description.adjustSize()
         self.adjustSize()
 
     def setupSelectAccountUI(self):
         self.uiWebAuthDialog.m_headingLabel.setText(self.tr("Choose a Passkey"))
-        self.uiWebAuthDialog.m_description.setText(self.tr("Which passkey do you want to use for ")
-                                                   + self.uxRequest.relyingPartyId()
-                                                   + self.tr("? "))
+        id = self.uxRequest.relyingPartyId()
+        description = self.tr("Which passkey do you want to use for {}?").format(id)
+        self.uiWebAuthDialog.m_description.setText(description)
         self.uiWebAuthDialog.m_pinGroupBox.setVisible(False)
         self.uiWebAuthDialog.m_mainVerticalLayout.removeWidget(self.uiWebAuthDialog.m_pinGroupBox)
         self.uiWebAuthDialog.buttonBox.button(QDialogButtonBox.Retry).setVisible(False)
@@ -101,8 +102,8 @@ class WebAuthDialog(QDialog):
     def setupFinishCollectTokenUI(self):
 
         self.clearSelectAccountButtons()
-        self.uiWebAuthDialog.m_headingLabel.setText(self.tr("Use your security key with")
-                                                    + self.uxRequest.relyingPartyId())
+        text = self.tr("Use your security key with {}").format(self.uxRequest.relyingPartyId())
+        self.uiWebAuthDialog.m_headingLabel.setText(text)
         self.uiWebAuthDialog.m_description.setText(
             self.tr("Touch your security key again to complete the request."))
         self.uiWebAuthDialog.m_pinGroupBox.setVisible(False)
@@ -148,7 +149,7 @@ class WebAuthDialog(QDialog):
 
         match pinRequestInfo.error:
             case QWebEngineWebAuthUxRequest.PinEntryError.InternalUvLocked:
-                errorDetails = self.tr("Internal User Verification Locked ")
+                errorDetails = self.tr("Internal User Verification Locked")
             case QWebEngineWebAuthUxRequest.PinEntryError.WrongPin:
                 errorDetails = self.tr("Wrong PIN")
             case QWebEngineWebAuthUxRequest.PinEntryError.TooShort:
@@ -192,18 +193,18 @@ class WebAuthDialog(QDialog):
             case failure_reason.KeyNotRegistered:
                 error_description = self.tr("Key not registered")
             case failure_reason.KeyAlreadyRegistered:
-                error_description = self.tr("You already registered self device."
+                error_description = self.tr("You already registered self device.\n"
                                             "Try again with device")
                 isVisibleRetry = True
             case failure_reason.SoftPinBlock:
                 error_description = self.tr(
-                    "The security key is locked because the wrong PIN was entered too many times."
+                    "The security key is locked because the wrong PIN was entered too many times.\n"
                     "To unlock it, remove and reinsert it.")
                 isVisibleRetry = True
             case failure_reason.HardPinBlock:
                 error_description = self.tr(
-                    "The security key is locked because the wrong PIN was entered too many times."
-                    " Yo'll need to reset the security key.")
+                    "The security key is locked because the wrong PIN was entered too many times.\n"
+                    "You'll need to reset the security key.")
             case failure_reason.AuthenticatorRemovedDuringPinEntry:
                 error_description = self.tr(
                     "Authenticator removed during verification. Please reinsert and try again")
@@ -224,7 +225,6 @@ class WebAuthDialog(QDialog):
 
         self.uiWebAuthDialog.m_headingLabel.setText(error_heading)
         self.uiWebAuthDialog.m_description.setText(error_description)
-        self.uiWebAuthDialog.m_description.adjustSize()
         self.uiWebAuthDialog.m_pinGroupBox.setVisible(False)
         self.uiWebAuthDialog.buttonBox.button(QDialogButtonBox.Ok).setVisible(False)
         self.uiWebAuthDialog.buttonBox.button(QDialogButtonBox.Retry).setVisible(isVisibleRetry)
