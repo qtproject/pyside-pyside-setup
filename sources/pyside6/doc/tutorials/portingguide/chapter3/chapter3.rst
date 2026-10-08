@@ -3,7 +3,7 @@ Chapter 3: Port ``bookdwindow.cpp`` to ``bookwindow.py``
 
 After the bookdelegate, port the C++ code for the
 ``BookWindow`` class. It offers a QMainWindow, containing a
-``QTableView`` to present the books data, and a **Details**
+:class:`~PySide6.QtWidgets.QTableView` to present the books data, and a **Details**
 section with a set of input fields to edit the selected row
 in the table. To begin with, create the ``bookwindow.py``
 and add the following imports to it:
@@ -45,7 +45,7 @@ Python version
    :lines: 16-79
 
 .. note:: The Python version of the ``BookWindow`` class
-   definition inherits from both ``QMainWindow`` and
+   definition inherits from both :class:`~PySide6.QtWidgets.QMainWindow` and
    ``Ui_BookWindow``, which is defined in the
    ``ui_bookwindow.py`` file that you generated earlier.
 

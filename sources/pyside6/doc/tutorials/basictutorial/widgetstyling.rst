@@ -24,8 +24,8 @@ to each component. As an example, look at the following simple snippet:
         w.show()
         sys.exit(app.exec())
 
-When you execute this code, you will see a simple ``QLabel`` aligned at the
-center, and with a placeholder text.
+When you execute this code, you will see a simple :class:`~PySide6.QtWidgets.QLabel` aligned at
+the center, and with a placeholder text.
 
 .. image:: widgetstyling-simple-no.png
    :alt: Simple Widget with no style
@@ -34,7 +34,7 @@ center, and with a placeholder text.
 Qt widgets. This tutorial focuses on style sheets, which provide
 a CSS-like syntax (see `Qt Style Sheets Reference`_).
 
-A ``QLabel`` can be styled differently by setting some of its CSS
+A :class:`~PySide6.QtWidgets.QLabel` can be styled differently by setting some of its CSS
 properties, such as ``background-color`` and ``font-family``,
 so let's see how does the code look like with these changes:
 
@@ -57,8 +57,8 @@ so let's see how does the code look like with these changes:
         w.show()
         sys.exit(app.exec())
 
-Now when you run the code, notice that the ``QLabel`` looks different with your
-custom style:
+Now when you run the code, notice that the :class:`~PySide6.QtWidgets.QLabel` looks different
+with your custom style:
 
 .. image:: widgetstyling-simple-yes.png
    :alt: Simple Widget with Style
@@ -68,7 +68,7 @@ custom style:
 
   If you don't have the font ``Titillium`` installed, you can try with any
   other you prefer.
-  Remember you can list your installed fonts using ``QFontDatabase``,
+  Remember you can list your installed fonts using :class:`~PySide6.QtGui.QFontDatabase`,
   specifically the ``families()`` method.
 
 
@@ -107,8 +107,8 @@ component and optionally the name of the object::
         font-size: 20px;
     }
 
-The first style defines a ``background-color`` for all ``QLabel`` objects in your
-application, whereas the later one styles the ``title`` object only.
+The first style defines a ``background-color`` for all :class:`~PySide6.QtWidgets.QLabel`
+objects in your application, whereas the later one styles the ``title`` object only.
 
 .. note::
 
@@ -144,9 +144,9 @@ Look at this new example, with more widgets components:
    :linenos:
    :lines: 22-44
 
-This displays a two column widget, with a ``QListWidget`` on the left and a
-``QLabel`` and a ``QPushButton`` on the right. It looks like this when you run the
-code:
+This displays a two column widget, with a :class:`~PySide6.QtWidgets.QListWidget` on the left and
+a :class:`~PySide6.QtWidgets.QLabel` and a :class:`~PySide6.QtWidgets.QPushButton` on the right.
+It looks like this when you run the code:
 
 .. image:: widgetstyling-no.png
    :alt: Widget with no style
@@ -163,7 +163,7 @@ You can also use state-based styling on the QListWidget *items* for example, to
 style them differently depending on whether they are *selected* or not.
 
 After applying all the styling alternatives you explored in this topic, notice
-that the ``QLabel`` example looks a lot different now.
+that the :class:`~PySide6.QtWidgets.QLabel` example looks a lot different now.
 Try running the code to check its new look:
 
 .. image:: widgetstyling-yes.png

@@ -90,7 +90,7 @@ development process using *Qt Creator*:
       :lines: 5-33
       :emphasize-lines: 26-29
 
-#. Load the ``Main.qml`` to the ``QQuickView`` and call ``show()`` to
+#. Load the ``Main.qml`` to the :class:`~PySide6.QtQuick.QQuickView` and call ``show()`` to
    display the application window.
 
    .. literalinclude:: main.py

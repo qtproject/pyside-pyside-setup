@@ -70,7 +70,8 @@ to call the method `menuBar()` and populate it inside the `MainWindow` class.
 Notice that the code snippet adds a *File* menu with the *Exit* option only.
 
 The *Exit* option must be connected to a slot that triggers the application to exit. We pass
-``QWidget.close()`` here. After the last window has been closed, the application exits.
+:meth:`~PySide6.QtWidgets.QWidget.close` here. After the last window has been closed, the
+application exits.
 
 Empty widget and data
 ---------------------

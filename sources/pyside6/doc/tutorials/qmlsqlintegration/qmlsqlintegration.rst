@@ -32,8 +32,8 @@ of a chat application.
    :linenos:
    :lines: 48-60
 
-The ``data()`` function falls back to ``QSqlTableModel``'s implementation if the role is not a
-custom user role.
+The ``data()`` function falls back to :class:`~PySide6.QtSql.QSqlTableModel`'s implementation
+if the role is not a custom user role.
 If you get a user role, we can subtract :meth:`~.QtCore.Qt.UserRole` from it to get the index of
 that field, and then use that index to find the value to be returned.
 

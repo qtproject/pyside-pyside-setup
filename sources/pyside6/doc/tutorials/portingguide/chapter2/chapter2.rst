@@ -3,8 +3,8 @@ Chapter 2: ``bookdelegate.cpp`` to ``bookdelegate.py``
 
 Now that your database is in place, port the C++ code for the
 ``BookDelegate`` class. This class offers a delegate to present
-and edit the data in a ``QTableView``. It inherits
-``QSqlRelationalDelegate`` interface, which offers features
+and edit the data in a :class:`~PySide6.QtWidgets.QTableView`. It inherits
+:class:`~PySide6.QtSql.QSqlRelationalDelegate` interface, which offers features
 specific for handling relational databases, such as a combobox
 editor for foreign key fields. To begin with, create
 ``bookdelegate.py`` and add the following imports to it:
@@ -17,7 +17,7 @@ editor for foreign key fields. To begin with, create
 After the necessary ``import`` statements, port the
 constructor code for the ``BookDelegate`` class. Both
 the C++ and Python versions of this code initialize a
-``QSqlRelationalDelegate`` and ``QPixmap`` instance.
+:class:`~PySide6.QtSql.QSqlRelationalDelegate` and :class:`~PySide6.QtGui.QPixmap` instance.
 Here is how they look:
 
 C++ version
@@ -36,12 +36,12 @@ Python version
    :linenos:
    :lines: 10-17
 
-.. note:: The Python version loads the ``QPixmap`` using
+.. note:: The Python version loads the  ``QPixmap`` using
    the absolute path of ``star.png`` in the local
    filesystem.
 
 As the default functionality offered by the
-``QSqlRelationalDelegate`` is not enough to present
+:class:`~PySide6.QtSql.QSqlRelationalDelegate` is not enough to present
 the books data, you must reimplement a few functions.
 For example, painting stars to represent the rating for
 each book in the table. Here is how the reimplemented

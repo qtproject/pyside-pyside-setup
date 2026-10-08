@@ -18,8 +18,8 @@ very simple, it has a menu and shows a list of programming languages with
 multiselection.
 
 Translation works by passing the message strings through function calls that
-look up the translation. Each ``QObject`` instance provides a ``tr()``
-function for that purpose. There is also ``QCoreApplication.translate()``
+look up the translation. Each :class:`~PySide6.QtCore.QObject` instance provides a ``tr()``
+function for that purpose. There is also :meth:`~PySide6.QtCore.QCoreApplication.translate`
 for adding translated texts to non-QObject classes.
 
 Qt ships its own translations containing the error messages and standard
@@ -91,7 +91,7 @@ under ``:/translations``:
     </qresource>
     </RCC>
 
-At runtime, the translations need to be loaded using the ``QTranslator`` class:
+At runtime, the translations need to be loaded using the :class:`~PySide6.QtCore.QTranslator` class:
 
 .. code-block:: python
 

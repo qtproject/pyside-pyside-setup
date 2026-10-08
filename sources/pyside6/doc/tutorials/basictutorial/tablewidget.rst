@@ -4,19 +4,19 @@
 Displaying Data Using a Table Widget
 ====================================
 
-If you want to display data arranged in a table, use a ``QTableWidget`` to do
-so, without dealing with much configuration.
+If you want to display data arranged in a table, use a :class:`~PySide6.QtWidgets.QTableWidget`
+to do so, without dealing with much configuration.
 
-Notice that using a ``QTableWidget`` is not the only path to display
+Notice that using a :class:`~PySide6.QtWidgets.QTableWidget` is not the only path to display
 information in tables. You can also create a data model and display it using
-a ``QTableView``, but that is not in the scope of this tutorial.
+a :class:`~PySide6.QtWidgets.QTableView`, but that is not in the scope of this tutorial.
 
 .. note:: This Widget is a ready-to-use version of something you can customize
    further on. To know more about the Model/View architecture in Qt, refer to
    its `official documentation <https://doc.qt.io/qt-6/model-view-programming.html>`_.
 
-1. Import ``QTableWidget``, ``QTableWidgetItem``, and ``QColor`` to display
-   background colors:
+1. Import :class:`~PySide6.QtWidgets.QTableWidget`, :class:`~PySide6.QtQuick.QTableWidgetItem`, and
+   :class:`~PySide6.QtGui.QColor` to display background colors:
 
    .. code-block:: python
 
@@ -48,13 +48,13 @@ a ``QTableView``, but that is not in the scope of this tutorial.
            rgb = tuple(int(code_hex[i:i+2], 16) for i in (0, 2, 4))
            return QColor.fromRgb(rgb[0], rgb[1], rgb[2])
 
-4. Initialize the ``QApplication`` singleton:
+4. Initialize the :class:`~PySide6.QtWidgets.QApplication` singleton:
 
    .. code-block:: python
 
        app = QApplication()
 
-5. Configure the ``QTableWidget`` to have a number of rows equivalent
+5. Configure the :class:`~PySide6.QtWidgets.QTableWidget` to have a number of rows equivalent
    to the amount of items from the ``colors`` structure, and a number of
    columns with the members of one color entry, plus one.
    You can set the column name using the ``setHorizontalHeaderLabels`` as
@@ -70,9 +70,9 @@ a ``QTableView``, but that is not in the scope of this tutorial.
    .. note:: the reason of using ``+ 1`` is to include a new column where
       we can display the color.
 
-6. Iterate the data structure, create the ``QTableWidgetItems`` instances, and
-   add them into the table using a ``x, y`` coordinate. Here the data is being
-   assigned row-per-row:
+6. Iterate the data structure, create the :class:`~PySide6.QtWidgets.QTableWidgetItems` instances,
+   and add them into the table using a ``x, y`` coordinate. Here the data is being assigned
+   row-per-row:
 
    .. code-block:: python
 
@@ -85,7 +85,7 @@ a ``QTableView``, but that is not in the scope of this tutorial.
            table.setItem(i, 1, item_code)
            table.setItem(i, 2, item_color)
 
-7. Show the table and execute the ``QApplication``.
+7. Show the table and execute the :class:`~PySide6.QtWidgets.QApplication`.
 
    .. code-block:: python
 

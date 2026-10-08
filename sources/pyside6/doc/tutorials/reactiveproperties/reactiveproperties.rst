@@ -146,11 +146,12 @@ and write them, and the observers fire on changes written from QML too.
 .. image:: reactiveproperties.png
    :alt: The reactive cart running as a QML application
 
-Add the ``@QmlElement`` decorator on top of
+Add the :deco:`~PySide6.QtQml.QmlElement` decorator on top of
 ``@auto_properties`` and define the ``QML_IMPORT_NAME`` /
 ``QML_IMPORT_MAJOR_VERSION`` variables. Stack the decorators so
 ``@auto_properties`` runs first (innermost): it must add the generated
-properties to the ``QMetaObject`` before ``@QmlElement`` registers the type.
+properties to the :class:`~PySide6.QtCore.QMetaObject` before
+:deco:`~PySide6.QtQml.QmlElement` registers the type.
 
 .. literalinclude:: steps/05-app.py
    :language: python
@@ -181,8 +182,8 @@ a QML view *into* Python with
 :class:`~PySide6.QtQmlFeatures.load_qml_component`, then feed the reactive
 values into it.
 
-This time there is no ``@QmlElement`` on the ``Cart``: QML never creates it. The
-model is a plain Python object, and a small display-only QML component is loaded
+This time there is no :deco:`~PySide6.QtQml.QmlElement` on the ``Cart``: QML never creates it.
+The model is a plain Python object, and a small display-only QML component is loaded
 and driven from Python.
 
 .. literalinclude:: steps/06-load-component.py
