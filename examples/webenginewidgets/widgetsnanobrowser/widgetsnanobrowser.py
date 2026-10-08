@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
 
         self.webEngineView = QWebEngineView()
         self.setCentralWidget(self.webEngineView)
-        initialUrl = 'http://qt.io'
+        initialUrl = 'chrome://qt?example=Simple Browser'
         self.addressLineEdit.setText(initialUrl)
         self.webEngineView.load(QUrl(initialUrl))
         self.webEngineView.page().titleChanged.connect(self.setWindowTitle)

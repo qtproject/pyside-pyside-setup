@@ -42,7 +42,7 @@ if __name__ == "__main__":
     browser = Browser()
     window = browser.create_hidden_window()
 
-    url = QUrl.fromUserInput(args.url) if args.url else QUrl("chrome://qt")
+    url = QUrl.fromUserInput(args.url) if args.url else QUrl("chrome://qt?example=Simple Browser")
     window.tab_widget().set_url(url)
     window.show()
 
