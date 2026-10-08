@@ -8,8 +8,9 @@ The `Qt Resource System`_ is a mechanism for storing binary files
 in an application.
 
 The files will be embedded into the application and be acessible for the
-``QFile`` class and the constructors of the ``QIcon`` and ``QPixmap``
-classes taking a file name by using a special file name starting with ``:/``.
+:class:`~PySide6.QtCore.QFile` class and the constructors of the :class:`~PySide6.QtGui.QIcon`
+and :class:`~PySide6.QtGui.QPixmap` classes taking a file name by using a special file name
+starting with ``:/``.
 
 The most common uses are for custom images, icons, fonts, among others.
 
@@ -18,7 +19,7 @@ In this tutorial you will learn how to load custom images as button icons.
 For inspiration, we will try to adapt the multimedia player example
 from Qt.
 
-As you can see on the following image, the ``QPushButton`` that are used
+As you can see on the following image, the :class:`~PySide6.QtWidgets.QPushButton` that are used
 for the media actions (play, pause, stop, and so on) are using the
 default icons meant for such actions.
 

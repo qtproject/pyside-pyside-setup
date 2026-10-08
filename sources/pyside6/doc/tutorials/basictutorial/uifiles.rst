@@ -21,7 +21,8 @@ time by the `pyside6-uic`_ tool.
 
 To create a new Qt Design Form in *Qt Creator*, choose
 ``File/New File Or Project`` and "Main Window" for template. Save it as
-``mainwindow.ui``. Add a ``QPushButton`` to the center of the centralwidget.
+``mainwindow.ui``. Add a :class:`~PySide6.QtWidgets.QPushButton` to the center of the
+centralwidget.
 
 Your file ``mainwindow.ui`` should look something like this:
 
@@ -175,7 +176,7 @@ module:
 
     from PySide6.QtUiTools import QUiLoader
 
-The ``QUiLoader`` lets us load the **ui file** dynamically
+The :class:`~PySide6.QtUiTools.QUiLoader` lets us load the **ui file** dynamically
 and use it right away:
 
 .. code-block:: python
@@ -295,7 +296,7 @@ functions for registering types or adding instances of
 `QDesignerCustomWidgetInterface`_ .
 
 The function
-:meth:`registerCustomWidget()<PySide6.QtDesigner.QPyDesignerCustomWidgetCollection.registerCustomWidget>`
+:meth:`~PySide6.QtDesigner.QPyDesignerCustomWidgetCollection.registerCustomWidget`
 is used to register a widget type with *Qt Widgets Designer*. In the simple case, it
 can be used like ``QUiLoader.registerCustomWidget()``. It takes the custom widget
 type and some optional keyword arguments passing values that correspond to the

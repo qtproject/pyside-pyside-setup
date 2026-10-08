@@ -51,7 +51,7 @@ has a ``clicked()`` signal and :class:`~PySide6.QtWidgets.QLineEdit`
 (single line input field) has a slot named ``clear()``.
 So, a text input field with a button to clear the text
 could be implemented by placing a :class:`~PySide6.QtWidgets.QToolButton`
-to the right of the ``QLineEdit`` and connecting its ``clicked()`` signal to
+to the right of the :class:`~PySide6.QtWidgets.QLineEdit` and connecting its ``clicked()`` signal to
 the slot ``clear()``. This is done using the
 :meth:`~PySide6.QtCore.Signal.connect` method of the signal:
 
@@ -178,9 +178,9 @@ function that is being decorated.
 
 We recommend marking all methods used by signal connections with a
 :deco:`~PySide6.QtCore.Slot` decorator. Not doing causes run-time overhead
-due to the method being added to the ``QMetaObject`` when creating the connection.
-This is particularly important for ``QObject`` classes registered with QML, where
-missing decorators can introduce bugs.
+due to the method being added to the :class:`~PySide6.QtCore.QMetaObject` when creating the
+connection. This is particularly important for :class:`~PySide6.QtCore.QObject` classes
+registered with QML, where missing decorators can introduce bugs.
 
 Missing decorators can be diagnosed by activating warnings of the
 logging category ``qt.pyside.libpyside``; for example, by setting the
@@ -278,16 +278,18 @@ strings passed through the ``SIGNAL()`` and/or ``SLOT()`` functions:
 
 
 This is not normally recommended; it is only needed
-for a few cases where signals are only accessible via ``QMetaObject``
-(``QAxObject``, ``QAxWidget``, ``QDBusInterface``, or ``QWizardPage::registerField()``):
+for a few cases where signals are only accessible via :class:`~PySide6.QtCore.QMetaObject`
+(:class:`~PySide6.QtAxContainer.QAxObject`, :class:`~PySide6.QtAxContainer.QAxWidget`,
+:class:`~PySide6.QtDBus.QDBusInterface`, or
+:meth:`:class:`~PySide6.QtWidgets.QWizardPage.registerField`):
 
 .. code-block:: python
 
     wizard.registerField("text", line_edit, "text",
                          SIGNAL("textChanged(QString)"))
 
-The signature strings can be found by querying ``QMetaMethod.methodSignature()``
-when introspecting ``QMetaObject``:
+The signature strings can be found by querying :meth:`~PySide6.QtCore.QMetaMethod.methodSignature`
+when introspecting :class:`~PySide6.QtCore.QMetaObject`:
 
 .. code-block:: python
 
