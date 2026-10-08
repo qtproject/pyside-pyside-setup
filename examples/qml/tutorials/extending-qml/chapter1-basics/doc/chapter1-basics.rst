@@ -64,13 +64,13 @@ to perform drawing operations with the :class:`~PySide6.QtGui.QPainter` API.
 If the class just represented some data type and was not an
 item that actually needed to be displayed, it could simply inherit from
 :class:`~PySide6.QtCore.QObject`. Or, if we want to extend the functionality of an existing
-``QObject``-based class, it could inherit from that class instead.
+:class:`~PySide6.QtCore.QObject`-based class, it could inherit from that class instead.
 Alternatively, if we want to create a visual item that doesn't need to perform
-drawing operations with the ``QPainter`` API, we can just subclass
+drawing operations with the :class:`~PySide6.QtGui.QPainter` API, we can just subclass
 :class:`~PySide6.QtQuick.QQuickItem`.
 
 The ``PieChart`` class defines the two properties, ``name`` and ``color``, with
-the ``Property`` decorator, and overrides ``QQuickPaintedItem.paint()``. The
+the ``Property`` decorator, and overrides :meth:`~PySide6.QtQuick.QQuickPaintedItem.paint`. The
 ``PieChart`` class is registered using the :deco:`~PySide6.QtQml.QmlElement`
 decorator, to allow it to be used from QML. If you don't register the class, ``App.qml``
 won't be able to create a ``PieChart``.
@@ -90,7 +90,7 @@ Notice that although the color is specified as a string in QML, it is
 automatically converted to a :class:`~PySide6.QtGui.QColor` object for the PieChart
 ``color`` property. Automatic conversions are provided for various other QML value types.
 For example, a string like "640x480" can be automatically converted to a
-``QSize`` value.
+:class:`~PySide6.QtCore.QSize` value.
 
 We'll also create a main function that uses a :class:`~PySide6.QtQuick.QQuickView`
 to run and display ``App.qml``. Here is the application ``basics.py``:

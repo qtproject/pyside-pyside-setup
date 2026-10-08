@@ -1,8 +1,8 @@
-``ImageViewer`` displays images as supported by ``QImageReader``, using
-a QLabel.
+``ImageViewer`` displays images as supported by :class:`~PySide6.QtGui.QImageReader`,
+using a :class:`~PySide6.QtWidgets.QLabel`.
 
-In the constructor, we increase the allocation limit of ``QImageReader`` to
-allow for larger photos.
+In the constructor, we increase the allocation limit of
+:class:`~PySide6.QtGui.QImageReader` to allow for larger photos.
 
 In the ``openFile()`` function, we load the image and determine its size.
 If it is larger than the screen, we downscale it to screen size, maintaining

@@ -8,8 +8,8 @@ document. Properties of both the document and the viewer can be queried:
 ``AbstractViewer`` provides protected methods for derived classes to create
 actions and menus on the main window. In order to display these assets on the
 main window, they are parented to it. ``AbstractViewer`` is responsible for
-removing and destroying the UI assets it creates. It inherits from ``QObject``
-to implement signals and slots.
+removing and destroying the UI assets it creates. It inherits from
+:class:`~PySide6.QtCore.QObject` to implement signals and slots.
 
 The ``uiInitialized()`` signal is emitted after a viewer receives all necessary
 information about UI assets on the main window.

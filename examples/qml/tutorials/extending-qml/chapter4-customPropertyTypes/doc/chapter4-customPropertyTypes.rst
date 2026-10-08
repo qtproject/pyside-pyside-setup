@@ -46,8 +46,8 @@ we assign an ``PieSlice`` value which itself contains a ``color``:
     :lines: 4-22
 
 Like ``PieChart``, this new ``PieSlice`` type inherits from
-``QQuickPaintedItem``, is exposed via :deco:`~PySide6.QtQml.QmlElement` and declares
-its properties with the :class:`~PySide6.QtCore.Property` decorator:
+:class:`~PySide6.QtQuick.QQuickPaintedItem`, is exposed via :deco:`~PySide6.QtQml.QmlElement`
+and declares its properties with the :class:`~PySide6.QtCore.Property` decorator:
 
 .. literalinclude:: customPropertyTypes.py
     :lineno-start: 21

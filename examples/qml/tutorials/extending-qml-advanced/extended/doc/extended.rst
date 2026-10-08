@@ -36,5 +36,5 @@ In QML, a property is set on the line edit that only exists in the
         left_margin: 20
     }
 
-The extension type performs calls on the ``QLineEdit`` that otherwise will not
-be accessible to the QML engine.
+The extension type performs calls on the :class:`~PySide6.QtWidgets.QLineEdit` that
+otherwise will not be accessible to the QML engine.
