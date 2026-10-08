@@ -1,8 +1,9 @@
 Simple Browser
 ==============
 
-Simple Browser demonstrates how to use the Qt WebEngine Widgets classes to
-develop a small Web browser application that contains the following elements:
+Simple Browser demonstrates how to use the :mod:`PySide6.QtWebEngineWidgets`
+classes to develop a small Web browser application that contains the following
+elements:
 
 - Menu bar for opening stored pages and managing windows and tabs.
 - Navigation bar for entering a URL and for moving backward and
@@ -20,17 +21,19 @@ Class Hierarchy
 We will implement the following main classes:
 
 - ``Browser`` is a class managing the application windows.
-- ``BrowserWindow`` is a ``QMainWindow`` showing the menu, a navigation
-    bar, ``TabWidget``, and a status bar.
-- ``TabWidget`` is a ``QTabWidget`` and contains one or multiple
-    browser tabs.
-- ``WebView`` is a ``QWebEngineView``, provides a view for ``WebPage``,
-    and is added as a tab in ``TabWidget``.
-- ``WebPage`` is a ``QWebEnginePage`` that represents website content.
+- ``BrowserWindow`` is a :class:`~PySide6.QtWidgets.QMainWindow` showing the
+    menu, a navigation bar, ``TabWidget``, and a status bar.
+- ``TabWidget`` is a :class:`~PySide6.QtWidgets.QTabWidget` and contains
+    one or multiple browser tabs.
+- ``WebView`` is a :class:`~PySide6.QtWebEngineWidgets.QWebEngineView`,
+    providing a view for ``WebPage``, and is added as a tab in ``TabWidget``.
+- ``WebPage`` is a :class:`~PySide6.QtWebEngineCore.QWebEnginePage` that represents
+    website content.
 
 Additionally, we will implement some auxiliary classes:
 
-- ``WebPopupWindow`` is a ``QWidget`` for showing popup windows.
+- ``WebPopupWindow`` is a :class:`~PySide6.QtWidgets.QWidget` for showing
+    popup windows.
 - ``DownloadManagerWidget`` is a ``QWidget`` implementing the downloads
     list.
 
@@ -62,8 +65,9 @@ forwards the signals of the currently selected ``WebView``.
 Implementing WebView Functionality
 ++++++++++++++++++++++++++++++++++
 
-The class ``WebView`` is derived from ``QWebEngineView`` to support the
-following functionality:
+The class ``WebView`` is derived from
+:class:`~PySide6.QtWebEngineWidgets.QWebEngineView` to support the following
+functionality:
 
 - Displaying error messages in case the render process dies
 - Handling ``createWindow()`` requests
@@ -73,12 +77,13 @@ Managing WebWindows
 -------------------
 
 The loaded page might want to create windows of the type
-``QWebEnginePage.WebWindowType``, for example, when a JavaScript program requests
+:class:`~PySide6.QtWebEngineCore.QWebEnginePage.WebWindowType`
+for example, when a JavaScript program requests
 to open a document in a new window or dialog. This is handled by overriding
-``QWebView.createWindow()``.
+:meth:`~PySide6.QtWebEngineWidgets.QWebEngineView.createWindow`.
 
-In case of ``QWebEnginePage.WebDialog``, we create an instance of a custom
-``WebPopupWindow`` class.
+In case of ``QWebEnginePage.WebWindowType.WebDialog``, we create an instance
+of a custom ``WebPopupWindow`` class.
 
 Adding Context Menu Items
 -------------------------
@@ -86,14 +91,17 @@ Adding Context Menu Items
 We add a menu item to the context menu, so that users can right-click to have
 an inspector opened in a new window. We override
 ``QWebEngineView.contextMenuEvent()`` and use
-``QWebEnginePage.createStandardContextMenu()`` to create a default ``QMenu``
-with a default list of ``QWebEnginePage.WebAction`` actions.
+``QWebEnginePage.createStandardContextMenu()`` to create a default
+:class:`~PySide6.QtWidgets.QMenu` with a default list of
+:class:`~PySide6.QtWebEngineCore.QWebEnginePage.WebAction` actions.
 
 Implementing WebPage and WebView Functionality
 +++++++++++++++++++++++++++++++++++++++++++++++
 
-We implement ``WebPage`` as a subclass of ``QWebEnginePage`` and ``WebView`` as
-as subclass of ``QWebEngineView`` to enable HTTP, proxy authentication, as well
+We implement ``WebPage`` as a subclass of
+:class:`~PySide6.QtWebEngineCore.QWebEnginePage` and ``WebView`` as
+as subclass of :class:`~PySide6.QtWebEngineWidgets.QWebEngineView`
+to enable HTTP, proxy authentication, as well
 as ignoring SSL certificate errors when accessing web pages.
 
 In all the cases above, we display the appropriate dialog to the user. In
@@ -111,8 +119,8 @@ Opening a Web Page
 
 This section describes the workflow for opening a new page. When the user
 enters a URL in the navigation bar and presses Enter, the
-``QLineEdit.:returnPressed()`` signal is emitted and the new URL is then handed
-over to ``TabWidget.set_url()``.
+:meth:`~PySide6.QtWidgets.QLineEdit.returnPressed` signal is emitted and
+the new URL is then handed over to ``TabWidget.set_url()``.
 
 The call is forwarded to the currently selected tab.
 
@@ -132,13 +140,14 @@ private browsing on the tab-level, with some tabs in a window in normal mode,
 others in private mode.
 
 Implementing private browsing is quite easy using Qt WebEngine. All one has to
-do is to create a new ``QWebEngineProfile`` and use it in the
-``QWebEnginePage`` instead of the default profile. In the example, this new
-profile is owned by the ``Browser`` object.
+do is to create a new :class:`~PySide6.QtWebEngineCore.QWebEngineProfile` and use
+it in the :class:`~PySide6.QtWebEngineCore.QWebEnginePage` instead of the default
+profile. In the example, this new profile is owned by the ``Browser`` object.
 
 The required profile for *private browsing* is created together with its first
-window. The default constructor for ``QWebEngineProfile`` already puts it in
-*off-the-record* mode.
+window. The default constructor for
+:class:`~PySide6.QtWebEngineCore.QWebEngineProfile`
+already puts it in *off-the-record* mode.
 
 All that is left to do is to pass the appropriate profile down to the
 appropriate ``QWebEnginePage`` objects. The ``Browser`` object will hand to
@@ -146,24 +155,27 @@ each new ``BrowserWindow`` either the global default profile or one shared
 *off-the-record* profile instance.
 
 The ``BrowserWindow`` and ``TabWidget`` objects will then ensure that all
-``QWebEnginePage`` objects contained in a window will use this profile.
+:class:`~PySide6.QtWebEngineCore.QWebEnginePage` objects contained in a
+window will use this profile.
 
 Managing Downloads
 ++++++++++++++++++
 
-Downloads are associated with a ``QWebEngineProfile``. Whenever a download is
-triggered on a web page the ``QWebEngineProfile.downloadRequested`` signal is
-emitted with a ``QWebEngineDownloadRequest``, which in this example is
-forwarded to ``DownloadManagerWidget.download_requested()``.
+Downloads are associated with a :class:`~PySide6.QtWebEngineCore.QWebEngineProfile`.
+Whenever a download is triggered on a web page the
+:meth:`~PySide6.QtWebEngineCore.QWebEngineProfile.downloadRequested` signal is
+emitted with a :class:`~PySide6.QtWebEngineCore.QWebEngineDownloadRequest`, which
+in this example is forwarded to ``DownloadManagerWidget.download_requested()``.
 
 This method prompts the user for a file name (with a pre-filled suggestion) and
 starts the download (unless the user cancels the ``Save As`` dialog).
 
-The ``QWebEngineDownloadRequest`` object will periodically emit the
-``QWebEngineDownloadRequest.receivedBytesChanged()`` signal to notify potential
-observers of the download progress and the
-``QWebEngineDownloadRequest.stateChanged()`` signal when the download is
-finished or when an error occurs.
+The :class:`~PySide6.QtWebEngineCore.QWebEngineDownloadRequest` object will periodically
+emit the
+:meth:`~PySide6.QtWebEngineCore.QWebEngineDownloadRequest.receivedBytesChanged`
+signal to notify potential observers of the download progress and the
+:meth:`~PySide6.QtWebEngineCore.QWebEngineDownloadRequest.stateChanged()` signal when
+the download is finished or when an error occurs.
 
 Files and Attributions
 ++++++++++++++++++++++
