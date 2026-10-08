@@ -4,8 +4,8 @@ Scriptable Application Example
 This example demonstrates how to make a Qt C++ application scriptable.
 
 It has a class ``MainWindow`` (files ``mainwindow.cpp,h``)
-that inherits from ``QMainWindow``, for which bindings are generated
-using Shiboken.
+that inherits from :class:`~PySide6.QtWidgets.QMainWindow`, for which bindings
+are generated using Shiboken.
 
 The header ``wrappedclasses.h`` is passed to Shiboken which generates
 class wrappers and headers in a sub directory called ``AppLib/``

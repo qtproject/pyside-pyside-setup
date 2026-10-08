@@ -8,7 +8,7 @@ QML glue code.
 ``Main.qml`` is a bare ``ApplicationWindow`` with no children. From
 Python, a ``Slider``, several ``Label`` instances, and a ``Button`` are
 loaded from the ``QtQuick.Controls`` module, parented into the window's
-content item, and wired up. A ``QTimer`` animates the slider, a value
+content item, and wired up. A :class:`~PySide6.QtCore.QTimer` animates the slider, a value
 label tracks the slider through its ``valueChanged`` signal, and a reset
 button resets the slider from Python.
 
