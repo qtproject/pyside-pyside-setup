@@ -929,12 +929,16 @@ def module_QtDataVisualization() -> ModuleData:
 def module_QtGraphs() -> ModuleData:
     data = ModuleData("Graphs")
     data.qtlib.append("libQt6Graphs2DImpl")
+    data.metatypes.extend(["qt6graphs2dimpl_metatypes.json",
+                           "qt6graphs_metatypes.json"])
+    data.qml.append("QtGraphs2D")
 
     return data
 
 
 def module_QtGraphsWidgets() -> ModuleData:
     data = ModuleData("GraphsWidgets")
+    data.metatypes.append("qt6graphswidgets_metatypes.json")
 
     return data
 
