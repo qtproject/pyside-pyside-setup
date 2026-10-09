@@ -23,7 +23,8 @@ using namespace Qt::StringLiterals;
 static inline void writeMethod(TextStream &s, const QString &privateObjType,
                                const QString &cppName, const QString &pythonName = {})
 {
-    s << PyMethodDefEntry{pythonName, privateObjType + "::"_L1 + cppName,
+    s << PyMethodDefEntry{pythonName.isEmpty() ? cppName : pythonName,
+                          privateObjType + "::"_L1 + cppName,
                           PyMethodFlag::SingleObject, cppName}
         << ",\n";
 }
@@ -31,7 +32,8 @@ static inline void writeMethod(TextStream &s, const QString &privateObjType,
 static inline void writeNoArgsMethod(TextStream &s, const QString &privateObjType,
                                      const  QString &cppName, const QString &pythonName = {})
 {
-    s << PyMethodDefEntry{pythonName, privateObjType + "::"_L1 + cppName,
+    s << PyMethodDefEntry{pythonName.isEmpty() ? cppName : pythonName,
+                          privateObjType + "::"_L1 + cppName,
                           PyMethodFlag::NoArgs, cppName}
         << ",\n";
 }
