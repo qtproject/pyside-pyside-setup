@@ -49,7 +49,7 @@ class StyleControl(QGroupBox):
         self.m_theme_combo.activated.connect(self._theme_combo_activated)
 
     def _refresh_themes(self):
-        names = self.m_style.themeNames()
+        names = self.m_style.availableThemeNames()
         current = self.m_style.themeName()
         with QSignalBlocker(self.m_theme_combo):
             self.m_theme_combo.clear()
