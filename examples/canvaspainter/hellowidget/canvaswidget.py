@@ -32,7 +32,7 @@ class CanvasWidget(QCanvasPainterWidget):
         centerY = self.height() / 2
 
         # Paint the background circle
-        gradient1 = QCanvasRadialGradient(centerX, centerY - size * 0.1, size * 0.6)
+        gradient1 = QCanvasRadialGradient(centerX, centerY - size * 0.1, 0, size * 0.6)
         gradient1.setStartColor(QColor(0x909090))
         gradient1.setEndColor(QColor(0x404040))
         p.beginPath()
