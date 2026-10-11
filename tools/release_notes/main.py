@@ -36,7 +36,7 @@ This section contains the release notes for different versions of Qt for Python.
 """
 
 
-JIRA_URL = "https://qt-project.atlassian.net/browse/"
+JIRA_URL = "https://qt-project.atlassian.net/browse"
 
 
 class Changelog:
