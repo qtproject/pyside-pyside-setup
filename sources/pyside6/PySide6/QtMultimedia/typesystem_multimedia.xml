@@ -172,6 +172,11 @@
         <enum-type name="Error"/>
         <enum-type name="Loops" python-type="IntEnum" since="6.2.3"/>
         <modify-function signature="setSource(QUrl)" allow-thread="true"/>
+        <modify-function signature="pause()" allow-thread="true"/>
+        <modify-function signature="play()" allow-thread="true"/>
+        <modify-function signature="setAudioOutput(QAudioOutput*)" allow-thread="true"/>
+        <modify-function signature="setVideoOutput(QObject*)" allow-thread="true"/>
+        <modify-function signature="stop()" allow-thread="true"/>
     </object-type>
     <!-- see qtmultimedia/5773f7214c7430a98dea3974c0597cb3ee0ea7f5 might reappear in 6.3
     <object-type name="QMediaPlaylist"/>
