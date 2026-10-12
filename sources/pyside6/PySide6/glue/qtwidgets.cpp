@@ -224,6 +224,7 @@ static const char msgInvalidParameterRemoval[] =
     "Invalid parameter None passed to removeLayoutOwnership().";
 
 void addLayoutOwnership(QLayout *layout, QLayoutItem *item);
+void moveLayoutOwnership(QLayout *layout, QLayoutItem *item);
 void removeLayoutOwnership(QLayout *layout, QWidget *widget);
 
 inline void addLayoutOwnership(QLayout *layout, QWidget *widget)
@@ -275,12 +276,20 @@ inline void addLayoutOwnership(QLayout *layout, QLayout *other)
                                         pyChild, true);
         return;
     }
+
+    for (int i = 0, i_max = other->count(); i < i_max; ++i) {
+        QLayoutItem *item = other->itemAt(i);
+        if (PyErr_Occurred() || !item)
+            return;
+        moveLayoutOwnership(layout, item);
+    }
+
     Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QLayout *](layout));
     Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QLayout *](other));
     Shiboken::Object::setParent(pyParent, pyChild);
 }
 
-inline void addLayoutOwnership(QLayout *layout, QLayoutItem *item)
+inline void moveLayoutOwnership(QLayout *layout, QLayoutItem *item)
 {
 
     if (layout == nullptr || item == nullptr) {
@@ -294,6 +303,11 @@ inline void addLayoutOwnership(QLayout *layout, QLayoutItem *item)
         if (QLayout *l = item->layout())
             addLayoutOwnership(layout, l);
     }
+}
+
+inline void addLayoutOwnership(QLayout *layout, QLayoutItem *item)
+{
+    moveLayoutOwnership(layout, item);
 
     Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QLayout *](layout));
     Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QLayoutItem *](item));
