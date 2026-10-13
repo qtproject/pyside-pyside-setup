@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import functools
 import os
 import re
 import subprocess
@@ -175,14 +176,14 @@ def edit_config_file():
 
 
 """
-Config file handling, cache and read function
+Config file handling
 """
-config_dict: dict = {}
 
 
+@functools.cache
 def read_config_file(file_name):
-    """Read the config file into config_dict, expanding continuation lines"""
-    global config_dict
+    """Read the config file and return a dict of values, expanding continuation lines"""
+    result: dict = {}
     keyPattern = re.compile(r'^\s*([A-Za-z0-9\_\-]+)\s*=\s*(.*)$')
     with open(file_name) as f:
         while True:
@@ -197,7 +198,8 @@ def read_config_file(file_name):
                 while value.endswith('\\'):
                     value = value.rstrip('\\')
                     value += f.readline().rstrip()
-                config_dict[key] = expand_reference(config_dict, value)
+                result[key] = expand_reference(result, value)
+    return result
 
 
 def read_config(key):
@@ -206,8 +208,7 @@ def read_config(key):
     a key 'key' for the repository directory '/foo/qt-5', check for the
     repo-specific value 'key-qt5' and then for the general 'key'.
     """
-    if not config_dict:
-        read_config_file(config_file)
+    config_dict = read_config_file(config_file)
     repo_value = config_dict.get(f"{key}-{base_dir}")
     return repo_value if repo_value else config_dict.get(key)
 
