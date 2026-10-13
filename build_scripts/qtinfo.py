@@ -216,7 +216,8 @@ class QtInfo(metaclass=Singleton):
     def _get_cmake_mkspecs_variables(self):
         setup_script_dir = Path.cwd()
         sources_dir = setup_script_dir / "sources"
-        qt_target_mkspec_dir = (sources_dir / "shiboken6" / "config.tests" / "target_qt_mkspec").as_posix()
+        qt_target_mkspec_dir = (sources_dir / "shiboken6" / "config.tests"
+                                / "target_qt_mkspec").as_posix()
         config_tests_dir = (setup_script_dir / "build" / "config.tests").as_posix()
 
         cmake_cache_args = []
