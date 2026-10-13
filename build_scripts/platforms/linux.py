@@ -72,7 +72,8 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
 
     # Set RPATH for Qt libs.
     if not is_android:
-        pyside_build.update_rpath_for_linux(RpathTargetType.qt_libraries, qt_lib_dir=destination_qt_lib_dir)
+        pyside_build.update_rpath_for_linux(RpathTargetType.qt_libraries,
+                                            qt_lib_dir=destination_qt_lib_dir)
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build() and not OPTION['NO_QT_TOOLS']:
