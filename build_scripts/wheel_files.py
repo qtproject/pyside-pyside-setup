@@ -356,6 +356,7 @@ def module_QtGui() -> ModuleData:
 
     _metatypes = [
         "qt6eglfsdeviceintegrationprivate_metatypes.json",
+        "qt6eglfskmsgbmsupportprivate_metatypes.json",
         "qt6eglfskmssupportprivate_metatypes.json",
         "qt6kmssupportprivate_metatypes.json",
         "qt6xcbqpaprivate_metatypes.json",
@@ -363,6 +364,7 @@ def module_QtGui() -> ModuleData:
 
     _qtlib = [
         "libQt6EglFSDeviceIntegration",
+        "libQt6EglFsKmsGbmSupport",
         "libQt6EglFsKmsSupport",
         "libQt6XcbQpa",
     ]
