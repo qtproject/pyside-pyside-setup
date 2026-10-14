@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
+import functools
 import importlib
 import importlib.util
+import json
 import os
 import platform
 import re
@@ -111,25 +113,14 @@ def get_make(platform_arch, build_type):
     return (make_path, make_generator)
 
 
-_allowed_versions_cache = None
-
-
+@functools.cache
 def get_allowed_python_versions():
-    global _allowed_versions_cache
-    if _allowed_versions_cache is not None:
-        return _allowed_versions_cache
-    pattern = r'Programming Language :: Python :: (\d+)\.(\d+)'
-    supported = []
-
-    for line in config.classifiers:
-        found = re.search(pattern, line)
-        if found:
-            major = int(found.group(1))
-            minor = int(found.group(2))
-            supported.append((major, minor))
-
-    _allowed_versions_cache = sorted(supported)
-    return _allowed_versions_cache
+    config_file = Path(__file__).parents[1] / "wheel_artifacts" / "python_versions.json"
+    with config_file.open(encoding="utf-8") as json_file:
+        json_data = json.load(json_file)
+    min_minor_version = json_data["minimum_minor_version"]
+    max_minor_version = json_data["maximum_minor_version"]
+    return [(3, minor) for minor in range(min_minor_version, max_minor_version + 1)]
 
 
 def check_allowed_python_version():

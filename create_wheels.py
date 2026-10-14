@@ -248,6 +248,29 @@ def get_platform_tag(package_path: Path) -> str:
     return _tag
 
 
+def get_conf_python_minor_version_range() -> tuple[int, int]:
+    """Return the supported minor_version range as specified in config file."""
+    config_file = Path("wheel_artifacts/python_versions.json")
+    with config_file.open(encoding="utf-8") as json_file:
+        json_data = json.load(json_file)
+    return json_data["minimum_minor_version"], json_data["maximum_minor_version"]
+
+
+def python_minor_version_range() -> tuple[int, int]:
+    """Return the supported minor_version range."""
+    min_minor_version, max_minor_version = get_conf_python_minor_version_range()
+    return min_minor_version, max_minor_version
+
+
+def python_language_versions(minor_versions: tuple[int, int]) -> str:
+    """Return the Programming Language version entries as a TOML list."""
+    PYTHON = "Programming Language :: Python"
+    result = f'"{PYTHON}",\n    "{PYTHON} :: 3",\n'
+    for minor in range(minor_versions[0], minor_versions[1] + 1):
+        result += f'    "{PYTHON} :: 3.{minor}",\n'
+    return result
+
+
 def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Path) -> str:
     _name = setup.name
     _tag = get_platform_tag(package_path)
@@ -281,6 +304,10 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
             _lines.append(f"{extra_name} = [{', '.join(_pinned)}]")
         _optional_deps_block = "\n".join(_lines)
 
+    minor_versions = python_minor_version_range()
+    requires_python = f">=3.{minor_versions[0]}, <3.{minor_versions[1] + 1}"
+    limited_api = f"cp3{minor_versions[0]}"
+
     with open(artifacts / "pyproject.toml.base", encoding="utf-8") as f:
         content = (
             f.read()
@@ -292,6 +319,9 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
             .replace('# PROJECT_SCRIPTS', _console_scripts)
             .replace('"PROJECT_DEPENDENCIES"', f"{_dependencies}")
             .replace('# PROJECT_OPTIONAL_DEPENDENCIES', _optional_deps_block)
+            .replace('"PYTHON_LANGUAGE_VERSIONS",', python_language_versions(minor_versions))
+            .replace("REQUIRES_PYTHON", requires_python)
+            .replace('PY_LIMITED_API', limited_api)
         )
     return content
 
