@@ -10,7 +10,7 @@ authors = [
 description = "PROJECT_DESCRIPTION"
 readme = "PROJECT_README"
 version = "PROJECT_VERSION"
-requires-python = ">=3.10, <3.16"
+requires-python = "REQUIRES_PYTHON"
 keywords = ["Qt"]
 license = "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only"
 dependencies = "PROJECT_DEPENDENCIES"
@@ -27,14 +27,7 @@ classifiers = [
     "Operating System :: Microsoft",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: C++",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
-    "Programming Language :: Python :: 3.15",
+    "PYTHON_LANGUAGE_VERSIONS",
     "Topic :: Database",
     "Topic :: Software Development",
     "Topic :: Software Development :: Code Generators",
@@ -55,7 +48,7 @@ Tracker = "https://qt-project.atlassian.net/browse/PYSIDE"
 # PROJECT_SCRIPTS
 
 [tool.distutils.bdist_wheel]
-py_limited_api = "cp310"
+py_limited_api = "PY_LIMITED_API"
 plat_name = "PROJECT_TAG"
 
 [tool.setuptools.packages.find]

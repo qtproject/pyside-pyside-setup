@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -15,6 +16,13 @@ try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib  # type: ignore[no-redef]
+
+
+def get_python_minor_version_range():
+    config_file = Path(__file__).parents[1] / "wheel_artifacts" / "python_versions.json"
+    with config_file.open(encoding="utf-8") as json_file:
+        json_data = json.load(json_file)
+    return json_data["minimum_minor_version"], json_data["maximum_minor_version"]
 
 
 class Config(metaclass=Singleton):
@@ -82,7 +90,10 @@ class Config(metaclass=Singleton):
         self.setup_kwargs['author_email'] = _author["email"]
         self.setup_kwargs['url'] = _pyproject_data["urls"]["Homepage"]
         self.setup_kwargs['license'] = _pyproject_data["license"]
-        self.setup_kwargs['python_requires'] = _pyproject_data["requires-python"]
+
+        min_minor_version, max_minor_version = get_python_minor_version_range()
+        python_requires = f">=3.{min_minor_version}, <3.{max_minor_version + 1}"
+        self.setup_kwargs['python_requires'] = python_requires
 
         self.classifiers = _pyproject_data["classifiers"]
         self.setup_kwargs['classifiers'] = self.classifiers
