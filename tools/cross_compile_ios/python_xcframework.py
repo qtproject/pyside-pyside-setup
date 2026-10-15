@@ -22,7 +22,7 @@ except ImportError:
 
 
 PYTHON_VERSION = "3.15"       # major.minor -- used for stdlib paths (lib/pythonX.Y)
-PYTHON_RELEASE = "3.15.0rc2"  # exact python.org release tag for the iOS XCframework
+PYTHON_RELEASE = "3.15.0"     # exact python.org release tag for the iOS XCframework
 
 TEMPLATES_PATH = Path(__file__).parent / "templates"
 IOS_CACHE_DIR = Path.home() / ".pyside6_ios"
@@ -33,7 +33,7 @@ PYTHON_ORG_IOS_URL = (
 
 # published directly on the python.org release page
 _PYTHON_IOS_SHA256: dict[str, str] = {
-    "3.15.0rc2": "2496d92689da625cd349e856e17b3d540787f8d17806e21536e8d394d940adc0",
+    "3.15.0": "68e98ab35cc0643ba3a227a8c7768da45c2a5e67dbe1bc26598537e96680fd19",
 }
 
 
