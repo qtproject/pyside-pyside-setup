@@ -44,6 +44,18 @@ Building for a physical device additionally requires an ``Apple Developer Team I
 through the ``--team-id`` option or the ``team_id`` key in ``pysidedeploy.spec``. Building for the
 simulator does not require one.
 
+Tool dependencies
+-----------------
+
+``pyside6-ios-deploy`` needs ``tqdm`` and ``certifi``. Install them with:
+
+.. code-block:: bash
+
+    pip install tqdm certifi
+
+Without them, the tool exits and lists the missing packages. The tool then prints the
+``pip install -r`` command for the ``requirements-ios.txt`` file it ships with.
+
 Download Python.xcframework
 ---------------------------
 
@@ -386,6 +398,14 @@ have to match the Python version running on the device.
 
     cd pyside-setup && git checkout 6.12
 
+#. Install libclang. The cross-compilation first builds shiboken6 for the host Mac, and its
+   generator parses the Qt headers with libclang (supported versions: 16-22). If you don't have it,
+   download a prebuilt version from the Qt servers, extract it, and point the build to it::
+
+    export LLVM_INSTALL_DIR=/path/to/libclang
+
+   See the `macOS build instructions`_ for the download link. CMake 3.22 or later is required as well.
+
 #. Install the dependencies::
 
     pip install -r requirements.txt
@@ -430,3 +450,4 @@ The finished iOS wheels are written to ``dist_ios/`` in the repository root.
 
 .. _`qt_download`: https://www.qt.io/download
 .. _`Qt for Python downloads page`: https://download.qt.io/official_releases/QtForPython/pyside6/
+.. _`macOS build instructions`: https://doc.qt.io/qtforpython-6/building_from_source/macOS.html
