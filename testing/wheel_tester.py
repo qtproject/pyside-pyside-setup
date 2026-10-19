@@ -109,11 +109,12 @@ def clean_egg_info():
 
 
 def install_wheel(wheel_path):
-    log.info(f"Installing wheel: {wheel_path}")
+    platform = f'"{sys.version}"/"{sys.platform}"'
+    log.info(f"Installing wheel: {wheel_path} on {platform}")
     exit_code = run_process([sys.executable, "-m", "pip", "install", wheel_path])
     log.info("")
     if exit_code:
-        raise RuntimeError(f"Error while installing wheel {wheel_path}")
+        raise RuntimeError(f'Error while installing wheel {wheel_path} on {platform}')
 
 
 def try_install_wheels(wheels_dir, py_version):
