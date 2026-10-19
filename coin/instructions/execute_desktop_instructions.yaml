@@ -119,7 +119,7 @@ instructions:
         property: host.os
         equals_value: Windows
   - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYSIDE_VIRTUALENV}}\\Scripts\\python.exe create_wheels.py"
+    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYSIDE_VIRTUALENV}}\\Scripts\\python.exe create_wheels.py --verbose 3"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 300
     enable_if:
@@ -129,7 +129,7 @@ instructions:
     userMessageOnFailure: >
          Failed to create wheels for Windows
   - type: ExecuteCommand
-    command: "{{.Env.PYSIDE_VIRTUALENV}}/bin/python create_wheels.py"
+    command: "{{.Env.PYSIDE_VIRTUALENV}}/bin/python create_wheels.py --verbose 3"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 300
     enable_if:
