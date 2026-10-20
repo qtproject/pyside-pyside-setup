@@ -85,6 +85,9 @@ entitlements =
 # Code signing style. Possible values: [Automatic, Manual]
 signing_style = Automatic
 
+# Python packages to install for the target and bundle with the app. Comma separated
+packages =
+
 # Extra header search paths, relative to project_dir. Comma separated
 header_search_paths =
 

@@ -160,6 +160,9 @@ class IOSConfig(Config):
         header_search_paths = self.get_value("ios", "header_search_paths")
         self.header_search_paths = header_search_paths.split(",") if header_search_paths else []
 
+        packages = self.get_value("ios", "packages", ignore_fail=True)
+        self.packages = packages.split(",") if packages else []
+
         # Left empty in the spec, [ios] deployment_target follows whatever the Qt kit
         # in the wheel was built for. It is deliberately never written back, so that
         # empty keeps meaning "follow Qt" across Qt upgrades, and any value in there

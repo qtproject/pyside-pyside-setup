@@ -5,11 +5,12 @@
 import argparse
 import logging
 import shutil
+import sys
 import traceback
 from pathlib import Path
 from textwrap import dedent
 
-from deploy_lib import create_config_file, config_option_exists, MAJOR_VERSION
+from deploy_lib import create_config_file, config_option_exists, run_command, MAJOR_VERSION
 from deploy_lib.ios import IOSConfig, IOSData
 from deploy_lib.ios import pbxproj, main_mm, info_plist, ios_dependency
 
@@ -124,6 +125,20 @@ def main(main_file: Path = None, name: str = None, wheel_pyside: Path = None,
             else:
                 shutil.copyfile(entitlements_src, entitlements_dest)
                 logging.info(f"[DEPLOY] Copied {entitlements_src} -> {entitlements_dest}")
+
+        if config.packages:
+            # pip needs a PEP 730 tag, eg: ios_18_0_arm64_iphonesimulator. The deployment target
+            # can be just "18", so the minor version is padded.
+            major, minor = (config.deployment_target + ".0").split(".")[:2]
+            sdk = "iphonesimulator" if config.simulator else "iphoneos"
+            platform = f"ios_{major}_{minor}_{config.arch}_{sdk}"
+            run_command([sys.executable, "-m", "pip", "install", "--upgrade",
+                         "--target", config.generated_files_path / "site-packages",
+                         "--only-binary", ":all:", "--platform", platform,
+                         "--python-version", config.python_version, "--implementation", "cp",
+                         "--abi", f"cp{config.python_version.replace('.', '')}",
+                         "--extra-index-url", "https://pypi.anaconda.org/beeware/simple",
+                         *config.packages], dry_run=dry_run)
 
         pbxproj_path = proj_dir / "project.pbxproj"
         if dry_run:
