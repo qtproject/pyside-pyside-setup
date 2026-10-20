@@ -29,11 +29,14 @@ Library documentation
 
 - `libshiboken`_
 - `libpyside`_
+- `libpysideqml`_
 - `libpysideremoteobjects`_
 
 .. _libshiboken: ../shiboken6/libshiboken/libshiboken-module.html
 .. _libpyside: ../pyside6/libpyside/libpyside-module.html
+.. _libpysideqml: ../pyside6/libpysideqml/libpysideqml-module.html
 .. _libpysideremoteobjects: ../pyside6/libpysideremoteobjects/libpysideremoteobjects-module.html
+
 
 Implementation details
 ----------------------
