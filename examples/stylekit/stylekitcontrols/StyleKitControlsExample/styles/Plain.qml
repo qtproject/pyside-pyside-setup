@@ -78,15 +78,9 @@ Style {
     }
 
     delayButton {
-        padding: 0
         indicator {
-            radius: 4
-            foreground {
-                radius: 4
-                color: palette.accent.lighter(1.2)
-            }
+            bottomMargin: -3
         }
-        checked.indicator.foreground.color: palette.accent.darker(1.2)
     }
 
     itemDelegate {
@@ -130,6 +124,15 @@ Style {
 
     roundButton {
         background.radius: 255
+    }
+
+    dial {
+        background {
+            radius: 255
+            color: Qt.darker("white", 1.1)
+            scale: 1.0
+        }
+        handle.radius: 255
     }
 
     scrollBar {
