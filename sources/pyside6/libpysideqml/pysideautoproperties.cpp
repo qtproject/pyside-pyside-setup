@@ -153,6 +153,12 @@ static PyTypeObject *PySideAutoProperties_TypeF()
 
 } // extern "C"
 
+/*!
+    \namespace PySide::AutoProperties
+    \brief Namespace for the \c @auto_properties class decorator of QtQmlFeatures.
+    \ingroup QmlFeatures
+    \inmodule libpysideqml
+*/
 namespace PySide::AutoProperties {
 
 static const char *AutoProperties_SignatureStrings[] = {

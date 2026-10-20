@@ -40,6 +40,15 @@
 
 using namespace Qt::StringLiterals;
 
+/*!
+    \typedef PySide::Qml::QuickRegisterItemFunction
+
+    Function used by the QtQuick module to fill the
+    \c QQmlPrivate::RegisterType::parserStatusCast, \c valueSourceCast
+    and \c valueInterceptorCast fields with the correct values.
+
+    \sa PySide::Qml::setQuickRegisterItemFunction()
+*/
 static PySide::Qml::QuickRegisterItemFunction quickRegisterItemFunction = nullptr;
 
 static inline QByteArray qmlElementKey()
@@ -288,7 +297,41 @@ static int qmlRegisterType(PyObject *pyObj, PyObject *pyClassInfoObj,
     return qmlRegisterType(pyObj, importData, metaObject, classInfoMetaObject);
 }
 
-// Legacy (pre 6.7) compatibility helper for the free register functions.
+/*!
+    PySide implementation of the qmlRegisterType<T>() function.
+
+    This is a helper for the legacy free \c qmlRegisterType*() functions (pre 6.7).
+    Decorators should be used instead.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a pyObj
+            \li Python type to be registered.
+        \row
+            \li \a uri
+            \li QML element URI.
+        \row
+            \li \a versionMajor
+            \li QML component major version.
+        \row
+            \li \a versionMinor
+            \li QML component minor version.
+        \row
+            \li \a qmlName
+            \li QML element name.
+        \row
+            \li \a noCreationReason
+            \li Reason for the type not being creatable.
+        \row
+            \li \a creatable
+            \li Whether the type is creatable.
+    \endtable
+
+    Returns the metatype id of the registered type or -1 on failure.
+*/
 int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int versionMinor,
                     const char *qmlName, const char *noCreationReason,
                     bool creatable)
@@ -574,7 +617,44 @@ static int qmlRegisterSingletonType(PyObject *pyObj, const ImportData &importDat
     return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
 }
 
-// Legacy (pre 6.7) compatibility helper for the free register functions.
+/*!
+    PySide implementation of the qmlRegisterSingletonType<T>() function.
+
+    This is a helper for the legacy free \c qmlRegisterSingletonType<T>()
+    function (pre 6.7). Decorators should be used instead.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a pyObj
+            \li Python type to be registered.
+        \row
+            \li \a uri
+            \li QML element URI.
+        \row
+            \li \a versionMajor
+            \li QML component major version.
+        \row
+            \li \a versionMinor
+            \li QML component minor version.
+        \row
+            \li \a qmlName
+            \li QML element name.
+        \row
+            \li \a callback
+            \li Callback creating the singleton instance.
+        \row
+            \li \a isQObject
+            \li Whether the type is a QObject (as opposed to a QJSValue).
+        \row
+            \li \a hasCallback
+            \li Whether \a callback is set.
+    \endtable
+
+    Returns the metatype id of the registered type or -1 on failure.
+*/
 int qmlRegisterSingletonType(PyObject *pyObj,const char *uri,
                              int versionMajor, int versionMinor, const char *qmlName,
                              PyObject *callback, bool isQObject, bool hasCallback)
@@ -627,7 +707,38 @@ static int qmlRegisterSingletonInstance(PyObject *pyObj, const ImportData &impor
     return ids.value(0, -1);
 }
 
-// Legacy (pre 6.7) compatibility helper for the free register functions.
+/*!
+    PySide implementation of the qmlRegisterSingletonInstance<T>() function.
+
+    This is a helper for the legacy free \c qmlRegisterSingletonInstance<T>()
+    function (pre 6.7) . Decorators should be used instead.
+
+    \table
+        \header
+            \li Parameter
+            \li Meaning
+        \row
+            \li \a pyObj
+            \li Python type to be registered.
+        \row
+            \li \a uri
+            \li QML element URI.
+        \row
+            \li \a versionMajor
+            \li QML component major version.
+        \row
+            \li \a versionMinor
+            \li QML component minor version.
+        \row
+            \li \a qmlName
+            \li QML element name.
+        \row
+            \li \a instanceObject
+            \li Singleton object to be registered.
+    \endtable
+
+    Returns the metatype id of the registered type or -1 on failure.
+*/
 int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMajor,
                                  int versionMinor, const char *qmlName,
                                  PyObject *instanceObject)
@@ -732,6 +843,12 @@ PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
     return pyObj;
 }
 
+/*!
+    PySide implementation of the \c QML_ELEMENT macro (\c @QmlElement decorator)
+    registering the Python type \a pyObj.
+
+    Returns \a pyObj or \c nullptr with a Python error set on failure.
+*/
 PyObject *qmlElementMacro(PyObject *pyObj)
 {
     return qmlElementMacro(pyObj, "QmlElement", "auto"_ba);
@@ -742,11 +859,23 @@ PyObject *qmlNamedElementMacro(PyObject *pyObj, const QByteArray &typeName)
     return qmlElementMacro(pyObj, "QmlNamedElement", typeName);
 }
 
+/*!
+    PySide implementation of the \c QML_ANONYMOUS macro (\c @QmlAnonymous decorator)
+    registering the Python type \a pyObj.
+
+    Returns \a pyObj or \c nullptr with a Python error set on failure.
+*/
 PyObject *qmlAnonymousMacro(PyObject *pyObj)
 {
     return qmlElementMacro(pyObj, "QmlAnonymous",  "anonymous"_ba);
 }
 
+/*!
+    PySide implementation of the \c QML_SINGLETON macro (\c @QmlSingleton decorator).
+
+    Marks the Python type \a pyObj as singleton. The registration happens
+    in a subsequent \c @QmlElement decorator. Returns \a pyObj.
+*/
 PyObject *qmlSingletonMacro(PyObject *pyObj)
 {
     PySide::Qml::ensureQmlTypeInfo(pyObj)->flags.setFlag(PySide::Qml::QmlTypeFlag::Singleton);
@@ -754,11 +883,23 @@ PyObject *qmlSingletonMacro(PyObject *pyObj)
     return pyObj;
 }
 
+/*!
+    Returns the function set by the QtQuick module for registering
+    QQuickItem-derived types.
+
+    \sa setQuickRegisterItemFunction()
+*/
 QuickRegisterItemFunction getQuickRegisterItemFunction()
 {
     return quickRegisterItemFunction;
 }
 
+/*!
+    Sets the \a function for registering QQuickItem-derived types.
+    This is called by the QtQuick module.
+
+    \sa getQuickRegisterItemFunction()
+*/
 void setQuickRegisterItemFunction(QuickRegisterItemFunction function)
 {
     quickRegisterItemFunction = function;

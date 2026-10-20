@@ -106,6 +106,10 @@ void initQmlUncreatable(PyObject *module)
     PepModule_AddType(module, qmlUncreatableType);
 }
 
+/*!
+    Sets the class info marking the Python \a type as uncreatable
+    with the given \a reason.
+*/
 void setUncreatableClassInfo(PyTypeObject *type, const QByteArray &reason)
 {
     PySide::ClassInfo::setClassInfo(type, {
@@ -113,6 +117,12 @@ void setUncreatableClassInfo(PyTypeObject *type, const QByteArray &reason)
         {"QML.UncreatableReason"_ba, reason} });
 }
 
+/*!
+    \overload
+
+    Adds the class info marking a type as uncreatable with the given
+    \a reason to the meta object \a builder.
+*/
 void setUncreatableClassInfo(QMetaObjectBuilder *builder, const QByteArray &reason)
 {
     builder->addClassInfo("QML.Creatable", "false");

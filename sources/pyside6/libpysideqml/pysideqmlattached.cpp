@@ -206,6 +206,13 @@ PySide::Qml::QmlExtensionInfo qmlAttachedInfo(PyTypeObject *t,
     return result;
 }
 
+/*!
+    PySide implementation of the qmlAttachedPropertiesObject<T>() function.
+
+    Returns the attached object instance of the attaching type
+    \a typeObject for the attachee \a obj. If \a create is \c true,
+    the attached object is created if it does not exist yet.
+*/
 QObject *qmlAttachedPropertiesObject(PyObject *typeObject, QObject *obj, bool create)
 {
     auto *type = reinterpret_cast<PyTypeObject *>(typeObject);
