@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 from functools import lru_cache
 from importlib.metadata import distributions as _distributions
+from importlib.metadata import packages_distributions
 
 from . import IMPORT_WARNING_PYSIDE, DEFAULT_IGNORE_DIRS, run_command
 
@@ -196,6 +197,38 @@ def find_pyside_modules(project_dir: Path, extra_ignore_dirs: list[Path] = None,
         ValueError("[DEPLOY] No PySide6 modules were found")
 
     return list(all_modules)
+
+
+def find_third_party_packages(project_dir: Path, extra_ignore_dirs: list[Path] = None,
+                              project_data=None) -> tuple[list[str], list[str]]:
+    """
+    Searches all the python files in the project for imports that are neither stdlib, PySide6,
+    nor the project's own modules. Returns the names of the installed distributions providing
+    them, and the imported names for which no installed distribution was found.
+    """
+    if extra_ignore_dirs is not None:
+        extra_ignore_dirs = tuple(extra_ignore_dirs)
+    py_files = get_py_files(project_dir, extra_ignore_dirs, project_data)
+
+    # ignore the local imports
+    local = {file.relative_to(project_dir).parts[0].removesuffix(".py")
+             for file in py_files if file.is_relative_to(project_dir)}
+
+    imported = set()
+    for py_file in py_files:
+        for node in ast.walk(get_ast(py_file)):
+            if isinstance(node, ast.Import):
+                imported.update(alias.name.split(".")[0] for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                imported.add(node.module.split(".")[0])
+
+    imported -= local | set(sys.stdlib_module_names) | {"PySide6", "shiboken6", "__future__"}
+
+    distributions = packages_distributions()
+    packages = sorted({dist for name in imported for dist in distributions.get(name, [])})
+    unresolved = sorted(name for name in imported if name not in distributions)
+
+    return packages, unresolved
 
 
 class QtDependencyReader:
