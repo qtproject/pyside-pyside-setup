@@ -171,6 +171,12 @@ PyTypeObject *PySideChange_TypeF(void)
 
 } // extern "C"
 
+/*!
+    \namespace PySide::Change
+    \brief Namespace for the \c Change type of QtQmlFeatures.
+    \ingroup QmlFeatures
+    \inmodule libpysideqml
+*/
 namespace PySide::Change {
 
 static const char *Change_SignatureStrings[] = {

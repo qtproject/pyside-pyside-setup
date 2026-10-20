@@ -80,6 +80,12 @@ static PyTypeObject *PySideQmlComponent_TypeF()
 
 } // extern "C"
 
+/*!
+    \namespace PySide::QmlComponent
+    \brief Namespace for the \c load_qml_component function of QtQmlFeatures.
+    \ingroup QmlFeatures
+    \inmodule libpysideqml
+*/
 namespace PySide::QmlComponent {
 
 static const char *QmlComponent_SignatureStrings[] = {

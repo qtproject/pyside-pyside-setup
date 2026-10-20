@@ -16,11 +16,6 @@ QT_FORWARD_DECLARE_CLASS(QObject)
 namespace PySide::Qml
 {
 
-/// PySide implementation of qmlAttachedPropertiesObject<T> function.
-/// \param typeObject attaching type
-/// \param obj        attachee
-/// \param create     Whether to create the Attachment object
-/// \return           Attachment object instance
 PYSIDEQML_API QObject *qmlAttachedPropertiesObject(PyObject *typeObject, QObject *obj,
                                                    bool create = true);
 

@@ -46,9 +46,38 @@ static void removeLastHandler(QQmlListProperty<QObject> *propList)
     m->removeLast(propList);
 }
 
+/*!
+    \class QmlListPropertyMixin
+    \brief A mixin for PySide properties handling the registration of
+           QQmlListProperty<> in a metaCall() and providing virtuals for
+           the list functionality.
+    \inmodule libpysideqml
+*/
+
+/*!
+    \enum QmlListPropertyMixin::MethodFlag
+
+    Specifies the list methods implemented by a subclass.
+
+    \value Count      count() is implemented.
+    \value At         at() is implemented.
+    \value Append     append() is implemented.
+    \value Clear      clear() is implemented.
+    \value Replace    replace() is implemented.
+    \value RemoveLast removeLast() is implemented.
+*/
+
+
 QmlListPropertyMixin::QmlListPropertyMixin() noexcept = default;
 QmlListPropertyMixin::~QmlListPropertyMixin() = default;
 
+/*!
+    Call this from a metaCall() of a property to register the property.
+
+    For QMetaObject::ReadProperty \a call, a QQmlListProperty<QObject>
+    for the QObject \a source with the handlers specified by methodFlags()
+    is written to \a args.
+*/
 void QmlListPropertyMixin::handleMetaCall(PyObject *source, QMetaObject::Call call, void **args)
 {
     if (call != QMetaObject::ReadProperty)

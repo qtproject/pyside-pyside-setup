@@ -16,6 +16,33 @@
 
 #include <signalmanager.h>
 
+/*!
+    \module libpysideqml
+    \title PySide QML library
+    \brief Library for QML functionality.
+
+    Contains the functionality for registering Python types with QML
+    and the decorators of the QtQml module and the \l{QmlFeatures module}.
+*/
+
+/*!
+    \group QmlFeatures
+    \title QmlFeatures module
+
+    \brief QmlFeatures module
+*/
+
+/*!
+    \namespace PySide
+    \brief Root namespace.
+    \inmodule libpysideqml
+*/
+
+/*!
+    \namespace PySide::Qml
+    \brief Namespace for QML type registration and decorators.
+    \inmodule libpysideqml
+*/
 namespace PySide::Qml
 {
 
