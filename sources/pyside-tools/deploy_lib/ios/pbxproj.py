@@ -52,10 +52,17 @@ def _stdlib_script(cfg: IOSConfig) -> str:
     """Copy the Python stdlib via Python-Apple-support's own utils.sh
     (ships inside the xcframework at build/utils.sh)."""
     xcframework_rel = os.path.relpath(cfg.xcframework_path, cfg.output_dir)
+    # Third-party packages whose .so files must become frameworks. Passed one by one, since
+    # PySide6/ in the same packages/ folder must not be processed.
+    extra = ""
+    site_packages = cfg.generated_files_path / "site-packages"
+    if cfg.packages and site_packages.is_dir():
+        extra = "".join(f" {quote('packages/' + p.name)}"
+                        for p in sorted(site_packages.iterdir()) if p.is_dir())
     return (
         f'set -e\n'
         f'source "$PROJECT_DIR"/{quote(xcframework_rel)}/build/utils.sh\n'
-        f'install_python {quote(xcframework_rel)}\n'
+        f'install_python {quote(xcframework_rel)}{extra}\n'
     )
 
 
@@ -79,6 +86,9 @@ def _pyside6_packages_script(cfg: IOSConfig) -> str:
         '    --exclude="*.a" --exclude="*.h" --exclude="__pycache__/" --exclude="*.pyc" \\',
         f'    {quote(str(cfg.shiboken_dir))}/ "$PKG/shiboken6/"',
     ]
+    if cfg.packages:
+        lines += ['rsync -a --exclude="__pycache__/" --exclude="*.pyc" \\',
+                  f'    {quote(str(cfg.generated_files_path / "site-packages"))}/ "$PKG/"']
     return "\n".join(lines) + "\n"
 
 
@@ -305,9 +315,9 @@ def generate(cfg: IOSConfig, qml_plugins: list[QmlPlugin], qt_deps: QtDependenci
     pyside6_phase_id = ids.next()
     packages_phase_id = ids.next()
     shell_phases = [
-        (stdlib_phase_id, "Process Python libraries", _stdlib_script(cfg)),
         (pyside6_phase_id, "Copy PySide6 Packages", _pyside6_packages_script(cfg)),
         (packages_phase_id, "Copy Python Packages", _packages_script(cfg)),
+        (stdlib_phase_id, "Process Python libraries", _stdlib_script(cfg)),
     ]
 
     # -- Configurations
