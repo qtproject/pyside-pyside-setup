@@ -9,9 +9,15 @@ from pathlib import Path
 from zipfile import ZipFile
 
 from .. import Config, safe_extractall
-from ..dependency_util import get_py_files
+from ..dependency_util import get_py_files, find_third_party_packages
 from .ios_helper import IOSData, get_wheel_ios_target, get_xcframework_python_version
 from .python_xcframework import download_python_support
+
+
+# A name with an optional version specifier. Must not start with "-", or pip
+# would read it as an option.
+_PACKAGE_REQUIREMENT = re.compile(
+    r"[A-Za-z0-9][A-Za-z0-9._-]*((==|>=|<=|~=|!=|<|>)[A-Za-z0-9.*+!_-]+)?")
 
 
 def _unpack_wheel(wheel_path: Path, dest_parent: Path, package_name: str) -> Path:
@@ -160,8 +166,17 @@ class IOSConfig(Config):
         header_search_paths = self.get_value("ios", "header_search_paths")
         self.header_search_paths = header_search_paths.split(",") if header_search_paths else []
 
-        packages = self.get_value("ios", "packages", ignore_fail=True)
-        self.packages = packages.split(",") if packages else []
+        listed = self.get_value("ios", "packages", ignore_fail=True)
+        scanned, self.unresolved_imports = find_third_party_packages(
+            self.project_dir, extra_ignore_dirs=self.extra_ignore_dirs,
+            project_data=self.project_data)
+        listed_names = {p.strip() for p in listed.split(",") if p.strip()} if listed else set()
+        self.packages = sorted(listed_names | set(scanned))
+        for package in self.packages:
+            if not _PACKAGE_REQUIREMENT.fullmatch(package):
+                raise RuntimeError(f"[DEPLOY] \"{package}\" is not a valid package requirement "
+                                   "in [ios] packages, eg: \"requests\" or \"numpy==2.5.2\"")
+        self.set_value("ios", "packages", ",".join(self.packages))
 
         # Left empty in the spec, [ios] deployment_target follows whatever the Qt kit
         # in the wheel was built for. It is deliberately never written back, so that
