@@ -89,7 +89,9 @@ class Config(metaclass=Singleton):
         self.setup_kwargs['author'] = _author["name"]
         self.setup_kwargs['author_email'] = _author["email"]
         self.setup_kwargs['url'] = _pyproject_data["urls"]["Homepage"]
-        self.setup_kwargs['license'] = _pyproject_data["license"]
+        license = _pyproject_data["license"]
+        license_text = license["text"] if type(license) is dict else license
+        self.setup_kwargs['license'] = license_text
 
         min_minor_version, max_minor_version = get_python_minor_version_range()
         python_requires = f">=3.{min_minor_version}, <3.{max_minor_version + 1}"
