@@ -130,12 +130,16 @@ Style {
     }
 
     delayButton {
-        padding: 0
+        indicator {
+            height: 2
+            border.width: 0
+            bottomMargin: -2
+            foreground.margins: 0
+        }
     }
 
     dial {
-        background.visible: false
-        indicator {
+        background {
             width: 100
             height: 100
             radius: 255
@@ -309,7 +313,7 @@ Style {
         }
 
         delayButton {
-            indicator.color: "transparent"
+            indicator.color: "lightgray"
         }
 
         flatButton {
@@ -453,7 +457,7 @@ Style {
         }
 
         delayButton {
-            indicator.color: "transparent"
+            indicator.color: "#666666"
         }
 
         flatButton {

@@ -167,10 +167,12 @@ Style {
     }
 
     delayButton {
-        padding: 0
         indicator {
-            color: "transparent"
-            border.width: 0
+            height: 10
+            bottomMargin: -2
+            leftMargin: 5
+            rightMargin: 5
+            border.width: 1
         }
     }
 
@@ -216,14 +218,10 @@ Style {
     }
 
     dial {
-        indicator {
+        background {
             width: 184
             height: 184
             radius: 255
-            foreground {
-                width: 8
-                height: 8
-            }
         }
     }
 
