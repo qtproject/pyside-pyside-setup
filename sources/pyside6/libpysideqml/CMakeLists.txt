@@ -127,3 +127,14 @@ if(NOT is_pyside6_superproject_build)
                             ARCHIVE DESTINATION "PySide6"
                             RUNTIME DESTINATION "PySide6")
 endif()
+
+# documentation
+set(libpysideqml_qdocconf "${CMAKE_CURRENT_BINARY_DIR}/libpysideqml.qdocconf")
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libpysideqml.qdocconf.in"
+               "${libpysideqml_qdocconf}" @ONLY)
+
+add_custom_target(libpysideqml_qdoc
+                 COMMAND qdoc "${libpysideqml_qdocconf}"
+                 COMMENT "Generating libpysideqml documentation"
+                 VERBATIM)
