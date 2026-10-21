@@ -2,8 +2,10 @@
 
 ## Relevant preprocessor defines
 
-- The version range is determined by `wheel_artifacts/pyproject.toml.base`.
-  This file also defines the version tag (`py_limited_api = "cp310"`).
+- The minor version range is determined by `wheel_artifacts/python_versions.json`.
+  This is read by *create_wheels.py* to generate a TOML file from the template
+  `wheel_artifacts/pyproject.toml.base`. The script also
+  defines the version tag (`py_limited_api = "cp310"`).
 - `PY_VERSION_HEX` Python version (defined in CPython headers)
 - `Py_LIMITED_API` Limited API minimum version, defined in several CMake files
 - `PYPY_VERSION`  [PyPy](https://pypy.org/) version (defined in PyPy headers)
