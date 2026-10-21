@@ -11,6 +11,7 @@ import importlib.util
 import json
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
+from enum import Enum, auto
 from pathlib import Path
 from shutil import copy, rmtree, copytree
 
@@ -74,6 +75,17 @@ WHEEL_OPTIONAL_DEPENDENCIES: dict[str, dict[str, tuple[list[str], tuple[str, ...
         "full": (["PySide6_Examples", "shiboken6_generator"], None),
     },
 }
+
+
+class BuildType(Enum):
+    LIMITED_API = auto()
+    FREE_THREADED = auto()
+    DEBUG = auto()
+    RELEASE = auto()
+
+
+BUILDTYPE_POSTFIX_MAPPING = [(BuildType.LIMITED_API, "a"), (BuildType.FREE_THREADED, "t"),
+                             (BuildType.DEBUG, "d"), (BuildType.RELEASE, "")]
 
 
 @dataclass
@@ -256,7 +268,7 @@ def get_conf_python_minor_version_range() -> tuple[int, int]:
     return json_data["minimum_minor_version"], json_data["maximum_minor_version"]
 
 
-def python_minor_version_range() -> tuple[int, int]:
+def python_minor_version_range(build_type: BuildType) -> tuple[int, int]:
     """Return the supported minor_version range."""
     min_minor_version, max_minor_version = get_conf_python_minor_version_range()
     return min_minor_version, max_minor_version
@@ -271,7 +283,8 @@ def python_language_versions(minor_versions: tuple[int, int]) -> str:
     return result
 
 
-def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Path) -> str:
+def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Path,
+                            build_type: BuildType) -> str:
     _name = setup.name
     _tag = get_platform_tag(package_path)
 
@@ -304,7 +317,7 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
             _lines.append(f"{extra_name} = [{', '.join(_pinned)}]")
         _optional_deps_block = "\n".join(_lines)
 
-    minor_versions = python_minor_version_range()
+    minor_versions = python_minor_version_range(build_type)
     requires_python = f">=3.{minor_versions[0]}, <3.{minor_versions[1] + 1}"
     limited_api = f"cp3{minor_versions[0]}"
 
@@ -531,20 +544,20 @@ def venv_name():
     return Path(v).name if v else None
 
 
-def get_build_directory(options: Namespace):
+def get_build_directory(options: Namespace) -> tuple[Path, BuildType]:
     build_dir = Path("build")
     # Search for a "--env" option first", try postfix "a" for limited API or "d", debug
     venv = options.env if options.env else venv_name()
     if venv:
-        for postfix in ("a", "d", ""):
+        for build_type, postfix in BUILDTYPE_POSTFIX_MAPPING:
             result = build_dir / f"{venv}{postfix}"
             if result.is_dir():
-                return result
+                return result, build_type
     if options.env:
         raise ValueError(f'Invalid environment "{options.env}" passed')
     # Try explicit build-dir
     if options.build_dir and (Path(options.build_dir) / PACKAGE_FOR_WHEELS).is_dir():
-        return Path(options.build_dir)
+        return Path(options.build_dir), BuildType.LIMITED_API
     # Fallback to existing dirs (skip "config.tests")
     for d in build_dir.glob("*"):
         if (d / PACKAGE_FOR_WHEELS).is_dir():
@@ -553,7 +566,7 @@ def get_build_directory(options: Namespace):
                 "the first valid directory it could find on its own. If this is not the one you "
                 "want, use the --env or --build-dir options to provide it explicitly."
             )
-            return d
+            return d, BuildType.LIMITED_API
     raise FileNotFoundError(
         "Unable to determine build directory, no matching virtual environment found")
 
@@ -609,7 +622,7 @@ if __name__ == "__main__":
     # and the functions in build_scripts/wheel_files.py
     check_modules_consistency()
 
-    build_directory = get_build_directory(options)
+    build_directory, build_type = get_build_directory(options)
 
     verbose = options.verbose if options.verbose else 0
     # Setup paths
@@ -669,7 +682,8 @@ if __name__ == "__main__":
 
         # 2. Generate 'pyproject.toml'
         log.info("-- Generating pyproject.toml")
-        pyproject_toml_content = generate_pyproject_toml(artifacts_path, setup, package_path)
+        pyproject_toml_content = generate_pyproject_toml(artifacts_path, setup, package_path,
+                                                         build_type)
         with open(pyproject_toml_path, "w", encoding="utf-8") as f:
             f.write(pyproject_toml_content)
 
