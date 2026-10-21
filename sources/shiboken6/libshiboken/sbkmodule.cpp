@@ -229,8 +229,8 @@ static PyTypeObject *incarnateType(PyObject *module, const std::string &name,
 // the creation of the type(s), this is efficient.
 void loadLazyClassesWithNameStd(const std::string &name)
 {
-    for (auto const & tableIter : moduleData()->moduleToFuncs) {
-        auto nameToFunc = tableIter.second;
+    for (auto &tableIter : moduleData()->moduleToFuncs) {
+        auto &nameToFunc = tableIter.second;
         auto funcIter = nameToFunc.find(name);
         if (funcIter != nameToFunc.end()) {
             // attribute exists in the lazy types.
