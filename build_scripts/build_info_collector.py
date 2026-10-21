@@ -33,6 +33,8 @@ def prefix():
         name += "p"
     if OPTION["LIMITED_API"] == "yes":
         name += "a"
+    if sysconfig.get_config_vars('Py_GIL_DISABLED')[0]:
+        name += "t"
     return Path(name), has_virtual_env
 
 
