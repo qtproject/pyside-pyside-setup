@@ -160,7 +160,12 @@ static void pythonToCpp_Tuple_POD(PyObject *pyIn, void *cppOut)
         static const Conversions::SpecificConverter argConverter("QVariant");
         PyObject *item = PyTuple_GetItem(pyIn, i);
         QVariant &variant = cppOutRef[i];
-        Conversions::SpecificConverter converter(variant.metaType().name());
+        const auto metaType = variant.metaType();
+        if (!metaType.isValid()) {
+            PyErr_Format(PyExc_ValueError, "Invalid meta type at %zd.", i);
+            return;
+        }
+        Conversions::SpecificConverter converter(metaType.name());
         Shiboken::Conversions::pythonToCppCopy(converter, item, variant.data());
     }
 }

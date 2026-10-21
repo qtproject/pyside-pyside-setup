@@ -204,6 +204,9 @@ static PyObject *convertGenericReturnArgument(const void *retData, QMetaType met
 {
     PyObject *result = nullptr;
     switch (metaType.id()) {
+    case QMetaType::UnknownType:
+        return PyErr_Format(PyExc_RuntimeError, "%s: Received an invalid meta type.",
+                            __FUNCTION__);
     case QMetaType::Bool:
         result = *reinterpret_cast<const bool *>(retData) ? Py_True : Py_False;
         Py_INCREF(result);

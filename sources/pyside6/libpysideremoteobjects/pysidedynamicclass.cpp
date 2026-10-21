@@ -127,9 +127,13 @@ struct SourceDefs
                     PyErr_SetString(PyExc_TypeError, "Property setter takes exactly one argument");
                     return nullptr;
                 }
-                Conversions::SpecificConverter converter(currentVariant.metaType().name());
+                const auto metaType = currentVariant.metaType();
+                if (!metaType.isValid()) {
+                    PyErr_SetString(PyExc_TypeError, "Invalid meta type");
+                    return nullptr;
+                }
+                Conversions::SpecificConverter converter(metaType.name());
                 QVariant variant{currentVariant.metaType()};
-                auto metaType = currentVariant.metaType();
                 if (metaType.flags().testFlag(QMetaType::IsEnumeration)) {
                     converter.toCpp(PyTuple_GetItem(args, 0), variant.data());
                     variant.convert(metaType);
@@ -294,8 +298,12 @@ struct ReplicaDefs
                                     "Property setter takes exactly one argument");
                     return nullptr;
                 }
-                Conversions::SpecificConverter converter(currentVariant.metaType().name());
-                auto metaType = currentVariant.metaType();
+                const auto metaType = currentVariant.metaType();
+                if (!metaType.isValid()) {
+                    PyErr_SetString(PyExc_TypeError, "Invalid meta type");
+                    return nullptr;
+                }
+                Conversions::SpecificConverter converter(metaType.name());
                 if (metaType.flags().testFlag(QMetaType::IsEnumeration)) {
                     converter.toCpp(PyTuple_GetItem(args, 0), currentVariant.data());
                     currentVariant.convert(metaType);

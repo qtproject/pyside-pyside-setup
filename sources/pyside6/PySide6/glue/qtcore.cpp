@@ -240,7 +240,7 @@ auto *pyType = reinterpret_cast<PyTypeObject *>(%in);
 // @snippet conversion-pytypeobject-qmetatype
 
 // @snippet conversion-qmetatype-pytypeobject
-auto pyType = Shiboken::Conversions::getPythonTypeObject(%in.name());
+PyTypeObject *pyType = %in.isValid() ? Shiboken::Conversions::getPythonTypeObject(%in.name()) : nullptr;
 %out = pyType ? (reinterpret_cast<PyObject *>(pyType)) : Py_None;
 Py_INCREF(%out);
 return %out;
@@ -1900,6 +1900,9 @@ if (!qArgData)
     return nullptr;
 
 switch (qArgData.metaType.id()) {
+    case QMetaType::UnknownType:
+        return PyErr_Format(PyExc_RuntimeError, "%s: Received an invalid meta type.",
+                            __FUNCTION__);
     case QMetaType::Bool:
         *reinterpret_cast<bool *>(qArgData.data) = %2 == Py_True;
         break;

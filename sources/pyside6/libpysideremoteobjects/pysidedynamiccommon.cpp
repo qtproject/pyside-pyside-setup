@@ -17,6 +17,10 @@ using namespace Shiboken;
 PyObject *toPython(const QVariant &variant)
 {
     auto metaType = variant.metaType();
+    if (!metaType.isValid()) {
+        PyErr_SetString(PyExc_RuntimeError, "Invalid meta type");
+        return nullptr;
+    }
     Conversions::SpecificConverter converter(metaType.name());
     auto *value = converter.toPython(variant.data());
     if (metaType.flags().testFlag(QMetaType::IsGadget)) {

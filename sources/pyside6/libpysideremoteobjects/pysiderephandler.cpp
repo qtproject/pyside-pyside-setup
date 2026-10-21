@@ -379,6 +379,10 @@ static void RepFile_tp_free(void *self)
 bool instantiateFromDefaultValue(QVariant &variant, const QString &defaultValue)
 {
     auto metaType = variant.metaType();
+    if (!metaType.isValid()) {
+        PyErr_Format(PyExc_TypeError, "Invalid meta type");
+        return false;
+    }
     auto *pyType = Shiboken::Conversions::getPythonTypeObject(metaType.name());
     if (!pyType) {
         PyErr_Format(PyExc_TypeError, "Failed to find Python type for meta type: %s",
