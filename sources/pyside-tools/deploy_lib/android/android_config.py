@@ -121,9 +121,9 @@ class AndroidConfig(Config):
         else:
             modls = self._find_pysidemodules()
             modls += self._find_qtquick_modules()
-            modls += self._find_dependent_qt_modules(modules=modls)
-            # remove duplicates
-            self.modules = list(set(modls))
+            # the order of the modules is the order in which the Qt libraries are loaded on
+            # Android
+            self.modules = self._order_qt_modules(modules=modls)
 
         # gets the xml dependency files from Qt installation path
         self.dependency_files = self._find_dependency_files()
@@ -289,14 +289,16 @@ class AndroidConfig(Config):
 
         return arch
 
-    def _find_dependent_qt_modules(self, modules: list[str]) -> list[str]:
+    def _order_qt_modules(self, modules: list[str]) -> list[str]:
         """
-        Given pysidedeploy_config.modules, find all the other dependent Qt modules. This is
-        done by using llvm-readobj (readelf) to find the dependent libraries from the module
-        library.
+        Given pysidedeploy_config.modules, add all the other dependent Qt modules and return
+        them in loading order: every module comes after the modules it depends on. The Android
+        QtLoader loads the Qt libraries in this order, and a Qt library crashes in its
+        JNI_OnLoad if its dependencies are not loaded yet. The dependencies are found by using
+        llvm-readobj (readelf) to find the dependent libraries from the module library.
         """
-        dependent_modules = set()
-        all_dependencies = set()
+        pyside_only_modules = []
+        ordered_libs = []
         lib_pattern = re.compile(f"libQt6(?P<mod_name>.*)_{self.arch}")
 
         llvm_readobj = get_llvm_readobj(self.ndk_path)
@@ -311,12 +313,13 @@ class AndroidConfig(Config):
             safe_extractall(archive, Path(tmpdir))
             qt_libs_tmpdir = Path(tmpdir) / lib_path_suffix
             # find the lib folder where Qt libraries are stored
-            for module_name in sorted(modules):
+            for module_name in sorted(set(modules)):
                 if module_name in PYSIDE_ONLY_MODULES:
                     # No Qt library exists for these, so there is nothing to
                     # read Qt dependencies from.
                     logging.info(f"[DEPLOY] Skipping {module_name} while collecting Qt "
                                  "dependencies: it has no Qt library")
+                    pyside_only_modules.append(module_name)
                     continue
                 qt_module_path = qt_libs_tmpdir / f"libQt6{module_name}_{self.arch}.so"
                 if not qt_module_path.exists():
@@ -324,24 +327,26 @@ class AndroidConfig(Config):
                                             " inside the wheel")
                 find_lib_dependencies(llvm_readobj=llvm_readobj, lib_path=qt_module_path,
                                       dry_run=self.dry_run,
-                                      used_dependencies=all_dependencies)
-
-        for dependency in all_dependencies:
-            match = lib_pattern.search(dependency)
-            if match:
-                module = match.group("mod_name")
-                if module not in modules:
-                    dependent_modules.add(module)
+                                      used_dependencies=ordered_libs)
 
         # check if the PySide6 binary for the Qt module actually exists
         # eg: libQt6QmlModels.so exists and it includes QML types. Hence, it makes no
-        dependent_modules = [module for module in dependent_modules if module in
-                             get_all_pyside_modules()]
-        dependent_modules_str = ",".join(dependent_modules)
+        # sense to load it as a module: it is loaded as a dependency of the libraries using it.
+        pyside_modules = get_all_pyside_modules()
+        ordered_modules = []
+        for lib in ordered_libs:
+            match = lib_pattern.search(lib)
+            if match:
+                module = match.group("mod_name")
+                if module in modules or module in pyside_modules:
+                    ordered_modules.append(module)
+
+        dependent_modules_str = ",".join(module for module in ordered_modules
+                                         if module not in modules)
         logging.info("[DEPLOY] The following extra dependencies were found:"
                      f" {dependent_modules_str}")
 
-        return dependent_modules
+        return ordered_modules + pyside_only_modules
 
     def _find_dependency_files(self) -> list[zipfile.Path]:
         """

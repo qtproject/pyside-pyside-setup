@@ -8,8 +8,10 @@ import re
 import shutil
 import sys
 import tempfile
+import types
 import unittest
 import subprocess
+import zipfile
 from pathlib import Path
 from unittest import mock
 from unittest.mock import patch
@@ -94,11 +96,11 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         self.buildozer_config = self.temp_example / "buildozer.spec"
 
     @patch("deploy_lib.android.android_config.AndroidConfig._find_local_libs")
-    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.AndroidConfig._order_qt_modules")
     @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     def test_dry_run(self, mock_qtlibs, mock_extraqtmodules, mock_local_libs, mock_extract_jar):
         mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
-        mock_extraqtmodules.return_value = []
+        mock_extraqtmodules.side_effect = lambda modules: list(modules)
         dependent_plugins = ["platforms_qtforandroid",
                              "platforminputcontexts_qtvirtualkeyboardplugin",
                              "iconengines_qsvgicon"]
@@ -114,14 +116,14 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
 
     @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
-    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.AndroidConfig._order_qt_modules")
     @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     def test_config(self, mock_qtlibs, mock_extraqtmodules, mock_recipes_exist, mock_find_jars,
                     mock_extract_jar):
         jar_dir = "tmp/jar/PySide6/jar"
         mock_extract_jar.return_value = Path(jar_dir)
         mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
-        mock_extraqtmodules.return_value = []
+        mock_extraqtmodules.side_effect = lambda modules: list(modules)
         mock_recipes_exist.return_value = True
         jars, init_classes = ["/tmp/jar/PySide6/jar/Qt6Android.jar",
                               "/tmp/jar/PySide6/jar/Qt6AndroidBindings.jar"], []
@@ -187,7 +189,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
 
     @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
-    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.AndroidConfig._order_qt_modules")
     @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     def test_pyside_only_module_excluded_from_qt_libs(self, mock_qtlibs, mock_extraqtmodules,
                                                       mock_recipes_exist, mock_find_jars,
@@ -202,7 +204,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         jar_dir = "tmp/jar/PySide6/jar"
         mock_extract_jar.return_value = Path(jar_dir)
         mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
-        mock_extraqtmodules.return_value = ["QmlFeatures"]
+        mock_extraqtmodules.side_effect = lambda modules: list(modules) + ["QmlFeatures"]
         mock_recipes_exist.return_value = True
         mock_find_jars.return_value = [], []
 
@@ -224,13 +226,13 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
 
     @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
-    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.AndroidConfig._order_qt_modules")
     @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     def test_p4a_pinned_to_commit(self, mock_qtlibs, mock_extraqtmodules, mock_recipes_exist,
                                   mock_find_jars, mock_extract_jar):
         mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
         mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
-        mock_extraqtmodules.return_value = []
+        mock_extraqtmodules.side_effect = lambda modules: list(modules)
         mock_recipes_exist.return_value = True
         mock_find_jars.return_value = [], []
 
@@ -248,14 +250,14 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
 
     @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
-    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.AndroidConfig._order_qt_modules")
     @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     def test_android_api_levels_are_explicit(self, mock_qtlibs, mock_extraqtmodules,
                                              mock_recipes_exist, mock_find_jars,
                                              mock_extract_jar):
         mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
         mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
-        mock_extraqtmodules.return_value = []
+        mock_extraqtmodules.side_effect = lambda modules: list(modules)
         mock_recipes_exist.return_value = True
         mock_find_jars.return_value = [], []
 
@@ -273,7 +275,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
 
     @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
-    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.AndroidConfig._order_qt_modules")
     @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     def test_spec_round_trips_through_buildozer_parser(self, mock_qtlibs, mock_extraqtmodules,
                                                        mock_recipes_exist, mock_find_jars,
@@ -285,7 +287,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
 
         mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
         mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
-        mock_extraqtmodules.return_value = []
+        mock_extraqtmodules.side_effect = lambda modules: list(modules)
         mock_recipes_exist.return_value = True
         mock_find_jars.return_value = [], []
 
@@ -330,10 +332,10 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
                                      wheel_pyside=wheel,
                                      qt_libs_path=zf.Path(wheel) / "PySide6/Qt/lib")
 
-        result = android_config.AndroidConfig._find_dependent_qt_modules(
+        result = android_config.AndroidConfig._order_qt_modules(
             stub, ["Core", "QmlFeatures"])
 
-        self.assertEqual(result, [])
+        self.assertEqual(result, ["QmlFeatures"])
         # Only the module that has a Qt library was inspected.
         self.assertEqual(mock_find_deps.call_count, 1)
         inspected = Path(mock_find_deps.call_args.kwargs["lib_path"]).name
@@ -438,7 +440,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
 
     @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
-    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.AndroidConfig._order_qt_modules")
     @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     @patch("deploy_lib.android.android_config.download_android_ndk")
     def test_no_ndk_passed(self, mock_ndk, mock_qtlibs, mock_extraqtmodules, mock_recipes_exist,
@@ -446,7 +448,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         jar_dir = "tmp/jar/PySide6/jar"
         mock_extract_jar.return_value = Path(jar_dir)
         mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
-        mock_extraqtmodules.return_value = []
+        mock_extraqtmodules.side_effect = lambda modules: list(modules)
         mock_recipes_exist.return_value = True
         jars, init_classes = ["/tmp/jar/PySide6/jar/Qt6Android.jar",
                               "/tmp/jar/PySide6/jar/Qt6AndroidBindings.jar"], []
@@ -468,7 +470,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
 
     @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
-    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.AndroidConfig._order_qt_modules")
     @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     @patch("deploy_lib.android.android_config.download_android_ndk")
     def test_ndk_resolved_with_existing_config_file(self, mock_ndk, mock_qtlibs,
@@ -478,7 +480,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         exists, otherwise every run after the first one fails."""
         mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
         mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
-        mock_extraqtmodules.return_value = []
+        mock_extraqtmodules.side_effect = lambda modules: list(modules)
         mock_recipes_exist.return_value = True
         mock_find_jars.return_value = [], []
         mock_ndk.return_value = Path("/tmp/android_ndk")
@@ -532,7 +534,7 @@ class TestPySide6AndroidDeployQml(DeployTestBase):
     @patch("deploy_lib.android.android_config.AndroidConfig._find_local_libs")
     @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
-    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.AndroidConfig._order_qt_modules")
     @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     def test_config_with_Qml(self, mock_qtlibs, mock_extraqtmodules, mock_recipes_exist,
                              mock_find_jars, mock_local_libs, mock_extract_jar,
@@ -541,7 +543,8 @@ class TestPySide6AndroidDeployQml(DeployTestBase):
         jar_dir = "tmp/jar/PySide6/jar"
         mock_extract_jar.return_value = Path(jar_dir)
         mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
-        mock_extraqtmodules.return_value = ['Qml', 'Network', 'QmlModels', 'OpenGL']
+        mock_extraqtmodules.side_effect = (
+            lambda modules: list(modules) + ['Qml', 'Network', 'QmlModels', 'OpenGL'])
         mock_recipes_exist.return_value = True
         jars, init_classes = ["/tmp/jar/PySide6/jar/Qt6Android.jar",
                               "/tmp/jar/PySide6/jar/Qt6AndroidBindings.jar",
@@ -596,6 +599,103 @@ class TestPySide6AndroidDeployQml(DeployTestBase):
 
         self.config_file.unlink()
         self.buildozer_config_file.unlink()
+
+
+class TestAndroidQtLibLoadOrder(unittest.TestCase):
+    """The Android QtLoader loads the Qt libraries in the order of
+    --qt-libs. A Qt library whose dependencies are not loaded yet crashes in
+    its JNI_OnLoad, so that order has to follow the library dependencies."""
+
+    ARCH = "arm64-v8a"
+    # The Qt libraries each Qt library needs directly. Core is deliberately
+    # missing from the lists of the upper modules, so that it is only found by
+    # following the dependencies of their dependencies.
+    NEEDED = {
+        "Core": [],
+        "Gui": ["Core"],
+        "Network": ["Core"],
+        "Qml": ["Network", "Gui"],
+        "QmlModels": ["Qml"],
+        "Quick": ["Qml", "QmlModels", "Gui"],
+        "QuickTemplates2": ["Quick"],
+        "QuickControls2": ["QuickTemplates2"],
+    }
+    # QmlModels and QuickTemplates2 have no PySide module.
+    PYSIDE_MODULES = ["Core", "Gui", "Network", "Qml", "Quick", "QuickControls2"]
+
+    @classmethod
+    def setUpClass(cls):
+        pyside_tools = Path(__file__).parents[5].resolve() / "sources" / "pyside-tools"
+        sys.path.append(str(pyside_tools))
+        cls.android_helper = importlib.import_module("deploy_lib.android.android_helper")
+        cls.android_config = importlib.import_module("deploy_lib.android.android_config")
+
+    def _lib(self, module):
+        return f"libQt6{module}_{self.ARCH}.so"
+
+    def _run_command(self, command, dry_run, fetch_output=False):
+        """Fake llvm-readobj --needed-libs"""
+        module = re.fullmatch(rf"libQt6(.*)_{self.ARCH}\.so", Path(command[-1]).name).group(1)
+        needed = ["libc.so"] + [self._lib(dep) for dep in self.NEEDED[module]] + ["libm.so"]
+        lines = ["NeededLibraries ["] + [f"  {lib}" for lib in needed] + ["]"]
+        return None, "\n".join(lines).encode("utf-8")
+
+    def _all_dependencies(self, module):
+        dependencies = set()
+        for dependency in self.NEEDED[module]:
+            dependencies |= {dependency} | self._all_dependencies(dependency)
+        return dependencies
+
+    def _assert_dependencies_first(self, libs):
+        """Check each library comes after all the libraries it depends on, as far as
+        both are in libs."""
+        for module in self.NEEDED:
+            if self._lib(module) not in libs:
+                continue
+            for dependency in self._all_dependencies(module):
+                if self._lib(dependency) in libs:
+                    self.assertLess(libs.index(self._lib(dependency)),
+                                    libs.index(self._lib(module)),
+                                    f"{dependency} must be loaded before {module}: {libs}")
+
+    def test_find_lib_dependencies_follows_transitive_dependencies(self):
+        libs = []
+        with patch.object(self.android_helper, "run_command", self._run_command):
+            self.android_helper.find_lib_dependencies(
+                llvm_readobj=Path("llvm-readobj"), lib_path=Path(self._lib("QuickControls2")),
+                used_dependencies=libs)
+        self.assertEqual(set(libs), {self._lib(module) for module in self.NEEDED})
+        self._assert_dependencies_first(libs)
+
+    def test_order_qt_modules(self):
+        tmpdir = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmpdir)
+        wheel = tmpdir / "pyside6-fake-android_aarch64.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            for module in self.NEEDED:
+                archive.writestr(f"PySide6/Qt/lib/{self._lib(module)}", b"")
+        stub = types.SimpleNamespace(arch=self.ARCH, ndk_path=tmpdir, dry_run=False,
+                                     wheel_pyside=wheel,
+                                     qt_libs_path=zipfile.Path(wheel) / "PySide6/Qt/lib")
+
+        with (patch.object(self.android_helper, "run_command", self._run_command),
+              patch.object(self.android_config, "get_llvm_readobj", return_value=wheel),
+              patch.object(self.android_config, "get_all_pyside_modules",
+                           return_value=self.PYSIDE_MODULES)):
+            # Neither the order of the modules nor duplicates may matter.
+            for modules in (["QuickControls2", "Core", "Quick", "Core"],
+                            ["Core", "Quick", "QuickControls2"],
+                            ["Quick", "QuickControls2", "Core", "QmlFeatures"]):
+                with self.subTest(modules=modules):
+                    result = self.android_config.AndroidConfig._order_qt_modules(stub, modules)
+                    libs = [self._lib(module) for module in result if module in self.NEEDED]
+                    self._assert_dependencies_first(libs)
+                    # Dependencies that have a PySide module are added, the ones
+                    # that have none are not.
+                    self.assertEqual(set(result) - {"QmlFeatures"},
+                                     {"Core", "Gui", "Network", "Qml", "Quick", "QuickControls2"})
+                    self.assertEqual(len(result), len(set(result)))
+                    self.assertEqual("QmlFeatures" in result, "QmlFeatures" in modules)
 
 
 if __name__ == "__main__":
