@@ -428,6 +428,8 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
             self._handle_import(n.name)
 
     def visit_ImportFrom(self, node):
+        if node.module is None:  # "from . import module"
+            return
         if "." in node.module:  # "from PySide6.QtWidgets import QWidget"
             self._handle_import(node.module)
         elif node.module == "PySide6":  # "from PySide6 import QtWidgets"
