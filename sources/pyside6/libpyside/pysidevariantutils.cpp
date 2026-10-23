@@ -10,6 +10,7 @@
 #include <autodecref.h>
 #include <sbkconverter.h>
 #include <sbkpep.h>
+#include <sbkpytuplerange.h>
 #include <basewrapper.h>
 
 using namespace Qt::StringLiterals;
@@ -126,23 +127,21 @@ QMetaType resolveMetaType(PyTypeObject *type)
     // tp_base does not always point to the first base class, but rather to the first
     // that has added any python fields or slots to its object layout.
     // See https://mail.python.org/pipermail/python-list/2009-January/520733.html
-    if (type->tp_bases) {
-        const auto size = PyTuple_Size(type->tp_bases);
-        Py_ssize_t i = 0;
+    if (Shiboken::PyTupleTypeRange basesRange(type->tp_bases); !basesRange.isEmpty()) {
+        auto basesIt = basesRange.begin();
         // PYSIDE-1887, PYSIDE-86: Skip QObject base class of QGraphicsObject;
         // it needs to use always QGraphicsItem as a QVariant type for
         // QGraphicsItem::itemChange() to work.
-        if (qstrcmp(typeName, "QGraphicsObject*") == 0 && size > 1) {
-            auto *firstBaseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, 0));
+        if (basesRange.size() > 1 && qstrcmp(typeName, "QGraphicsObject*") == 0) {
+            PyTypeObject *firstBaseType = *basesIt;
             if (SbkObjectType_Check(firstBaseType)) {
                 const char *firstBaseTypeName = Shiboken::ObjectType::getOriginalName(firstBaseType);
                 if (firstBaseTypeName != nullptr && qstrcmp(firstBaseTypeName, "QObject*") == 0)
-                    ++i;
+                    ++basesIt;
             }
         }
-        for ( ; i < size; ++i) {
-            auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, i));
-            const QMetaType derived = resolveMetaType(baseType);
+        for (auto basesEnd = basesRange.end(); basesIt != basesEnd; ++basesIt) {
+            const QMetaType derived = resolveMetaType(*basesIt);
             if (derived.isValid())
                 return derived;
         }

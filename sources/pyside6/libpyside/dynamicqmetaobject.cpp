@@ -17,6 +17,7 @@
 #include <gilstate.h>
 #include <sbkpep.h>
 #include <pep384ext.h>
+#include <sbkpytuplerange.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 
@@ -577,18 +578,16 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     // This enforces registering of all signals and slots at type parsing time, and not later at
     // signal connection time, thus making sure no method indices change which would break
     // existing connections.
-    PyObject *mro = type->tp_mro;
-    const Py_ssize_t basesCount = PyTuple_Size(mro);
+    const Shiboken::PyTupleTypeRange mro(type->tp_mro);
 
     std::vector<PyTypeObject *> basesToCheck;
     // Prepend the actual type that we are parsing.
-    basesToCheck.reserve(1U + basesCount);
+    basesToCheck.reserve(1U + mro.size());
     basesToCheck.push_back(type);
 
     auto *sbkObjTypeF = SbkObject_TypeF();
     auto *baseObjType = &PyBaseObject_Type;
-    for (Py_ssize_t i = 0; i < basesCount; ++i) {
-        auto *baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, i));
+    for (PyTypeObject *baseType : mro) {
         if (baseType != sbkObjTypeF && baseType != baseObjType
             && !PySide::isQObjectDerived(baseType, false)) {
             basesToCheck.push_back(baseType);

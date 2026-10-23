@@ -10,6 +10,7 @@
 #include <autodecref.h>
 #include <basewrapper.h>
 #include <sbkpep.h>
+#include <sbkpytuplerange.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
@@ -94,8 +95,7 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
     auto *data = reinterpret_cast<PySideSlot *>(self);
     if (!data->slotData)
         data->slotData = new SlotData;
-    for(Py_ssize_t i = 0, i_max = PyTuple_Size(args); i < i_max; i++) {
-        PyObject *argType = PyTuple_GetItem(args, i);
+    for (auto *argType : Shiboken::PyTupleRange(args)) {
         const auto typeName = PySide::Signal::getTypeName(argType);
         if (typeName.isEmpty()) {
             PyErr_Format(PyExc_TypeError, "Unknown signal argument type: %s", Py_TYPE(argType)->tp_name);

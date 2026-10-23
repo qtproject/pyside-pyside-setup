@@ -6,6 +6,7 @@
 #include "autodecref.h"
 #include "sbkpepbuffer.h"
 #include "basewrapper_p.h"
+#include "sbkpytuplerange.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "pep384impl.h"
@@ -122,15 +123,11 @@ static void formatPyTypeObject(PyTypeObject *obj, std::ostream &str, bool verbos
 
 static void formatTypeTuple(PyObject *t, const char *what, std::ostream &str)
 {
-    const Py_ssize_t size = t != nullptr && PyTuple_Check(t) != 0 ? PyTuple_Size(t) : 0;
-    if (size > 0) {
-        str << ", " << what << "=[" << size << "]{";
-        for (Py_ssize_t i = 0; i < size; ++i) {
+    if (const Shiboken::PyTupleEnumeratedRange tuple(t); !tuple.isEmpty()) {
+        str << ", " << what << "=[" << tuple.size() << "]{";
+        for (auto [i, item] : tuple) {
             if (i != 0)
                 str << ", ";
-            // PyTuple_GetItem returns a borrowed reference; AutoDecRef must not be used
-            // here as it would decrement the refcount of an object still owned by the tuple.
-            PyObject *item = PyTuple_GetItem(t, i);
             if (item == nullptr) {
                 str << '0'; // Observed with non-ready types
             } else {
@@ -164,15 +161,12 @@ static void formatPySequence(PyObject *obj, std::ostream &str)
 
 static void formatPyTuple(PyObject *obj, std::ostream &str)
 {
-
-    const Py_ssize_t size = PyTuple_Size(obj);
-    str << size << " <";
-    for (Py_ssize_t i = 0; i < size; ++i) {
+    const Shiboken::PyTupleEnumeratedRange tuple(obj);
+    str << tuple.size() << " <";
+    for (auto [i, item] : tuple) {
         if (i)
             str << ", ";
         str << '(';
-        // PyTuple_GetItem returns a borrowed reference; must not be decremented.
-        PyObject *item = PyTuple_GetItem(obj, i);
         formatPyObject(item, str);
         str << ')';
     }

@@ -11,9 +11,11 @@
 #include "sbkfeature_base.h"
 #include "sbkmodule.h"
 #include "sbkpep.h"
+#include "sbkpytuplerange.h"
 #include "sbkstaticstrings.h"
 #include "sbkstring.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstring>
 #include <fstream>
@@ -412,12 +414,11 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName
         return nullptr;
     }
 
-    PyObject *mro = Py_TYPE(obWrapper)->tp_mro;
+    PyTypeObject *type = Py_TYPE(obWrapper);
     bool defaultFound = false;
     // The first class in the mro (index 0) is the class being checked and it should not be tested.
     // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
-    for (Py_ssize_t idx = 1, size = PyTuple_Size(mro); idx < size - 1; ++idx) {
-        auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+    for (PyTypeObject *parent : Shiboken::PyTupleTypeRange(type->tp_mro).slice(1).chop(1)) {
         AutoDecRef parentDict(PepType_GetDict(parent));
         if (parentDict) {
             if (PyObject *defaultMethod = PyDict_GetItem(parentDict.object(), pyMethodName)) {
@@ -550,33 +551,27 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     if (!Object::isUserType(self))
         return false;
 
-    auto *startType = Py_TYPE(self);
-    auto *mro = startType->tp_mro;
-    Py_ssize_t idx = 0;
-    const Py_ssize_t n = PyTuple_Size(mro);
     /* No need to check the last one: it's gonna be skipped anyway.  */
+    auto mroRange = Shiboken::PyTupleTypeRange(Py_TYPE(self)->tp_mro).chop(1);
+    const auto mroEnd = mroRange.end();
+
     const char *className = typeStruct.fullName;
-    for ( ; idx + 1 < n; ++idx) {
-        auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
-        if (std::strcmp(className, PepType_GetFullyQualifiedNameStr(lookType)) == 0)
-            break;
-    }
+    auto namePred = [className](PyTypeObject *t) {
+        return std::strcmp(className, PepType_GetFullyQualifiedNameStr(t)) == 0; };
+    auto mroIt = std::find_if(mroRange.begin(), mroEnd, namePred);
+    if (mroIt == mroEnd)
+        return false;
     // We are now at the first non-Python class `QObject`.
     // mro: ('C', 'A', 'QObject', 'Object', 'B', 'object')
     // We want to catch class `B` and call its `__init__`.
-    for (idx += 1; idx + 1 < n; ++idx) {
-        auto *t = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
-        if (isPythonType(t))
-            break;
-    }
-    if (idx >= n)
+    mroIt = std::find_if(++mroIt, mroEnd, isPythonType);
+    if (mroIt == mroEnd)
         return false;
 
-    auto *obSubType = PyTuple_GetItem(mro, idx);
-    auto *subType = reinterpret_cast<PyTypeObject *>(obSubType);
+    auto *subType = *mroIt;
     if (subType == &PyBaseObject_Type)
         return false;
-    AutoDecRef func(PyObject_GetAttr(obSubType, _init));
+    AutoDecRef func(PyObject_GetAttr(reinterpret_cast<PyObject *>(subType), _init));
     // PYSIDE-2654: If this has no implementation then we get object.__init__
     //              but that is the same case like above.
     if (func == objectInit)

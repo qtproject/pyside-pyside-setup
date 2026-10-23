@@ -6,6 +6,7 @@
 #include "autodecref.h"
 #include "sbkpep.h"
 #include "sbkpepbuffer.h"
+#include "sbkpytuplerange.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 
@@ -72,8 +73,7 @@ static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec,
             bases = basesPatch.object();
         }
 
-        for (Py_ssize_t idx = 0, n = PyTuple_Size(bases); idx < n; ++idx) {
-            PyObject *obBase = PyTuple_GetItem(bases, idx);
+        for (auto [idx, obBase] : Shiboken::PyTupleEnumeratedRange(bases)) {
             auto *base = reinterpret_cast<PyTypeObject *>(obBase);
             PyTypeObject *meta = Py_TYPE(obBase);
             if (meta->tp_new != PyType_Type.tp_new) {

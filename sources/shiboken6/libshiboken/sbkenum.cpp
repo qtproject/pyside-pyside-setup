@@ -5,6 +5,7 @@
 #include "sbkenum.h"
 #include "sbkenum_p.h"
 #include "sbkpep.h"
+#include "sbkpytuplerange.h"
 #include "sbkstring.h"
 #include "helper.h"
 #include "sbkstaticstrings.h"
@@ -130,14 +131,8 @@ int enumIsFlag(PyObject *ob_type)
     auto *metatype = Py_TYPE(ob_type);
     if (metatype != globals->PyEnumMeta)
         return -1;
-    auto *mro = reinterpret_cast<PyTypeObject *>(ob_type)->tp_mro;
-    const Py_ssize_t n = PyTuple_Size(mro);
-    for (Py_ssize_t idx = 0; idx < n; ++idx) {
-        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
-        if (sub_type == reinterpret_cast<PyTypeObject *>(globals->PyFlag))
-            return 1;
-    }
-    return 0;
+    const Shiboken::PyTupleRange mro(reinterpret_cast<PyTypeObject *>(ob_type)->tp_mro);
+    return std::find(mro.begin(), mro.end(), globals->PyFlag) != mro.end() ? 1 : 0;
 }
 
 ///////////////////////////////////////////////////////////////////////

@@ -10,6 +10,7 @@
 #include <helper.h>
 #include <pep384ext.h>
 #include <sbkconverter.h>
+#include <sbkpytuplerange.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 
@@ -77,11 +78,10 @@ struct PodDefs
         auto *type = Py_TYPE(self);
         std::string repr(PepType_GetFullyQualifiedNameStr(type));
         repr += "(";
-        for (Py_ssize_t i = 0; i < PyTuple_Size(self); ++i) {
+        for (auto [i, item] : Shiboken::PyTupleEnumeratedRange(self)) {
             if (i > 0)
                 repr += ", ";
 
-            auto *item = PyTuple_GetItem(self, i);
             Shiboken::AutoDecRef item_repr(PyObject_Repr(item));
             repr += String::toCString(item_repr.object());
         }
@@ -149,17 +149,17 @@ static void pythonToCpp_Tuple_POD(PyObject *pyIn, void *cppOut)
 {
     auto &cppOutRef = *reinterpret_cast<QVariantList *>(cppOut);
 
-    Py_ssize_t tupleSize = PyTuple_Size(pyIn);
-    if (tupleSize != cppOutRef.size()) {
+    const Shiboken::PyTupleEnumeratedRange pyInRange(pyIn);
+
+    if (pyInRange.size() != cppOutRef.size()) {
         PyErr_Format(PyExc_ValueError,
                      "Size mismatch: tuple has %zd elements, but POD expects %zd elements",
-                     tupleSize, cppOutRef.size());
+                     pyInRange.size(), cppOutRef.size());
         return;
     }
 
-    for (Py_ssize_t i = 0; i < tupleSize; ++i) {
+    for (auto [i, item] : pyInRange) {
         static const Conversions::SpecificConverter argConverter("QVariant");
-        PyObject *item = PyTuple_GetItem(pyIn, i);
         QVariant &variant = cppOutRef[i];
         const auto metaType = variant.metaType();
         if (!metaType.isValid()) {

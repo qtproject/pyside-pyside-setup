@@ -12,6 +12,7 @@
 #include <autodecref.h>
 #include <pep384ext.h>
 #include <sbkconverter.h>
+#include <sbkpytuplerange.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
@@ -591,11 +592,8 @@ static PyObject *getFromType(PyTypeObject *type, PyObject *name)
     AutoDecRef tpDict(PepType_GetDict(type));
     auto *attr = PyDict_GetItem(tpDict.object(), name);
     if (!attr) {
-        PyObject *bases = type->tp_bases;
-        const Py_ssize_t size = PyTuple_Size(bases);
-        for (Py_ssize_t i = 0; i < size; ++i) {
-            PyObject *base = PyTuple_GetItem(bases, i);
-            attr = getFromType(reinterpret_cast<PyTypeObject *>(base), name);
+        for (PyTypeObject *base : Shiboken::PyTupleTypeRange(type->tp_bases)) {
+            attr = getFromType(base, name);
             if (attr)
                 return attr;
         }

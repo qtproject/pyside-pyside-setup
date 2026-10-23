@@ -7,6 +7,7 @@
 #include "pep384impl.h"
 #include "pep384impl_p.h"
 #include "autodecref.h"
+#include "sbkpytuplerange.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
 #include "basewrapper.h"
@@ -184,13 +185,8 @@ find_name_in_mro(PyTypeObject *type, PyObject *name, int *error)
      * type->tp_mro can be replaced during dict lookup, e.g. when comparing to
      * non-string keys. */
     assert(PyTuple_Check(type->tp_mro));
-    Py_INCREF(type->tp_mro);
-    Shiboken::AutoDecRef mro(type->tp_mro);
-    for (Py_ssize_t i = 0, n = PyTuple_Size(mro.object()); i < n; ++i) {
-        auto *base = PyTuple_GetItem(mro.object(), i);
-        assert(PyType_Check(base));
-        auto *type = reinterpret_cast<PyTypeObject *>(base);
-        Shiboken::AutoDecRef dict(PepType_GetDict(type));
+    for (PyTypeObject *base : Shiboken::OwningPyTupleTypeRange(type->tp_mro)) {
+        Shiboken::AutoDecRef dict(PepType_GetDict(base));
         assert(!dict.isNull() && PyDict_Check(dict.object()));
         if (auto *res = PyDict_GetItem(dict.object(), name))
             return res;

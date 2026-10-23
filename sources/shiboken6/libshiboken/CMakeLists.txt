@@ -84,6 +84,7 @@ sbknumpyview.h
 sbkpep.h
 sbkpepbuffer.h
 sbkpython.h
+sbkpytuplerange.h
 sbksmartpointer.cpp sbksmartpointer.h
 sbkstaticstrings.cpp sbkstaticstrings.h sbkstaticstrings_p.h
 sbkstring.cpp sbkstring.h
@@ -203,6 +204,7 @@ install(FILES
         sbkmodule_p.h
         sbknumpycheck.h
         sbknumpyview.h
+        sbkpytuplerange.h
         sbkstring.h
         sbkcppstring.h
         sbksmartpointer.h

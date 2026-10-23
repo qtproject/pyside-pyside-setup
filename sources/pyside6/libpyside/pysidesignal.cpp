@@ -19,6 +19,7 @@
 #include <sbkconverter.h>
 #include <sbkenum.h>
 #include <sbkerrors.h>
+#include <sbkpytuplerange.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
@@ -315,8 +316,7 @@ static int signalTpInit(PyObject *obSelf, PyObject *args, PyObject *kwds)
     }
     self->data->signalArguments = argumentNamesOpt.value();
 
-    for (Py_ssize_t i = 0, i_max = PyTuple_Size(args); i < i_max; i++) {
-        PyObject *arg = PyTuple_GetItem(args, i);
+    for (auto *arg : Shiboken::PyTupleRange(args)) {
         if (PySequence_Check(arg) && !Shiboken::String::check(arg) && !PyEnumMeta_Check(arg)) {
             tupledArgs = true;
             self->data->signatures.append(PySide::Signal::parseSignature(arg));
@@ -876,11 +876,9 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
     // but walk through the whole mro to find a hidden method with the same name.
     auto signalName = inst->d->signalName;
     Shiboken::AutoDecRef name(Shiboken::String::fromCString(signalName));
-    auto *mro = inst->d->shared->sourceType->tp_mro;
-    const Py_ssize_t n = PyTuple_Size(mro);
 
-    for (Py_ssize_t idx = 0; idx < n; idx++) {
-        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+    auto *sourceType = inst->d->shared->sourceType;
+    for (PyTypeObject *sub_type : Shiboken::PyTupleTypeRange(sourceType->tp_mro)) {
         Shiboken::AutoDecRef tpDict(PepType_GetDict(sub_type));
         auto *hom = PyDict_GetItem(tpDict, name);
         if (hom != nullptr && PyCallable_Check(hom) != 0) {

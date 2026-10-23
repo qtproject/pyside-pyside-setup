@@ -8,6 +8,7 @@
 #include <pep384ext.h>
 #include <sbkpython.h>
 #include <sbkpep.h>
+#include <sbkpytuplerange.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
 #include <signature.h>
@@ -25,8 +26,8 @@ extern "C"
 
 static int computedTpInit(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
-    Py_ssize_t nArgs = PyTuple_Size(args);
-    if (nArgs == 0) {
+    const Shiboken::PyTupleEnumeratedRange argsRange(args);
+    if (argsRange.isEmpty()) {
         PyErr_SetString(PyExc_TypeError,
                         "@computed requires at least one dependency name");
         return -1;
@@ -34,12 +35,11 @@ static int computedTpInit(PyObject *self, PyObject *args, PyObject * /* kw */)
 
     auto *data = reinterpret_cast<PySideComputed *>(self);
     Py_XDECREF(data->depNames);
-    data->depNames = PyList_New(nArgs);
+    data->depNames = PyList_New(argsRange.size());
     if (!data->depNames)
         return -1;
 
-    for (Py_ssize_t i = 0; i < nArgs; ++i) {
-        PyObject *arg = PyTuple_GetItem(args, i);
+    for (auto [i, arg] : argsRange) {
         if (!PyUnicode_Check(arg)) {
             PyErr_Format(PyExc_TypeError,
                          "@computed argument %zd must be a string, not %s",

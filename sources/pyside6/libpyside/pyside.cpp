@@ -40,6 +40,7 @@
 #include <sbkstaticstrings.h>
 #include <sbkfeature_base.h>
 #include <sbkmodule.h>
+#include <sbkpytuplerange.h>
 
 #include <QtCore/qabstracteventdispatcher.h>
 #include <QtCore/qbytearray.h>
@@ -244,11 +245,8 @@ static QByteArrayList _SbkType_LookupProperty(PyTypeObject *type,
     QByteArray origName(_sigWithOrigName(name, snake_flag));
     if (origName.isEmpty())
         return QByteArrayList{};
-    PyObject *mro = type->tp_mro;
-    auto n = PyTuple_Size(mro);
     auto len = std::strlen(origName);
-    for (Py_ssize_t idx = 0; idx < n; idx++) {
-        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+    for (PyTypeObject *base : Shiboken::PyTupleTypeRange(type->tp_mro)) {
         if (!SbkObjectType_Check(base))
             continue;
         auto *props = SbkObjectType_GetPropertyStrings(base);
@@ -556,8 +554,7 @@ void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject * /* kwds *
 
     TypeUserData *userData = nullptr;
 
-    for (Py_ssize_t i = 0, numBases = PyTuple_Size(bases); i < numBases; ++i) {
-        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(bases, i));
+    for (PyTypeObject *base : Shiboken::PyTupleTypeRange(bases)) {
         if (PyType_IsSubtype(base, qObjType)) {
             userData = retrieveTypeUserData(base);
             break;

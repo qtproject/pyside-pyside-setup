@@ -13,6 +13,7 @@
 #include "sbkconverter.h"
 #include "sbkerrors.h"
 #include "sbkfeature_base.h"
+#include "sbkpytuplerange.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
 #include "sbkstring.h"
@@ -74,17 +75,15 @@ namespace Shiboken
 template <class Predicate>
 bool walkThroughBases(PyTypeObject *currentType, Predicate predicate)
 {
-    PyObject *bases = currentType->tp_bases;
-    const Py_ssize_t numBases = PyTuple_Size(bases);
-    bool result = false;
-    for (Py_ssize_t i = 0; !result && i < numBases; ++i) {
-        auto *type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(bases, i));
+    for (PyTypeObject *type : Shiboken::PyTupleTypeRange(currentType->tp_bases)) {
         if (PyType_IsSubtype(type, SbkObject_TypeF()) != 0) {
-            result = PepType_SOTP(type)->is_user_type
-                     ? walkThroughBases(type, predicate) : predicate(type);
+            const bool found = PepType_SOTP(type)->is_user_type
+                                   ? walkThroughBases(type, predicate) : predicate(type);
+            if (found)
+                return true;
         }
     }
-    return result;
+    return false;
 }
 
 static unsigned getTypeIndexOnHierarchy(PyTypeObject *baseType, PyTypeObject *desiredType)
@@ -629,9 +628,8 @@ static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args
                                      &PyDict_Type, &dict))
         return nullptr;
 
-    for (Py_ssize_t i=0, i_max=PyTuple_Size(pyBases); i < i_max; i++) {
-        PyObject *baseType = PyTuple_GetItem(pyBases, i);
-        if (PepExt_Type_GetNewSlot(reinterpret_cast<PyTypeObject *>(baseType)) == SbkDummyNew) {
+    for (PyTypeObject *baseType : Shiboken::PyTupleTypeRange(pyBases)) {
+        if (PepExt_Type_GetNewSlot(baseType) == SbkDummyNew) {
             // PYSIDE-595: A base class does not allow inheritance.
             return reinterpret_cast<PyTypeObject *>(SbkDummyNew(metatype, args, kwds));
         }

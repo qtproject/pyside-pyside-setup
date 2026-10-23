@@ -22,6 +22,7 @@
 #include <sbkconverter.h>
 #include <sbkenum.h>
 #include <sbkpep.h>
+#include <sbkpytuplerange.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
 #include <sbkerrors.h>
@@ -219,8 +220,7 @@ PyObject *methodGetAttr(PyObject *self, PyObject *name)
         return result;
 
     auto *type = Py_TYPE(self);
-    for (Py_ssize_t i = 0, size = PyTuple_Size(type->tp_mro); i < size; ++i) {
-        auto *candidate = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_mro, i));
+    for (PyTypeObject *candidate : Shiboken::PyTupleTypeRange(type->tp_mro)) {
         if (candidate != &PyBaseObject_Type) {
             PyErr_Clear();
             Shiboken::AutoDecRef mangledName(_Pep_TypePrivateMangle(candidate, name));

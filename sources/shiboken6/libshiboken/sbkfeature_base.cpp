@@ -8,6 +8,7 @@
 #include "pep384ext.h"
 #include "sbkenum.h"
 #include "sbkerrors.h"
+#include "sbkpytuplerange.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
@@ -288,12 +289,9 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
     static PyObject *const _member_map_ = String::createStaticString("_member_map_");
     // This is similar to `find_name_in_mro`, but instead of looking directly into
     // tp_dict, we also search for the attribute in local classes of that dict (Part 2).
-    PyObject *mro = type->tp_mro;
     PyObject *result{};
-    assert(PyTuple_Check(mro));
-    for (Py_ssize_t idx = 0, n = PyTuple_Size(mro); idx < n; ++idx) {
-        auto *base = PyTuple_GetItem(mro, idx);
-        auto *type_base = reinterpret_cast<PyTypeObject *>(base);
+    assert(PyTuple_Check(type->tp_mro));
+    for (PyTypeObject *type_base : Shiboken::PyTupleTypeRange(type->tp_mro)) {
         if (!SbkObjectType_Check(type_base))
             continue;
         auto sotp = PepType_SOTP(type_base);

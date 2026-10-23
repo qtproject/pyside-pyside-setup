@@ -11,6 +11,7 @@
 #include <autodecref.h>
 #include <sbkfeature_base.h>
 #include <sbkpep.h>
+#include <sbkpytuplerange.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <signature_p.h>
@@ -361,13 +362,9 @@ static inline void SelectFeatureSet(PyTypeObject *type)
     last_type = type;
     last_select_id = select_id;
 
-    auto *mro = type->tp_mro;
-    const Py_ssize_t n = PyTuple_Size(mro);
     // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
-    for (Py_ssize_t idx = 0; idx < n - 2; idx++) {
-        auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+    for (PyTypeObject *sub_type : Shiboken::PyTupleTypeRange(type->tp_mro).chop(2))
         SelectFeatureSetSubtype(sub_type, select_id);
-    }
     // PYSIDE-1436: Clear all caches for the type and subtypes.
     PyType_Modified(type);
 }
@@ -646,11 +643,8 @@ static QByteArrayList GetPropertyStringsMro(PyTypeObject *type)
      */
     auto res = QByteArrayList();
 
-    PyObject *mro = type->tp_mro;
-    const Py_ssize_t n = PyTuple_Size(mro);
     // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
-    for (Py_ssize_t idx = 0; idx < n - 2; idx++) {
-        auto *subType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
+    for (PyTypeObject *subType : Shiboken::PyTupleTypeRange(type->tp_mro).chop(2)) {
         auto *props = SbkObjectType_GetPropertyStrings(subType);
         if (props != nullptr)
             for (; *props != nullptr; ++props)
