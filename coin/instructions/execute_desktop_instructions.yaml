@@ -64,14 +64,9 @@ instructions:
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
-        condition: and
-        conditions:
-        - condition: property
-          property: host.os
-          equals_value: Linux
-        - condition: property
-          property: host.osVersion
-          not_equals_value: Ubuntu_24_04
+        condition: property
+        property: host.os
+        equals_value: Linux
     userMessageOnFailure: >
          Failed to install requirements-coin.txt dependencies on Linux
   - type: ExecuteCommand
