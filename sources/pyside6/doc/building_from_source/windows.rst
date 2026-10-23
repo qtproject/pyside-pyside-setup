@@ -7,7 +7,7 @@ selected when using the online installer.
 Requirements
 ------------
 
-* `MSVC2022`_ for Python 3 on Windows,
+* `MSVC2026 or MSVC2022`_ for Python 3 on Windows,
 * `OpenSSL`_ (optional for SSL support, Qt must have been configured using the same SSL library).
 * ``sphinx`` package for the documentation (optional).
 * Check the platform dependencies of `Qt for Windows`_.
@@ -15,7 +15,7 @@ Requirements
 .. note:: The Python provided by the Microsoft Store is not compatible with PySide. Please
     use https://www.python.org/downloads/ to get a Python Interpreter.
 
-.. _MSVC2022: https://visualstudio.microsoft.com/downloads/
+.. _`MSVC2026 or MSVC2022`: https://visualstudio.microsoft.com/downloads/
 .. _OpenSSL: https://sourceforge.net/projects/openssl/
 .. _`Qt for Windows`: https://doc.qt.io/qt-6/windows.html
 
@@ -55,10 +55,10 @@ Setting up CLANG
 
 libclang can be downloaded from the
 `Qt servers <https://download.qt.io/development_releases/prebuilt/libclang>`_.
-for example, ``libclang-release_20.1.3-based-windows-vs2019_64.7z``.
+for example, ``libclang-release_23.1.1-based-windows-vs2022_64.7z``.
 
 For ARM64 Windows, use:
-``libclang-release_20.1.3-based-windows-vs2022_arm64.7z``.
+``libclang-release_23.1.1-based-windows-vs2022_arm64.7z``.
 
 Note that from version 12 onwards, the prebuilt Windows binaries from
 `LLVM <https://www.llvm.org>`_ no longer contain CMake configuration files; so
@@ -77,9 +77,9 @@ Cloning the official repository can be done by::
 
     git clone https://code.qt.io/pyside/pyside-setup
 
-Checking out the version that we want to build, for example, 6.10::
+Checking out the version that we want to build, for example, 6.12::
 
-    cd pyside-setup && git checkout 6.10
+    cd pyside-setup && git checkout 6.12
 
 Install the general dependencies::
 
@@ -97,7 +97,7 @@ Building PySide
 ~~~~~~~~~~~~~~~
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
-for example, ``C:\Qt\6.10.0\msvc2022_64\bin\qtpaths.exe``.
+for example, ``C:\Qt\6.12.0\msvc2022_64\bin\qtpaths.exe``.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 

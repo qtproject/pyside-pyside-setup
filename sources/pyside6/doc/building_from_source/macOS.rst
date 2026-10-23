@@ -45,12 +45,12 @@ Setting up CLANG
 
 If you don't have `libclang` already in your system, you can download from the Qt servers::
 
-    wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_20.1.3-based-macos-universal.7z
+    wget https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_23.1.1-based-macos-universal.7z
 
 Extract the files, and leave it in any desired path, and set the environment
 variable required::
 
-    7z x libclang-release_20.1.3-based-macos-universal.7z
+    7z x libclang-release_23.1.1-based-macos-universal.7z
     export LLVM_INSTALL_DIR=$PWD/libclang
 
 Getting PySide
@@ -60,9 +60,9 @@ Cloning the official repository can be done by::
 
     git clone https://code.qt.io/pyside/pyside-setup
 
-Checking out the version that we want to build, for example, 6.10::
+Checking out the version that we want to build, for example, 6.12::
 
-    cd pyside-setup && git checkout 6.10
+    cd pyside-setup && git checkout 6.12
 
 Install the general dependencies::
 
@@ -80,15 +80,15 @@ Building PySide
 ~~~~~~~~~~~~~~~
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
-for example, ``/opt/Qt/6.10.0/gcc_64/bin/qtpaths``.
+for example, ``/opt/Qt/6.12.0/gcc_64/bin/qtpaths``.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
-    python setup.py build --qtpaths=/opt/Qt/6.10.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    python setup.py build --qtpaths=/opt/Qt/6.12.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 With `uv`_, this command becomes::
 
-    uv run setup.py build --qtpaths=/opt/Qt/6.10.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    uv run setup.py build --qtpaths=/opt/Qt/6.12.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 
 Installing PySide
