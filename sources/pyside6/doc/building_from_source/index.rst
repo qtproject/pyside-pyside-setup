@@ -27,7 +27,10 @@ On **Linux** you might get them with your operating system package manager, on *
 you might get them with ``brew``, and on **Windows** you can download the installer from each
 website.
 
-* **Python**: 3.10+ `official Python website`_
+* **Python**: 3.13.5+ (`official Python website`_) for building wheels that
+  support Python 3.10-3.15 using the `Stable API`_, which requires `GH 134989`_.
+  When targeting only one Python minor version not using the `Stable API`_,
+  any version from 3.10-3.15 may be used.
 * **Qt:** 6.12+ `online installer`_
 * **CMake:** 3.25+ `official CMake website`_
 * **Git:** 2.0+. `official Git website`_
@@ -568,6 +571,8 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
 .. _BeautifulSoup: https://www.crummy.com/software/BeautifulSoup/
 .. _`CMake Unity Build Mode` : https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html
 .. _`official Python website`: https://www.python.org/downloads/
+.. _`Stable API`: https://docs.python.org/3/c-api/stable.html#stable
+.. _`GH 134989`: https://github.com/python/cpython/issues/134989
 .. _`online installer`: https://download.qt.io/official_releases/online_installers/
 .. _`official CMake website`: https://cmake.org/download/
 .. _`official Git website`: https://git-scm.com/downloads
