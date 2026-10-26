@@ -81,8 +81,9 @@ struct PodDefs
             if (i > 0)
                 repr += ", ";
 
-            PyObject *item_repr = PyObject_Repr(PyTuple_GetItem(self, i));
-            repr += String::toCString(item_repr);
+            auto *item = PyTuple_GetItem(self, i);
+            Shiboken::AutoDecRef item_repr(PyObject_Repr(item));
+            repr += String::toCString(item_repr.object());
         }
         repr += ")";
         return PyUnicode_FromString(repr.c_str());
@@ -151,7 +152,7 @@ static void pythonToCpp_Tuple_POD(PyObject *pyIn, void *cppOut)
     Py_ssize_t tupleSize = PyTuple_Size(pyIn);
     if (tupleSize != cppOutRef.size()) {
         PyErr_Format(PyExc_ValueError,
-                     "Size mismatch: tuple has %zd elements, but POD expects %d elements",
+                     "Size mismatch: tuple has %zd elements, but POD expects %zd elements",
                      tupleSize, cppOutRef.size());
         return;
     }
