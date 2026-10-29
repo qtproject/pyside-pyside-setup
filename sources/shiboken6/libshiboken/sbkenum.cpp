@@ -353,7 +353,9 @@ static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
     const char *dot = std::strrchr(fullName, '.');
     AutoDecRef name(Shiboken::String::fromCString(dot ? dot + 1 : fullName));
 
-    static PyObject *enumName = String::createStaticString("IntEnum");
+    // A module-scope enum has no entry in a type's enumTypeDict: it is an IntEnum.
+    static PyObject *const intEnumName = String::createStaticString("IntEnum");
+    PyObject *enumName = intEnumName;
     if (PyType_Check(scopeOrModule)) {
         // For global objects, we have no good solution, yet where to put the int info.
         auto *type = reinterpret_cast<PyTypeObject *>(scopeOrModule);
